@@ -1,0 +1,53 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\PERSO\\sources\\Catamailer\\src\\Catamailer.UI\\obj\\Debug\\net10.0-android\\scopedcss\\bundle\\Catamailer.UI.styles.css",
+      "PackagePath": "staticwebassets\\Catamailer.UI.styles.css"
+    },
+    {
+      "Id": "C:\\PERSO\\sources\\Catamailer\\src\\Catamailer.UI\\wwwroot\\app.css",
+      "PackagePath": "staticwebassets\\app.css"
+    },
+    {
+      "Id": "C:\\PERSO\\sources\\Catamailer\\src\\Catamailer.UI\\wwwroot\\index.html",
+      "PackagePath": "staticwebassets\\index.html"
+    },
+    {
+      "Id": "C:\\PERSO\\sources\\Catamailer\\src\\Catamailer.UI\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.min.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.min.css"
+    },
+    {
+      "Id": "C:\\PERSO\\sources\\Catamailer\\src\\Catamailer.UI\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.min.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.min.css.map"
+    },
+    {
+      "Id": "C:\\Users\\RAMONA-30174\\.nuget\\packages\\microsoft.aspnetcore.components.webview\\10.0.0\\staticwebassets\\blazor.modules.json",
+      "PackagePath": "staticwebassets\\_framework\\blazor.modules.json"
+    },
+    {
+      "Id": "C:\\Users\\RAMONA-30174\\.nuget\\packages\\microsoft.aspnetcore.components.webview\\10.0.0\\staticwebassets\\blazor.webview.js",
+      "PackagePath": "staticwebassets\\_framework\\blazor.webview.js"
+    },
+    {
+      "Id": "obj\\Debug\\net10.0-android\\staticwebassets\\msbuild.Catamailer.UI.Microsoft.AspNetCore.StaticWebAssetEndpoints.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssetEndpoints.props"
+    },
+    {
+      "Id": "obj\\Debug\\net10.0-android\\staticwebassets\\msbuild.Catamailer.UI.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net10.0-android\\staticwebassets\\msbuild.build.Catamailer.UI.props",
+      "PackagePath": "build\\Catamailer.UI.props"
+    },
+    {
+      "Id": "obj\\Debug\\net10.0-android\\staticwebassets\\msbuild.buildMultiTargeting.Catamailer.UI.props",
+      "PackagePath": "buildMultiTargeting\\Catamailer.UI.props"
+    },
+    {
+      "Id": "obj\\Debug\\net10.0-android\\staticwebassets\\msbuild.buildTransitive.Catamailer.UI.props",
+      "PackagePath": "buildTransitive\\Catamailer.UI.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

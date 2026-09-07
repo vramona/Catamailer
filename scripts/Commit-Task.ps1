@@ -20,14 +20,17 @@ Write-Host "Hash du code genere : $commitHash" -ForegroundColor Yellow
 Write-Host "Injection du hash dans la documentation..." -ForegroundColor Cyan
 $files = @("specs/Specs_Catamailer.md", "specs/Specs_Catamailer_Unit_Tests.md", "specs/ToDoList.md")
 
+# Utilisation stricte de UTF-8 sans BOM pour éviter la corruption
+$utf8NoBom = New-Object System.Text.UTF8Encoding $false
+
 foreach ($file in $files) {
     if (Test-Path $file) {
-        # Lecture brute pour éviter les cassures de tableau PowerShell
-        $content = Get-Content $file -Raw
+        $path = (Resolve-Path $file).Path
+        $content = [System.IO.File]::ReadAllText($path, $utf8NoBom)
+        
         if ($content -match '<COMMIT[-_]HASH>') {
             $newContent = $content -replace '<COMMIT[-_]HASH>', $commitHash
-            # Écriture propre en UTF-8
-            [System.IO.File]::WriteAllText((Resolve-Path $file).Path, $newContent, [System.Text.Encoding]::UTF8)
+            [System.IO.File]::WriteAllText($path, $newContent, $utf8NoBom)
             Write-Host " -> $file mis a jour." -ForegroundColor Green
         } else {
             Write-Host " -> $file ignore (aucune balise trouvee)." -ForegroundColor DarkGray

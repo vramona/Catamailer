@@ -6,9 +6,13 @@
     <Project Path="src/Catamailer.Migrator/Catamailer.Migrator.csproj" />
     <Project Path="src/Catamailer.UI/Catamailer.UI.csproj" />
   </Folder>
+  <Folder Name="/src/Tools/">
+    <Project Path="src/Tools/AiDocGenerator/AiDocGenerator.csproj" />
+  </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Catamailer.Application.Tests/Catamailer.Application.Tests.csproj" />
     <Project Path="tests/Catamailer.Domain.Tests/Catamailer.Domain.Tests.csproj" />
     <Project Path="tests/Catamailer.Infrastructure.Tests/Catamailer.Infrastructure.Tests.csproj" />
+    <Project Path="tests/Tools.AiDocGenerator.Tests/Tools.AiDocGenerator.Tests.csproj" />
   </Folder>
 </Solution>

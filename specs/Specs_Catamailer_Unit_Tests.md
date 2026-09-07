@@ -1,32 +1,38 @@
-﻿# SpÃ©cifications des Tests Unitaires - Catamailer
+﻿# Spécifications des Tests Unitaires - Catamailer
 
-Ce document rÃ©fÃ©rence l'intÃ©gralitÃ© des tests unitaires (TDD) et d'intÃ©gration validant le comportement de la Clean Architecture de Catamailer.
-
----
-
-## ðŸŸ¢ JALON 1 - CORE ENGINE & SQLITE
-### ðŸŸ¢ J1-S1 : ModÃ©lisation Domain
-*Ã€ complÃ©ter lors du dÃ©veloppement de J1-S1.*
-
-### ðŸŸ¢ J1-S2 : Moteurs d'Ã‰valuation
-*Ã€ complÃ©ter lors du dÃ©veloppement de J1-S2.*
+Ce document référence l'intégralité des tests unitaires (TDD) et d'intégration validant le comportement de la Clean Architecture de Catamailer.
 
 ---
 
-## ðŸŸ¢ JALON 2 - OUTLOOK COM & SHADOW MODE
-*Ã€ complÃ©ter.*
+## 🟢 JALON 0 - INITIALISATION & OUTILLAGE
+### 🟢 J0-S1 : Workspace & Scripts
+- [x] ✅ `J0-S1-T3 - Build_ShouldReturnCatamailerSpecificToc` (Validé le 07/09/2026 sur master - Commit : <COMMIT_HASH>) (Cpx: 3 / 3)
 
 ---
 
-## ðŸŸ¢ JALON 3 - TRAY APP, GLOBAL HOTKEYS & UI
-*Ã€ complÃ©ter.*
+## 🟢 JALON 1 - CORE ENGINE & SQLITE
+### 🟢 J1-S1 : Modélisation Domain
+*À compléter lors du développement de J1-S1.*
+
+### 🟢 J1-S2 : Moteurs d'Évaluation
+*À compléter lors du développement de J1-S2.*
 
 ---
 
-## ðŸŸ¢ JALON 4 - INBOX NOTES, AGENDA & ACTIONS INTERNES
-*Ã€ complÃ©ter.*
+## 🟢 JALON 2 - OUTLOOK COM & SHADOW MODE
+*À compléter.*
 
 ---
 
-## ðŸŸ¢ JALON 5 - MIGRATION CSV
-*Ã€ complÃ©ter.*
+## 🟢 JALON 3 - TRAY APP, GLOBAL HOTKEYS & UI
+*À compléter.*
+
+---
+
+## 🟢 JALON 4 - INBOX NOTES, AGENDA & ACTIONS INTERNES
+*À compléter.*
+
+---
+
+## 🟢 JALON 5 - MIGRATION CSV
+*À compléter.*

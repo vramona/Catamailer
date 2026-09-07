@@ -1,0 +1,112 @@
+﻿using System.Text;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+
+namespace AiDocGenerator.Analyzers;
+
+public static class CSharpAnalyzer
+{
+    public static async Task<string> AnalyzeProjectAsync(Project project, string solutionDir)
+    {
+        var markdownBuilder = new StringBuilder();
+
+        foreach (var document in project.Documents)
+        {
+            if (!document.SupportsSemanticModel) continue;
+
+            var syntaxTree = await document.GetSyntaxTreeAsync();
+            var semanticModel = await document.GetSemanticModelAsync();
+            if (syntaxTree == null || semanticModel == null) continue;
+
+            var root = await syntaxTree.GetRootAsync();
+            var typeDeclarations = root.DescendantNodes().OfType<TypeDeclarationSyntax>();
+
+            foreach (var typeDecl in typeDeclarations)
+            {
+                if (!typeDecl.Modifiers.Any(m => m.Text == "public")) continue;
+
+                string typeKind = typeDecl is ClassDeclarationSyntax ? "Class" :
+                                  typeDecl is InterfaceDeclarationSyntax ? "Interface" :
+                                  typeDecl is RecordDeclarationSyntax ? "Record" : "Struct";
+
+                string absolutePath = typeDecl.SyntaxTree.FilePath;
+                string relativePath = string.IsNullOrEmpty(solutionDir) ? absolutePath : Path.GetRelativePath(solutionDir, absolutePath);
+
+                markdownBuilder.AppendLine($"### {typeKind} : {typeDecl.Identifier.Text}");
+                markdownBuilder.AppendLine($"**Fichier** : `{relativePath}`");
+
+                var typeDoc = GetXmlSummary(typeDecl);
+                if (!string.IsNullOrEmpty(typeDoc))
+                    markdownBuilder.AppendLine($"**Rôle** : {typeDoc}");
+
+                markdownBuilder.AppendLine("**Membres et Invocations :**");
+
+                var methods = typeDecl.Members.OfType<MethodDeclarationSyntax>()
+                                      .Where(m => m.Modifiers.Any(mod => mod.Text == "public"));
+
+                foreach (var method in methods)
+                {
+                    var returnType = method.ReturnType.ToString();
+                    var methodName = method.Identifier.Text;
+                    var parameters = string.Join(", ", method.ParameterList.Parameters.Select(p => $"{p.Type} {p.Identifier}"));
+
+                    string signature = $"{returnType} {methodName}({parameters})";
+                    string methodDoc = GetXmlSummary(method);
+
+                    markdownBuilder.AppendLine(string.IsNullOrEmpty(methodDoc)
+                        ? $"- `{signature}`"
+                        : $"- `{signature}` : {methodDoc}");
+
+                    var invocations = method.DescendantNodes().OfType<InvocationExpressionSyntax>();
+                    var uniqueCalls = new HashSet<string>();
+
+                    foreach (var invocation in invocations)
+                    {
+                        var symbolInfo = semanticModel.GetSymbolInfo(invocation);
+                        if (symbolInfo.Symbol is IMethodSymbol methodSymbol)
+                        {
+                            if (methodSymbol.Locations.Any(loc => loc.IsInSource))
+                            {
+                                var targetType = methodSymbol.ContainingType.Name;
+                                var targetMethod = methodSymbol.Name;
+                                uniqueCalls.Add($"{targetType}.{targetMethod}()");
+                            }
+                        }
+                    }
+
+                    if (uniqueCalls.Any())
+                    {
+                        foreach (var call in uniqueCalls)
+                        {
+                            markdownBuilder.AppendLine($"  - *Appelle* ➡️ `{call}`");
+                        }
+                    }
+                }
+                markdownBuilder.AppendLine();
+            }
+        }
+
+        return markdownBuilder.ToString();
+    }
+
+    private static string GetXmlSummary(SyntaxNode node)
+    {
+        var xmlTrivia = node.GetLeadingTrivia()
+            .Select(i => i.GetStructure())
+            .OfType<DocumentationCommentTriviaSyntax>()
+            .FirstOrDefault();
+
+        if (xmlTrivia == null) return string.Empty;
+
+        var summaryElement = xmlTrivia.ChildNodes()
+            .OfType<XmlElementSyntax>()
+            .FirstOrDefault(e => e.StartTag.Name.ToString() == "summary");
+
+        if (summaryElement == null) return string.Empty;
+
+        var textNodes = summaryElement.Content.OfType<XmlTextSyntax>();
+        var summaryText = string.Join(" ", textNodes.SelectMany(t => t.TextTokens).Select(t => t.ValueText.Trim()));
+
+        return string.Join(" ", summaryText.Split(new[] { ' ', '\t', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries));
+    }
+}
