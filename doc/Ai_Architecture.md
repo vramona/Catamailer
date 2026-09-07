@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-07 18:38
+Généré le : 2026-09-07 18:44
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -31,6 +31,14 @@ Généré le : 2026-09-07 18:38
 - `bool Evaluate(string subject, string sender, RuleNode node)` : Évalue un nœud de règle composite par rapport aux métadonnées d'un e-mail.
   - *Appelle* ➡️ `ExecutionEngine.EvaluateCriterion()`
   - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
+
+### Class : HistoryRunner
+**Fichier** : `src\Catamailer.Application\HistoryRunner.cs`
+**Rôle** : Implémentation du service d'arrière-plan de rattrapage de l'historique des e-mails.
+**Membres et Invocations :**
+- `Task<int> ProcessPendingHistoryAsync(int maxItemsToProcess)`
+  - *Appelle* ➡️ `IDebounceService.IsAnalysisSuspendedAsync()`
+  - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
 
 ## Projet : Catamailer.Domain
 ### Class : AppSetting
@@ -68,6 +76,11 @@ Généré le : 2026-09-07 18:38
 ### Interface : IDebounceService
 **Fichier** : `src\Catamailer.Domain\IDebounceService.cs`
 **Rôle** : Définit le contrat permettant de gérer la suspension temporaire des traitements d'arrière-plan (Debounce).
+**Membres et Invocations :**
+
+### Interface : IHistoryRunner
+**Fichier** : `src\Catamailer.Domain\IHistoryRunner.cs`
+**Rôle** : Définit le contrat du service d'arrière-plan analysant le stock d'e-mails historiques.
 **Membres et Invocations :**
 
 ### Interface : IHistoryStateRepository
@@ -328,6 +341,19 @@ Généré le : 2026-09-07 18:38
 - `void Evaluate_ShouldReturnTrue_WhenOrNodeHasOneValidCriterion()`
   - *Appelle* ➡️ `RuleNode.AddCriterion()`
   - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
+
+### Class : HistoryRunnerTests
+**Fichier** : `tests\Catamailer.Application.Tests\HistoryRunnerTests.cs`
+**Rôle** : Classe de tests unitaires pour la tâche J2-S2-T3 (HistoryRunner).
+**Membres et Invocations :**
+- `Task ProcessPendingHistoryAsync_ShouldReturnZero_WhenAnalysisIsSuspended()`
+  - *Appelle* ➡️ `IDebounceService.IsAnalysisSuspendedAsync()`
+  - *Appelle* ➡️ `HistoryRunner.ProcessPendingHistoryAsync()`
+  - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
+- `Task ProcessPendingHistoryAsync_ShouldFetchCursorAndProcess_WhenNotSuspended()`
+  - *Appelle* ➡️ `IDebounceService.IsAnalysisSuspendedAsync()`
+  - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
+  - *Appelle* ➡️ `HistoryRunner.ProcessPendingHistoryAsync()`
 
 ## Projet : Catamailer.Domain.Tests
 ### Class : CategoryNodeTests
