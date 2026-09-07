@@ -1,4 +1,6 @@
-﻿# scripts/Commit-Task.ps1
+﻿# Historique :
+# 2026-09-07 : Ajout de la génération documentaire (AiDoc et FileList) avant validation Git.
+
 param(
     [Parameter(Mandatory=$true)]
     [string]$Message
@@ -7,6 +9,14 @@ param(
 Write-Host "========================================" -ForegroundColor Magenta
 Write-Host "[*] VALIDATION TACHE : $Message" -ForegroundColor Magenta
 Write-Host "========================================" -ForegroundColor Magenta
+
+Write-Host "Generation de la documentation IA et de l'arborescence..." -ForegroundColor Cyan
+if (Test-Path ".\scripts\Generate-AiDoc.ps1") { 
+    & ".\scripts\Generate-AiDoc.ps1" 
+}
+if (Test-Path ".\scripts\Generate-FileList.ps1") { 
+    & ".\scripts\Generate-FileList.ps1" 
+}
 
 Write-Host "Ajout des fichiers au perimetre Git..." -ForegroundColor Cyan
 git add --all

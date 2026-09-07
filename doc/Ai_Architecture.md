@@ -1,7 +1,19 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-07 12:55
+Généré le : 2026-09-07 13:22
 
 ## Projet : Catamailer.Application
+### Class : ClassificationEngine
+**Fichier** : `src\Catamailer.Application\ClassificationEngine.cs`
+**Rôle** : Moteur d'évaluation de l'Étape 1 : déduction de la catégorie principale en fonction des dictionnaires de mots-clés.
+**Membres et Invocations :**
+- `ClassificationResult? Classify(string subject, string sender, IEnumerable<string> recipients, IEnumerable<DictionaryRule> rules)` : Évalue les métadonnées d'un e-mail par rapport à un ensemble de règles de dictionnaire.
+  - *Appelle* ➡️ `CategoryNode.GetAscendanceChain()`
+
+### Class : ClassificationResult
+**Fichier** : `src\Catamailer.Application\ClassificationResult.cs`
+**Rôle** : Représente le résultat de l'évaluation de l'Étape 1 (Classification).
+**Membres et Invocations :**
+
 ## Projet : Catamailer.Domain
 ### Class : CategoryNode
 **Fichier** : `src\Catamailer.Domain\CategoryNode.cs`
@@ -148,6 +160,18 @@ Généré le : 2026-09-07 12:55
 - `void InjectEntryIfNeeded(string tocPath, string name, string href)` : Injecte une nouvelle entrée dans un fichier toc.yml si elle n'existe pas déjà.
 
 ## Projet : Catamailer.Application.Tests
+### Class : ClassificationEngineTests
+**Fichier** : `tests\Catamailer.Application.Tests\ClassificationEngineTests.cs`
+**Rôle** : Classe de test validant le comportement du moteur de classification (Étape 1).
+**Membres et Invocations :**
+- `void Classify_ShouldReturnNull_WhenNoRulesProvided()`
+  - *Appelle* ➡️ `ClassificationEngine.Classify()`
+- `void Classify_ShouldReturnCategoryAndAscendanceChain_WhenKeywordMatches()`
+  - *Appelle* ➡️ `CategoryNode.AddChild()`
+  - *Appelle* ➡️ `ClassificationEngine.Classify()`
+- `void Classify_ShouldReturnCategory_WhenKeywordMatchesRecipient()`
+  - *Appelle* ➡️ `ClassificationEngine.Classify()`
+
 ## Projet : Catamailer.Domain.Tests
 ### Class : CategoryNodeTests
 **Fichier** : `tests\Catamailer.Domain.Tests\CategoryNodeTests.cs`
@@ -203,6 +227,8 @@ Généré le : 2026-09-07 12:55
 - **Build-DocFx.ps1** : `scripts\Build-DocFx.ps1`
 - **Commit-Task.ps1** : `scripts\Commit-Task.ps1`
   - Paramètre : `[string] $Message` *(Obligatoire)*
+  - *Appelle* ➡️ `Generate-AiDoc.ps1`
+  - *Appelle* ➡️ `Generate-FileList.ps1`
 - **Complete-Jalon.ps1** : `scripts\Complete-Jalon.ps1`
   - Paramètre : `[string] $JalonBranch` *(Obligatoire)*
   - Paramètre : `[string] $BaseBranch`
