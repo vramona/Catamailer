@@ -41,7 +41,7 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 ### 🟢 J2-S1 : Interop & Synchronisation
 
 - [x] ✅ `J2-S1-T1 - StartListening_ShouldTriggerNewMailReceived_WhenOutlookRaisesNewMailEx` (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-1-com - Commit : a35093bdb4c674b551c5396fe728f0235bc30f3e) (Cpx: 5 / 5)
-- [x] ✅ `J2-S1-T2 - GetSelectedMail_ShouldReturnMetadata_WhenMailIsSelected` (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-1-com - Commit : <COMMIT_HASH>)
+- [x] ✅ `J2-S1-T2 - GetSelectedMail_ShouldReturnMetadata_WhenMailIsSelected` (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-1-com - Commit : ba7ecce2742edd503c7c7d4d823550ef5cafb4a0)
 ---
 
 ## 🟢 JALON 3 - TRAY APP, GLOBAL HOTKEYS & UI
