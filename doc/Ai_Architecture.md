@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-07 13:35
+Généré le : 2026-09-07 18:17
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -35,9 +35,34 @@ Généré le : 2026-09-07 13:35
 **Rôle** : Représente une règle de l'Étape 1 (Classification) liant un ensemble de mots-clés à une catégorie déduite.
 **Membres et Invocations :**
 
+### Interface : ICategoryManagerProvider
+**Fichier** : `src\Catamailer.Domain\ICategoryManagerProvider.cs`
+**Rôle** : Définit le contrat permettant de gérer les catégories au sein du fournisseur de messagerie (ex: Master Category List).
+**Membres et Invocations :**
+
 ### Interface : ICategoryRepository
 **Fichier** : `src\Catamailer.Domain\ICategoryRepository.cs`
 **Rôle** : Définit le contrat pour l'accès aux données de l'entité CategoryNode.
+**Membres et Invocations :**
+
+### Interface : IMailProvider
+**Fichier** : `src\Catamailer.Domain\IMailProvider.cs`
+**Rôle** : Définit le contrat d'écoute et d'interaction avec le fournisseur de messagerie.
+**Membres et Invocations :**
+
+### Interface : IMassUpdateProvider
+**Fichier** : `src\Catamailer.Domain\IMassUpdateProvider.cs`
+**Rôle** : Définit le contrat permettant la mise à jour en masse (renommage rétroactif) des catégories sur les e-mails existants.
+**Membres et Invocations :**
+
+### Interface : ISelectionProvider
+**Fichier** : `src\Catamailer.Domain\ISelectionProvider.cs`
+**Rôle** : Définit le contrat permettant de récupérer l'élément actuellement sélectionné dans le client de messagerie.
+**Membres et Invocations :**
+
+### Record : MailMetadata
+**Fichier** : `src\Catamailer.Domain\MailMetadata.cs`
+**Rôle** : Représente les métadonnées agnostiques extraites d'un e-mail.
 **Membres et Invocations :**
 
 ### Class : RuleAction
@@ -69,6 +94,47 @@ Généré le : 2026-09-07 13:35
 **Membres et Invocations :**
 - `Task AddAsync(CategoryNode category)`
 - `Task<CategoryNode?> GetByNameAsync(string name)`
+
+### Interface : IOutlookApplicationWrapper
+**Fichier** : `src\Catamailer.Infrastructure\IOutlookApplicationWrapper.cs`
+**Rôle** : Interface d'abstraction pour l'application COM Outlook, facilitant les tests unitaires.
+**Membres et Invocations :**
+
+### Class : OutlookCategoryManagerProvider
+**Fichier** : `src\Catamailer.Infrastructure\OutlookCategoryManagerProvider.cs`
+**Rôle** : Implémentation du fournisseur de gestion des catégories via l'Interop COM Outlook.
+**Membres et Invocations :**
+- `void AddCategory(string name, string colorCode)`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.CategoryExists()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.AddCategory()`
+- `void UpdateCategoryColor(string name, string newColorCode)`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.CategoryExists()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.UpdateCategory()`
+- `void RemoveCategory(string name)`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.CategoryExists()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.RemoveCategory()`
+
+### Class : OutlookMailProvider
+**Fichier** : `src\Catamailer.Infrastructure\OutlookMailProvider.cs`
+**Rôle** : Implémentation du fournisseur de messagerie basée sur l'Interop COM Outlook.
+**Membres et Invocations :**
+- `void StartListening()`
+- `void StopListening()`
+
+### Class : OutlookMassUpdateProvider
+**Fichier** : `src\Catamailer.Infrastructure\OutlookMassUpdateProvider.cs`
+**Rôle** : Implémentation du fournisseur de mise à jour en masse via l'Interop COM Outlook.
+**Membres et Invocations :**
+- `void UpdateCategoryNameOnItems(string oldCategoryName, string newCategoryName)`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.ReplaceCategoryOnAllItems()`
+
+### Class : OutlookSelectionProvider
+**Fichier** : `src\Catamailer.Infrastructure\OutlookSelectionProvider.cs`
+**Rôle** : Implémentation du fournisseur de sélection basée sur l'Interop COM Outlook.
+**Membres et Invocations :**
+- `MailMetadata? GetSelectedMail()` : Récupère les métadonnées de l'e-mail actuellement sélectionné.
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.GetSelectedEntryId()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.GetMailMetadata()`
 
 ## Projet : Catamailer.Migrator
 ## Projet : Catamailer.UI
@@ -242,6 +308,51 @@ Généré le : 2026-09-07 13:35
 - `Task GetByNameAsync_ShouldReturnCategory_WhenExists()`
   - *Appelle* ➡️ `CategoryRepositoryTests.GetInMemoryContext()`
   - *Appelle* ➡️ `CategoryRepository.GetByNameAsync()`
+
+### Class : OutlookCategoryManagerProviderTests
+**Fichier** : `tests\Catamailer.Infrastructure.Tests\OutlookCategoryManagerProviderTests.cs`
+**Rôle** : Classe de tests validant le comportement du gestionnaire de catégories Outlook.
+**Membres et Invocations :**
+- `void AddCategory_ShouldCallWrapperAdd_WhenCategoryDoesNotExist()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.CategoryExists()`
+  - *Appelle* ➡️ `OutlookCategoryManagerProvider.AddCategory()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.AddCategory()`
+- `void UpdateCategoryColor_ShouldCallWrapperUpdate_WhenCategoryExists()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.CategoryExists()`
+  - *Appelle* ➡️ `OutlookCategoryManagerProvider.UpdateCategoryColor()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.UpdateCategory()`
+- `void RemoveCategory_ShouldCallWrapperRemove_WhenCategoryExists()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.CategoryExists()`
+  - *Appelle* ➡️ `OutlookCategoryManagerProvider.RemoveCategory()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.RemoveCategory()`
+
+### Class : OutlookMailProviderTests
+**Fichier** : `tests\Catamailer.Infrastructure.Tests\OutlookMailProviderTests.cs`
+**Rôle** : Classe de tests validant le comportement du fournisseur Outlook COM.
+**Membres et Invocations :**
+- `void StartListening_ShouldTriggerNewMailReceived_WhenOutlookRaisesNewMailEx()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.GetMailMetadata()`
+  - *Appelle* ➡️ `OutlookMailProvider.StartListening()`
+
+### Class : OutlookMassUpdateProviderTests
+**Fichier** : `tests\Catamailer.Infrastructure.Tests\OutlookMassUpdateProviderTests.cs`
+**Rôle** : Classe de tests validant le comportement du fournisseur de mise à jour en masse Outlook.
+**Membres et Invocations :**
+- `void UpdateCategoryNameOnItems_ShouldCallWrapperReplaceCategory()`
+  - *Appelle* ➡️ `OutlookMassUpdateProvider.UpdateCategoryNameOnItems()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.ReplaceCategoryOnAllItems()`
+
+### Class : OutlookSelectionProviderTests
+**Fichier** : `tests\Catamailer.Infrastructure.Tests\OutlookSelectionProviderTests.cs`
+**Rôle** : Classe de tests validant le comportement du fournisseur de sélection Outlook.
+**Membres et Invocations :**
+- `void GetSelectedMail_ShouldReturnNull_WhenNoMailIsSelected()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.GetSelectedEntryId()`
+  - *Appelle* ➡️ `OutlookSelectionProvider.GetSelectedMail()`
+- `void GetSelectedMail_ShouldReturnMetadata_WhenMailIsSelected()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.GetSelectedEntryId()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.GetMailMetadata()`
+  - *Appelle* ➡️ `OutlookSelectionProvider.GetSelectedMail()`
 
 ## Projet : Tools.AiDocGenerator.Tests
 ### Class : CatamailerTocBuilderTests

@@ -21,10 +21,10 @@
 
 ## Jalon 2 - Outlook COM & Shadow Mode - feature/j2-outlook-integration
 ### Step 1 - Interop & Synchronisation - feature/j2-outlook-integration_step-1-com
-- [ ] ⚪ **J2-S1-T1** - Abstraction `IMailProvider` et écoute asynchrone (`NewMailEx`).
-- [ ] ⚪ **J2-S1-T2** - `SelectionProvider` : Récupération de l'élément sélectionné dans l'UI Outlook.
-- [ ] ⚪ **J2-S1-T3** - `CategoryManagerProvider` : Synchronisation CRUD avec la Master Category List.
-- [ ] ⚪ **J2-S1-T4** - `MassUpdateService` : Renommage rétroactif des e-mails.
+- [x] ✅ **J2-S1-T1** - Abstraction `IMailProvider` et écoute asynchrone (`NewMailEx`). (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-1-com - Commit : a35093bdb4c674b551c5396fe728f0235bc30f3e) (Cpx: 5 / 5)
+- [x] ✅ **J2-S1-T2** - `SelectionProvider` : Récupération de l'élément sélectionné dans l'UI Outlook. (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-1-com - Commit : ba7ecce2742edd503c7c7d4d823550ef5cafb4a0) (Cpx: 3 / 3)
+- [x] ✅ **J2-S1-T3** - `CategoryManagerProvider` : Synchronisation CRUD avec la Master Category List. (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-1-com - Commit : 12db1d65cd4d200dad3cfca53174282adf42f677) (Cpx: 5 / 5)
+- [x] ✅ **J2-S1-T4** - `MassUpdateService` : Renommage rétroactif des e-mails. (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-1-com - Commit : 00edec7a319adf68780fa47c75f4785839687971) (Cpx: 8 / 8)
 
 ### Step 2 - Reprise & Shadow Mode - feature/j2-outlook-integration_step-2-history
 - [ ] ⚪ **J2-S2-T1** - Curseur d'état et Service Background de Reprise (`LastEntryID`, Pattern Debounce 30 min).
