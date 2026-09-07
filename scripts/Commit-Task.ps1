@@ -22,8 +22,16 @@ $files = @("specs/Specs_Catamailer.md", "specs/Specs_Catamailer_Unit_Tests.md", 
 
 foreach ($file in $files) {
     if (Test-Path $file) {
-        (Get-Content $file) -replace '<COMMIT[-_]HASH>', $commitHash | Set-Content $file -Encoding UTF8
-        Write-Host " -> $file mis a jour." -ForegroundColor Green
+        # Lecture brute pour éviter les cassures de tableau PowerShell
+        $content = Get-Content $file -Raw
+        if ($content -match '<COMMIT[-_]HASH>') {
+            $newContent = $content -replace '<COMMIT[-_]HASH>', $commitHash
+            # Écriture propre en UTF-8
+            [System.IO.File]::WriteAllText((Resolve-Path $file).Path, $newContent, [System.Text.Encoding]::UTF8)
+            Write-Host " -> $file mis a jour." -ForegroundColor Green
+        } else {
+            Write-Host " -> $file ignore (aucune balise trouvee)." -ForegroundColor DarkGray
+        }
     } else {
         Write-Host "ATTENTION : Fichier $file introuvable." -ForegroundColor Red
     }
