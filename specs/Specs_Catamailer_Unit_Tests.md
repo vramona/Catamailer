@@ -29,11 +29,11 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 - [x] ✅ `J1-S2-T1 - Classify_ShouldReturnNull_WhenNoRulesProvided` (Validé le 07/09/2026 sur feature/j1-core-engine_step-2-evaluation - Commit : 4fd96526c05075f974eac1fcfc0ef7b0a1915478)
 - [x] ✅ `J1-S2-T1 - Classify_ShouldReturnCategoryAndAscendanceChain_WhenKeywordMatches` (Validé le 07/09/2026 sur feature/j1-core-engine_step-2-evaluation - Commit : 4fd96526c05075f974eac1fcfc0ef7b0a1915478)
 - [x] ✅ `J1-S2-T1 - Classify_ShouldReturnCategory_WhenKeywordMatchesRecipient` (Validé le 07/09/2026 sur feature/j1-core-engine_step-2-evaluation - Commit : 4fd96526c05075f974eac1fcfc0ef7b0a1915478)
-- [x] ✅ `J1-S2-T2 - Evaluate_ShouldReturnFalse_WhenNodeIsEmpty` (Validé le 07/09/2026 sur feature/j1-core-engine_step-2-evaluation - Commit : <COMMIT_HASH>)
-- [x] ✅ `J1-S2-T2 - Evaluate_ShouldReturnTrue_WhenSenderMatchesEqualsCriterion` (Validé le 07/09/2026 sur feature/j1-core-engine_step-2-evaluation - Commit : <COMMIT_HASH>)
-- [x] ✅ `J1-S2-T2 - Evaluate_ShouldReturnFalse_WhenSenderDoesNotMatchEqualsCriterion` (Validé le 07/09/2026 sur feature/j1-core-engine_step-2-evaluation - Commit : <COMMIT_HASH>)
-- [x] ✅ `J1-S2-T2 - Evaluate_ShouldReturnTrue_WhenSubjectMatchesContainsCriterion` (Validé le 07/09/2026 sur feature/j1-core-engine_step-2-evaluation - Commit : <COMMIT_HASH>)
-- [x] ✅ `J1-S2-T2 - Evaluate_ShouldReturnTrue_WhenOrNodeHasOneValidCriterion` (Validé le 07/09/2026 sur feature/j1-core-engine_step-2-evaluation - Commit : <COMMIT_HASH>)
+- [x] ✅ `J1-S2-T2 - Evaluate_ShouldReturnFalse_WhenNodeIsEmpty` (Validé le 07/09/2026 sur feature/j1-core-engine_step-2-evaluation - Commit : 1e41888639adabd3622a2c66a4aa6236577d9ad3)
+- [x] ✅ `J1-S2-T2 - Evaluate_ShouldReturnTrue_WhenSenderMatchesEqualsCriterion` (Validé le 07/09/2026 sur feature/j1-core-engine_step-2-evaluation - Commit : 1e41888639adabd3622a2c66a4aa6236577d9ad3)
+- [x] ✅ `J1-S2-T2 - Evaluate_ShouldReturnFalse_WhenSenderDoesNotMatchEqualsCriterion` (Validé le 07/09/2026 sur feature/j1-core-engine_step-2-evaluation - Commit : 1e41888639adabd3622a2c66a4aa6236577d9ad3)
+- [x] ✅ `J1-S2-T2 - Evaluate_ShouldReturnTrue_WhenSubjectMatchesContainsCriterion` (Validé le 07/09/2026 sur feature/j1-core-engine_step-2-evaluation - Commit : 1e41888639adabd3622a2c66a4aa6236577d9ad3)
+- [x] ✅ `J1-S2-T2 - Evaluate_ShouldReturnTrue_WhenOrNodeHasOneValidCriterion` (Validé le 07/09/2026 sur feature/j1-core-engine_step-2-evaluation - Commit : 1e41888639adabd3622a2c66a4aa6236577d9ad3)
 
 ---
 
