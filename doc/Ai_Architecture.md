@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-07 13:22
+Généré le : 2026-09-07 13:31
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -13,6 +13,14 @@ Généré le : 2026-09-07 13:22
 **Fichier** : `src\Catamailer.Application\ClassificationResult.cs`
 **Rôle** : Représente le résultat de l'évaluation de l'Étape 1 (Classification).
 **Membres et Invocations :**
+
+### Class : ExecutionEngine
+**Fichier** : `src\Catamailer.Application\ExecutionEngine.cs`
+**Rôle** : Moteur d'exécution de l'Étape 2 : évaluation de l'arbre booléen des conditions.
+**Membres et Invocations :**
+- `bool Evaluate(string subject, string sender, RuleNode node)` : Évalue un nœud de règle composite par rapport aux métadonnées d'un e-mail.
+  - *Appelle* ➡️ `ExecutionEngine.EvaluateCriterion()`
+  - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
 
 ## Projet : Catamailer.Domain
 ### Class : CategoryNode
@@ -171,6 +179,25 @@ Généré le : 2026-09-07 13:22
   - *Appelle* ➡️ `ClassificationEngine.Classify()`
 - `void Classify_ShouldReturnCategory_WhenKeywordMatchesRecipient()`
   - *Appelle* ➡️ `ClassificationEngine.Classify()`
+
+### Class : ExecutionEngineTests
+**Fichier** : `tests\Catamailer.Application.Tests\ExecutionEngineTests.cs`
+**Rôle** : Classe de test validant le comportement du moteur d'exécution (Étape 2).
+**Membres et Invocations :**
+- `void Evaluate_ShouldReturnFalse_WhenNodeIsEmpty()`
+  - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
+- `void Evaluate_ShouldReturnTrue_WhenSenderMatchesEqualsCriterion()`
+  - *Appelle* ➡️ `RuleNode.AddCriterion()`
+  - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
+- `void Evaluate_ShouldReturnFalse_WhenSenderDoesNotMatchEqualsCriterion()`
+  - *Appelle* ➡️ `RuleNode.AddCriterion()`
+  - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
+- `void Evaluate_ShouldReturnTrue_WhenSubjectMatchesContainsCriterion()`
+  - *Appelle* ➡️ `RuleNode.AddCriterion()`
+  - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
+- `void Evaluate_ShouldReturnTrue_WhenOrNodeHasOneValidCriterion()`
+  - *Appelle* ➡️ `RuleNode.AddCriterion()`
+  - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
 
 ## Projet : Catamailer.Domain.Tests
 ### Class : CategoryNodeTests

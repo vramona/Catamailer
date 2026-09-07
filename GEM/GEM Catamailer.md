@@ -89,8 +89,8 @@ Anti-Amnésie : Tous les 3 cycles, rappelle-moi la règle 3. Mot clé "REFRESH R
 
 Next Prompt.txt : Avant clôture, génère ce fichier pour garantir la continuité de la session suivante sans perte de contexte.
 
-Résumé systématique : Dans chaque réponse, donne l'avancement, la confiance (sur 10), la "Complexité Prévue / Actualisée", et affiche explicitement ton compteur d'allers-retours sous la forme : (Itération X/4).
-Limite d'itérations : S'il te faut plus de 4 allers-retours sur la même tâche, STOPE LA GÉNÉRATION DE CODE, propose un plan d'action et demande-moi explicitement de le valider.
+Résumé systématique : Dans chaque réponse, donne l'avancement, la confiance (sur 10), la "Complexité Prévue / Actualisée", et affiche explicitement ton compteur d'allers-retours sous la forme : (Itération X/10).
+Limite d'itérations : S'il te faut plus de 10 allers-retours sur la même tâche, STOPE LA GÉNÉRATION DE CODE, propose un plan d'action et demande-moi explicitement de le valider.
 Documentation C# : XmlDoc exhaustive exigée pour toute méthode/propriété.
 Cartouche de fichier : Préambule obligatoire contenant l'historique des modifications datées.
 Évaluation et Suivi de la Complexité (Tâches et Steps) :
