@@ -1,127 +1,77 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-07 11:22
+Généré le : 2026-09-07 13:35
 
 ## Projet : Catamailer.Application
-### Class : Class1
-**Fichier** : `src\Catamailer.Application\Class1.cs`
+### Class : ClassificationEngine
+**Fichier** : `src\Catamailer.Application\ClassificationEngine.cs`
+**Rôle** : Moteur d'évaluation de l'Étape 1 : déduction de la catégorie principale en fonction des dictionnaires de mots-clés.
 **Membres et Invocations :**
+- `ClassificationResult? Classify(string subject, string sender, IEnumerable<string> recipients, IEnumerable<DictionaryRule> rules)` : Évalue les métadonnées d'un e-mail par rapport à un ensemble de règles de dictionnaire.
+  - *Appelle* ➡️ `CategoryNode.GetAscendanceChain()`
+
+### Class : ClassificationResult
+**Fichier** : `src\Catamailer.Application\ClassificationResult.cs`
+**Rôle** : Représente le résultat de l'évaluation de l'Étape 1 (Classification).
+**Membres et Invocations :**
+
+### Class : ExecutionEngine
+**Fichier** : `src\Catamailer.Application\ExecutionEngine.cs`
+**Rôle** : Moteur d'exécution de l'Étape 2 : évaluation de l'arbre booléen des conditions.
+**Membres et Invocations :**
+- `bool Evaluate(string subject, string sender, RuleNode node)` : Évalue un nœud de règle composite par rapport aux métadonnées d'un e-mail.
+  - *Appelle* ➡️ `ExecutionEngine.EvaluateCriterion()`
+  - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
 
 ## Projet : Catamailer.Domain
-### Class : Class1
-**Fichier** : `src\Catamailer.Domain\Class1.cs`
+### Class : CategoryNode
+**Fichier** : `src\Catamailer.Domain\CategoryNode.cs`
+**Rôle** : Représente un nœud dans l'arbre hiérarchique des catégories, agissant comme vérité absolue (Master Data Management).
 **Membres et Invocations :**
+- `void AddChild(CategoryNode child)` : Ajoute un nœud enfant à cette catégorie et lie automatiquement ce nœud à ce parent.
+- `IEnumerable<CategoryNode> GetAscendanceChain()` : Récupère la chaîne d'ascendance complète depuis la racine jusqu'à ce nœud inclus.
+
+### Class : DictionaryRule
+**Fichier** : `src\Catamailer.Domain\DictionaryRule.cs`
+**Rôle** : Représente une règle de l'Étape 1 (Classification) liant un ensemble de mots-clés à une catégorie déduite.
+**Membres et Invocations :**
+
+### Interface : ICategoryRepository
+**Fichier** : `src\Catamailer.Domain\ICategoryRepository.cs`
+**Rôle** : Définit le contrat pour l'accès aux données de l'entité CategoryNode.
+**Membres et Invocations :**
+
+### Class : RuleAction
+**Fichier** : `src\Catamailer.Domain\RuleAction.cs`
+**Rôle** : Représente l'action finale à exécuter si un arbre de conditions est validé.
+**Membres et Invocations :**
+
+### Class : RuleCriterion
+**Fichier** : `src\Catamailer.Domain\RuleCriterion.cs`
+**Rôle** : Représente un critère de filtrage unitaire dans l'arbre d'exécution de l'Étape 2.
+**Membres et Invocations :**
+
+### Class : RuleNode
+**Fichier** : `src\Catamailer.Domain\RuleNode.cs`
+**Rôle** : Représente un nœud dans l'arbre composite des conditions d'exécution de l'Étape 2.
+**Membres et Invocations :**
+- `void AddCriterion(RuleCriterion criterion)` : Ajoute un critère de validation unitaire à ce nœud.
+- `void AddChildNode(RuleNode childNode)` : Ajoute un nœud enfant permettant d'imbriquer une nouvelle couche logique.
 
 ## Projet : Catamailer.Infrastructure
-### Class : Class1
-**Fichier** : `src\Catamailer.Infrastructure\Class1.cs`
+### Class : CatamailerDbContext
+**Fichier** : `src\Catamailer.Infrastructure\CatamailerDbContext.cs`
+**Rôle** : Contexte de base de données principal pour Catamailer (Entity Framework Core SQLite).
 **Membres et Invocations :**
+
+### Class : CategoryRepository
+**Fichier** : `src\Catamailer.Infrastructure\CategoryRepository.cs`
+**Rôle** : Implémentation SQLite du dépôt pour les catégories utilisant Entity Framework Core.
+**Membres et Invocations :**
+- `Task AddAsync(CategoryNode category)`
+- `Task<CategoryNode?> GetByNameAsync(string name)`
 
 ## Projet : Catamailer.Migrator
-## Projet : Catamailer.UI(net10.0-android)
-### Class : App
-**Fichier** : `src\Catamailer.UI\App.xaml.cs`
-**Membres et Invocations :**
-
-### Class : MainPage
-**Fichier** : `src\Catamailer.UI\MainPage.xaml.cs`
-**Membres et Invocations :**
-
-### Class : MauiProgram
-**Fichier** : `src\Catamailer.UI\MauiProgram.cs`
-**Membres et Invocations :**
-- `MauiApp CreateMauiApp()`
-
-### Class : MainActivity
-**Fichier** : `src\Catamailer.UI\Platforms\Android\MainActivity.cs`
-**Membres et Invocations :**
-
-### Class : MainApplication
-**Fichier** : `src\Catamailer.UI\Platforms\Android\MainApplication.cs`
-**Membres et Invocations :**
-
-### Class : Resource
-**Fichier** : `src\Catamailer.UI\obj\Debug\net10.0-android\designtime\__Microsoft.Android.Resource.Designer.cs`
-**Rôle** : Android Resource Designer class. Exposes the Android Resource designer assembly into the project Namespace.
-**Membres et Invocations :**
-
-
-### Composants Razor
-- **Routes** : `src\Catamailer.UI\Components\Routes.razor`
-- **_Imports** : `src\Catamailer.UI\Components\_Imports.razor`
-- **MainLayout** : `src\Catamailer.UI\Components\Layout\MainLayout.razor`
-- **NavMenu** : `src\Catamailer.UI\Components\Layout\NavMenu.razor`
-- **Counter** (Route: `/counter`) : `src\Catamailer.UI\Components\Pages\Counter.razor`
-- **Home** (Route: `/`) : `src\Catamailer.UI\Components\Pages\Home.razor`
-- **NotFound** (Route: `/not-found`) : `src\Catamailer.UI\Components\Pages\NotFound.razor`
-- **Weather** (Route: `/weather`) : `src\Catamailer.UI\Components\Pages\Weather.razor`
-
-## Projet : Catamailer.UI(net10.0-ios)
-### Class : App
-**Fichier** : `src\Catamailer.UI\App.xaml.cs`
-**Membres et Invocations :**
-
-### Class : MainPage
-**Fichier** : `src\Catamailer.UI\MainPage.xaml.cs`
-**Membres et Invocations :**
-
-### Class : MauiProgram
-**Fichier** : `src\Catamailer.UI\MauiProgram.cs`
-**Membres et Invocations :**
-- `MauiApp CreateMauiApp()`
-
-### Class : AppDelegate
-**Fichier** : `src\Catamailer.UI\Platforms\iOS\AppDelegate.cs`
-**Membres et Invocations :**
-
-### Class : Program
-**Fichier** : `src\Catamailer.UI\Platforms\iOS\Program.cs`
-**Membres et Invocations :**
-
-
-### Composants Razor
-- **Routes** : `src\Catamailer.UI\Components\Routes.razor`
-- **_Imports** : `src\Catamailer.UI\Components\_Imports.razor`
-- **MainLayout** : `src\Catamailer.UI\Components\Layout\MainLayout.razor`
-- **NavMenu** : `src\Catamailer.UI\Components\Layout\NavMenu.razor`
-- **Counter** (Route: `/counter`) : `src\Catamailer.UI\Components\Pages\Counter.razor`
-- **Home** (Route: `/`) : `src\Catamailer.UI\Components\Pages\Home.razor`
-- **NotFound** (Route: `/not-found`) : `src\Catamailer.UI\Components\Pages\NotFound.razor`
-- **Weather** (Route: `/weather`) : `src\Catamailer.UI\Components\Pages\Weather.razor`
-
-## Projet : Catamailer.UI(net10.0-maccatalyst)
-### Class : App
-**Fichier** : `src\Catamailer.UI\App.xaml.cs`
-**Membres et Invocations :**
-
-### Class : MainPage
-**Fichier** : `src\Catamailer.UI\MainPage.xaml.cs`
-**Membres et Invocations :**
-
-### Class : MauiProgram
-**Fichier** : `src\Catamailer.UI\MauiProgram.cs`
-**Membres et Invocations :**
-- `MauiApp CreateMauiApp()`
-
-### Class : AppDelegate
-**Fichier** : `src\Catamailer.UI\Platforms\MacCatalyst\AppDelegate.cs`
-**Membres et Invocations :**
-
-### Class : Program
-**Fichier** : `src\Catamailer.UI\Platforms\MacCatalyst\Program.cs`
-**Membres et Invocations :**
-
-
-### Composants Razor
-- **Routes** : `src\Catamailer.UI\Components\Routes.razor`
-- **_Imports** : `src\Catamailer.UI\Components\_Imports.razor`
-- **MainLayout** : `src\Catamailer.UI\Components\Layout\MainLayout.razor`
-- **NavMenu** : `src\Catamailer.UI\Components\Layout\NavMenu.razor`
-- **Counter** (Route: `/counter`) : `src\Catamailer.UI\Components\Pages\Counter.razor`
-- **Home** (Route: `/`) : `src\Catamailer.UI\Components\Pages\Home.razor`
-- **NotFound** (Route: `/not-found`) : `src\Catamailer.UI\Components\Pages\NotFound.razor`
-- **Weather** (Route: `/weather`) : `src\Catamailer.UI\Components\Pages\Weather.razor`
-
-## Projet : Catamailer.UI(net10.0-windows10.0.19041.0)
+## Projet : Catamailer.UI
 ### Class : App
 **Fichier** : `src\Catamailer.UI\App.xaml.cs`
 **Membres et Invocations :**
@@ -218,22 +168,80 @@ Généré le : 2026-09-07 11:22
 - `void InjectEntryIfNeeded(string tocPath, string name, string href)` : Injecte une nouvelle entrée dans un fichier toc.yml si elle n'existe pas déjà.
 
 ## Projet : Catamailer.Application.Tests
-### Class : UnitTest1
-**Fichier** : `tests\Catamailer.Application.Tests\UnitTest1.cs`
+### Class : ClassificationEngineTests
+**Fichier** : `tests\Catamailer.Application.Tests\ClassificationEngineTests.cs`
+**Rôle** : Classe de test validant le comportement du moteur de classification (Étape 1).
 **Membres et Invocations :**
-- `void Test1()`
+- `void Classify_ShouldReturnNull_WhenNoRulesProvided()`
+  - *Appelle* ➡️ `ClassificationEngine.Classify()`
+- `void Classify_ShouldReturnCategoryAndAscendanceChain_WhenKeywordMatches()`
+  - *Appelle* ➡️ `CategoryNode.AddChild()`
+  - *Appelle* ➡️ `ClassificationEngine.Classify()`
+- `void Classify_ShouldReturnCategory_WhenKeywordMatchesRecipient()`
+  - *Appelle* ➡️ `ClassificationEngine.Classify()`
+
+### Class : ExecutionEngineTests
+**Fichier** : `tests\Catamailer.Application.Tests\ExecutionEngineTests.cs`
+**Rôle** : Classe de test validant le comportement du moteur d'exécution (Étape 2).
+**Membres et Invocations :**
+- `void Evaluate_ShouldReturnFalse_WhenNodeIsEmpty()`
+  - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
+- `void Evaluate_ShouldReturnTrue_WhenSenderMatchesEqualsCriterion()`
+  - *Appelle* ➡️ `RuleNode.AddCriterion()`
+  - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
+- `void Evaluate_ShouldReturnFalse_WhenSenderDoesNotMatchEqualsCriterion()`
+  - *Appelle* ➡️ `RuleNode.AddCriterion()`
+  - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
+- `void Evaluate_ShouldReturnTrue_WhenSubjectMatchesContainsCriterion()`
+  - *Appelle* ➡️ `RuleNode.AddCriterion()`
+  - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
+- `void Evaluate_ShouldReturnTrue_WhenOrNodeHasOneValidCriterion()`
+  - *Appelle* ➡️ `RuleNode.AddCriterion()`
+  - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
 
 ## Projet : Catamailer.Domain.Tests
-### Class : UnitTest1
-**Fichier** : `tests\Catamailer.Domain.Tests\UnitTest1.cs`
+### Class : CategoryNodeTests
+**Fichier** : `tests\Catamailer.Domain.Tests\CategoryNodeTests.cs`
+**Rôle** : Classe de test validant les règles métier de l'arbre des catégories (CategoryNode).
 **Membres et Invocations :**
-- `void Test1()`
+- `void CategoryNode_Creation_ShouldSetPropertiesCorrectly()`
+- `void AddChild_ShouldSetParentAndInheritColor_WhenNoColorSpecified()`
+  - *Appelle* ➡️ `CategoryNode.AddChild()`
+- `void EffectiveColor_ShouldOverrideParentColor_WhenColorIsExplicitlySet()`
+  - *Appelle* ➡️ `CategoryNode.AddChild()`
+- `void GetAscendanceChain_ShouldReturnFullHierarchy_FromRootToNode()`
+  - *Appelle* ➡️ `CategoryNode.AddChild()`
+  - *Appelle* ➡️ `CategoryNode.GetAscendanceChain()`
+
+### Class : RuleModelsTests
+**Fichier** : `tests\Catamailer.Domain.Tests\RuleModelsTests.cs`
+**Rôle** : Classe de test validant la modélisation des entités de règles (DictionaryRule, RuleNode, RuleCriterion, RuleAction).
+**Membres et Invocations :**
+- `void DictionaryRule_Creation_ShouldSetProperties()`
+- `void RuleAction_Creation_ShouldSetActionTypeAndParameter()`
+- `void RuleCriterion_Creation_ShouldSetConditionFields()`
+- `void RuleNode_ShouldActAsComposite_HoldingCriteriaAndChildNodes()`
+  - *Appelle* ➡️ `RuleNode.AddCriterion()`
+  - *Appelle* ➡️ `RuleNode.AddChildNode()`
 
 ## Projet : Catamailer.Infrastructure.Tests
-### Class : UnitTest1
-**Fichier** : `tests\Catamailer.Infrastructure.Tests\UnitTest1.cs`
+### Class : CatamailerDbContextTests
+**Fichier** : `tests\Catamailer.Infrastructure.Tests\CatamailerDbContextTests.cs`
+**Rôle** : Classe de test validant l'intégration d'Entity Framework Core SQLite.
 **Membres et Invocations :**
-- `void Test1()`
+- `void EnsureCreated_ShouldCreateDatabaseAndTables()`
+- `void CanSaveAndRetrieve_CategoryNode()`
+
+### Class : CategoryRepositoryTests
+**Fichier** : `tests\Catamailer.Infrastructure.Tests\CategoryRepositoryTests.cs`
+**Rôle** : Classe de test validant le comportement du dépôt (Repository) des catégories.
+**Membres et Invocations :**
+- `Task AddAsync_ShouldPersistCategory()`
+  - *Appelle* ➡️ `CategoryRepositoryTests.GetInMemoryContext()`
+  - *Appelle* ➡️ `CategoryRepository.AddAsync()`
+- `Task GetByNameAsync_ShouldReturnCategory_WhenExists()`
+  - *Appelle* ➡️ `CategoryRepositoryTests.GetInMemoryContext()`
+  - *Appelle* ➡️ `CategoryRepository.GetByNameAsync()`
 
 ## Projet : Tools.AiDocGenerator.Tests
 ### Class : CatamailerTocBuilderTests
@@ -246,6 +254,8 @@ Généré le : 2026-09-07 11:22
 - **Build-DocFx.ps1** : `scripts\Build-DocFx.ps1`
 - **Commit-Task.ps1** : `scripts\Commit-Task.ps1`
   - Paramètre : `[string] $Message` *(Obligatoire)*
+  - *Appelle* ➡️ `Generate-AiDoc.ps1`
+  - *Appelle* ➡️ `Generate-FileList.ps1`
 - **Complete-Jalon.ps1** : `scripts\Complete-Jalon.ps1`
   - Paramètre : `[string] $JalonBranch` *(Obligatoire)*
   - Paramètre : `[string] $BaseBranch`
