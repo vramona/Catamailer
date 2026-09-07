@@ -5,6 +5,7 @@
 //         - 2026-09-07 : Création initiale (Phase Rouge).
 //         - 2026-09-07 : Ajout de GetSelectedEntryId pour J2-S1-T2 (Phase Rouge).
 //         - 2026-09-07 : Ajout des méthodes CRUD pour les catégories J2-S1-T3 (Phase Rouge).
+//         - 2026-09-07 : Ajout de ReplaceCategoryOnAllItems pour J2-S1-T4 (Phase Rouge).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -64,5 +65,12 @@ namespace Catamailer.Infrastructure
         /// </summary>
         /// <param name="name">Le nom de la catégorie.</param>
         void RemoveCategory(string name);
+
+        /// <summary>
+        /// Remplace une catégorie par une autre sur l'ensemble des éléments de la messagerie en utilisant une recherche avancée (DASL).
+        /// </summary>
+        /// <param name="oldCategoryName">Le nom de la catégorie à rechercher et retirer.</param>
+        /// <param name="newCategoryName">Le nom de la catégorie à appliquer.</param>
+        void ReplaceCategoryOnAllItems(string oldCategoryName, string newCategoryName);
     }
 }

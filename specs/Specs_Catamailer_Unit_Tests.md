@@ -46,6 +46,7 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 - [x] ✅ `J2-S1-T3 - AddCategory_ShouldCallWrapperAdd_WhenCategoryDoesNotExist` (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-1-com - Commit : 12db1d65cd4d200dad3cfca53174282adf42f677)
 - [x] ✅ `J2-S1-T3 - UpdateCategoryColor_ShouldCallWrapperUpdate_WhenCategoryExists` (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-1-com - Commit : 12db1d65cd4d200dad3cfca53174282adf42f677)
 - [x] ✅ `J2-S1-T3 - RemoveCategory_ShouldCallWrapperRemove_WhenCategoryExists` (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-1-com - Commit : 12db1d65cd4d200dad3cfca53174282adf42f677)
+- [x] ✅ `J2-S1-T4 - UpdateCategoryNameOnItems_ShouldCallWrapperReplaceCategory` (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-1-com - Commit : <COMMIT_HASH>)
 
 ---
 

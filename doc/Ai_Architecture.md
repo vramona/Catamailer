@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-07 18:06
+Généré le : 2026-09-07 18:16
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -48,6 +48,11 @@ Généré le : 2026-09-07 18:06
 ### Interface : IMailProvider
 **Fichier** : `src\Catamailer.Domain\IMailProvider.cs`
 **Rôle** : Définit le contrat d'écoute et d'interaction avec le fournisseur de messagerie.
+**Membres et Invocations :**
+
+### Interface : IMassUpdateProvider
+**Fichier** : `src\Catamailer.Domain\IMassUpdateProvider.cs`
+**Rôle** : Définit le contrat permettant la mise à jour en masse (renommage rétroactif) des catégories sur les e-mails existants.
 **Membres et Invocations :**
 
 ### Interface : ISelectionProvider
@@ -115,6 +120,13 @@ Généré le : 2026-09-07 18:06
 **Membres et Invocations :**
 - `void StartListening()`
 - `void StopListening()`
+
+### Class : OutlookMassUpdateProvider
+**Fichier** : `src\Catamailer.Infrastructure\OutlookMassUpdateProvider.cs`
+**Rôle** : Implémentation du fournisseur de mise à jour en masse via l'Interop COM Outlook.
+**Membres et Invocations :**
+- `void UpdateCategoryNameOnItems(string oldCategoryName, string newCategoryName)`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.ReplaceCategoryOnAllItems()`
 
 ### Class : OutlookSelectionProvider
 **Fichier** : `src\Catamailer.Infrastructure\OutlookSelectionProvider.cs`
@@ -321,6 +333,14 @@ Généré le : 2026-09-07 18:06
 - `void StartListening_ShouldTriggerNewMailReceived_WhenOutlookRaisesNewMailEx()`
   - *Appelle* ➡️ `IOutlookApplicationWrapper.GetMailMetadata()`
   - *Appelle* ➡️ `OutlookMailProvider.StartListening()`
+
+### Class : OutlookMassUpdateProviderTests
+**Fichier** : `tests\Catamailer.Infrastructure.Tests\OutlookMassUpdateProviderTests.cs`
+**Rôle** : Classe de tests validant le comportement du fournisseur de mise à jour en masse Outlook.
+**Membres et Invocations :**
+- `void UpdateCategoryNameOnItems_ShouldCallWrapperReplaceCategory()`
+  - *Appelle* ➡️ `OutlookMassUpdateProvider.UpdateCategoryNameOnItems()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.ReplaceCategoryOnAllItems()`
 
 ### Class : OutlookSelectionProviderTests
 **Fichier** : `tests\Catamailer.Infrastructure.Tests\OutlookSelectionProviderTests.cs`
