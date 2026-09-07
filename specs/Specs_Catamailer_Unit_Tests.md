@@ -20,10 +20,10 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 - [x] ✅ `J1-S1-T2 - RuleAction_Creation_ShouldSetActionTypeAndParameter` (Validé le 07/09/2026 sur feature/j1-core-engine_step-1-domain - Commit : 2cf32ba2f8e288abfc13c6de1c2fb10daa1ea146)
 - [x] ✅ `J1-S1-T2 - RuleCriterion_Creation_ShouldSetConditionFields` (Validé le 07/09/2026 sur feature/j1-core-engine_step-1-domain - Commit : 2cf32ba2f8e288abfc13c6de1c2fb10daa1ea146)
 - [x] ✅ `J1-S1-T2 - RuleNode_ShouldActAsComposite_HoldingCriteriaAndChildNodes` (Validé le 07/09/2026 sur feature/j1-core-engine_step-1-domain - Commit : 2cf32ba2f8e288abfc13c6de1c2fb10daa1ea146)
-- [x] ✅ `J1-S1-T3 - EnsureCreated_ShouldCreateDatabaseAndTables` (Validé le 07/09/2026 sur feature/j1-core-engine_step-1-domain - Commit : <COMMIT_HASH>)
-- [x] ✅ `J1-S1-T3 - CanSaveAndRetrieve_CategoryNode` (Validé le 07/09/2026 sur feature/j1-core-engine_step-1-domain - Commit : <COMMIT_HASH>)
-- [x] ✅ `J1-S1-T3 - AddAsync_ShouldPersistCategory` (Validé le 07/09/2026 sur feature/j1-core-engine_step-1-domain - Commit : <COMMIT_HASH>)
-- [x] ✅ `J1-S1-T3 - GetByNameAsync_ShouldReturnCategory_WhenExists` (Validé le 07/09/2026 sur feature/j1-core-engine_step-1-domain - Commit : <COMMIT_HASH>)
+- [x] ✅ `J1-S1-T3 - EnsureCreated_ShouldCreateDatabaseAndTables` (Validé le 07/09/2026 sur feature/j1-core-engine_step-1-domain - Commit : 1c3bba4f53bf603ecf5c749ce154869240b5ba06)
+- [x] ✅ `J1-S1-T3 - CanSaveAndRetrieve_CategoryNode` (Validé le 07/09/2026 sur feature/j1-core-engine_step-1-domain - Commit : 1c3bba4f53bf603ecf5c749ce154869240b5ba06)
+- [x] ✅ `J1-S1-T3 - AddAsync_ShouldPersistCategory` (Validé le 07/09/2026 sur feature/j1-core-engine_step-1-domain - Commit : 1c3bba4f53bf603ecf5c749ce154869240b5ba06)
+- [x] ✅ `J1-S1-T3 - GetByNameAsync_ShouldReturnCategory_WhenExists` (Validé le 07/09/2026 sur feature/j1-core-engine_step-1-domain - Commit : 1c3bba4f53bf603ecf5c749ce154869240b5ba06)
 
 ### 🟢 J1-S2 : Moteurs d'Évaluation
 *À compléter lors du développement de J1-S2.*
