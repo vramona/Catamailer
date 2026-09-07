@@ -47,6 +47,9 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 - [x] ✅ `J2-S1-T3 - UpdateCategoryColor_ShouldCallWrapperUpdate_WhenCategoryExists` (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-1-com - Commit : 12db1d65cd4d200dad3cfca53174282adf42f677)
 - [x] ✅ `J2-S1-T3 - RemoveCategory_ShouldCallWrapperRemove_WhenCategoryExists` (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-1-com - Commit : 12db1d65cd4d200dad3cfca53174282adf42f677)
 - [x] ✅ `J2-S1-T4 - UpdateCategoryNameOnItems_ShouldCallWrapperReplaceCategory` (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-1-com - Commit : 00edec7a319adf68780fa47c75f4785839687971)
+- [x] ✅ `J2-S2-T1 - HistoryStateRepository_ShouldPersistAndRetrieveState` (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-2-history - Commit : <COMMIT_HASH>)
+- [x] ✅ `J2-S2-T1 - HistoryStateRepository_ShouldUpdateExistingState` (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-2-history - Commit : <COMMIT_HASH>)
+- [x] ✅ `J2-S2-T1 - AppSettingsRepository_ShouldPersistAndRetrieveSetting` (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-2-history - Commit : <COMMIT_HASH>)
 
 ---
 

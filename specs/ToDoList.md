@@ -27,8 +27,10 @@
 - [x] ✅ **J2-S1-T4** - `MassUpdateService` : Renommage rétroactif des e-mails. (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-1-com - Commit : 00edec7a319adf68780fa47c75f4785839687971) (Cpx: 8 / 8)
 
 ### Step 2 - Reprise & Shadow Mode - feature/j2-outlook-integration_step-2-history
-- [ ] ⚪ **J2-S2-T1** - Curseur d'état et Service Background de Reprise (`LastEntryID`, Pattern Debounce 30 min).
-- [ ] ⚪ **J2-S2-T2** - `ShadowModeService` : Validation croisée (C# vs VBA) et Télémétrie (Verrou 300/30).
+- [x] ✅ **J2-S2-T1** - Modélisation des paramètres globaux (`IAppSettingsRepository`) et du curseur d'état (`IHistoryStateRepository`). (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-2-history - Commit : <COMMIT_HASH>) (Cpx: 5 / 5)
+- [ ] ⚪ **J2-S2-T2** - `DebounceService` : Suspension de l'analyse d'historique basée sur la configuration globale.
+- [ ] ⚪ **J2-S2-T3** - Service Background de Reprise (`HistoryRunner`) exploitant le `LastEntryID`.
+- [ ] ⚪ **J2-S2-T4** - `ShadowModeService` : Validation croisée (C# vs VBA) et Télémétrie (Verrou 300/30).
 
 ## Jalon 3 - Tray App, Global Hotkeys & UI - feature/j3-tray-ui
 ### Step 1 - Host & Hotkeys - feature/j3-tray-ui_step-1-host
@@ -43,6 +45,7 @@
 - [ ] ⚪ **J3-S3-T1** - Dashboard Shadow Mode.
 - [ ] ⚪ **J3-S3-T2** - Éditeur de Référentiel (TreeView Catégories).
 - [ ] ⚪ **J3-S3-T3** - Éditeur Dictionnaires et Builder Visuel (Étape 2).
+- [ ] ⚪ **J3-S3-T4** - Écran de Préférences Générales (Paramétrage du délai de Debounce).
 
 ## Jalon 4 - Inbox Notes, Agenda & Actions Internes - feature/j4-inbox-notes
 ### Step 1 - Modélisation & Agendas - feature/j4-inbox-notes_step-1-core

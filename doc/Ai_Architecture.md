@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-07 18:17
+Généré le : 2026-09-07 18:31
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -23,6 +23,11 @@ Généré le : 2026-09-07 18:17
   - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
 
 ## Projet : Catamailer.Domain
+### Class : AppSetting
+**Fichier** : `src\Catamailer.Domain\AppSetting.cs`
+**Rôle** : Représente un paramètre de configuration globale de l'application.
+**Membres et Invocations :**
+
 ### Class : CategoryNode
 **Fichier** : `src\Catamailer.Domain\CategoryNode.cs`
 **Rôle** : Représente un nœud dans l'arbre hiérarchique des catégories, agissant comme vérité absolue (Master Data Management).
@@ -35,6 +40,11 @@ Généré le : 2026-09-07 18:17
 **Rôle** : Représente une règle de l'Étape 1 (Classification) liant un ensemble de mots-clés à une catégorie déduite.
 **Membres et Invocations :**
 
+### Interface : IAppSettingsRepository
+**Fichier** : `src\Catamailer.Domain\IAppSettingsRepository.cs`
+**Rôle** : Contrat pour la gestion des paramètres globaux de l'application.
+**Membres et Invocations :**
+
 ### Interface : ICategoryManagerProvider
 **Fichier** : `src\Catamailer.Domain\ICategoryManagerProvider.cs`
 **Rôle** : Définit le contrat permettant de gérer les catégories au sein du fournisseur de messagerie (ex: Master Category List).
@@ -43,6 +53,11 @@ Généré le : 2026-09-07 18:17
 ### Interface : ICategoryRepository
 **Fichier** : `src\Catamailer.Domain\ICategoryRepository.cs`
 **Rôle** : Définit le contrat pour l'accès aux données de l'entité CategoryNode.
+**Membres et Invocations :**
+
+### Interface : IHistoryStateRepository
+**Fichier** : `src\Catamailer.Domain\IHistoryStateRepository.cs`
+**Rôle** : Contrat pour la gestion des états systèmes internes.
 **Membres et Invocations :**
 
 ### Interface : IMailProvider
@@ -82,7 +97,19 @@ Généré le : 2026-09-07 18:17
 - `void AddCriterion(RuleCriterion criterion)` : Ajoute un critère de validation unitaire à ce nœud.
 - `void AddChildNode(RuleNode childNode)` : Ajoute un nœud enfant permettant d'imbriquer une nouvelle couche logique.
 
+### Class : SystemState
+**Fichier** : `src\Catamailer.Domain\SystemState.cs`
+**Rôle** : Représente un état système interne (ex: curseur d'avancement).
+**Membres et Invocations :**
+
 ## Projet : Catamailer.Infrastructure
+### Class : AppSettingsRepository
+**Fichier** : `src\Catamailer.Infrastructure\AppSettingsRepository.cs`
+**Rôle** : Implémentation EF Core pour le dépôt des paramètres d'application.
+**Membres et Invocations :**
+- `Task<string?> GetSettingAsync(string key)`
+- `Task SetSettingAsync(string key, string value)`
+
 ### Class : CatamailerDbContext
 **Fichier** : `src\Catamailer.Infrastructure\CatamailerDbContext.cs`
 **Rôle** : Contexte de base de données principal pour Catamailer (Entity Framework Core SQLite).
@@ -94,6 +121,13 @@ Généré le : 2026-09-07 18:17
 **Membres et Invocations :**
 - `Task AddAsync(CategoryNode category)`
 - `Task<CategoryNode?> GetByNameAsync(string name)`
+
+### Class : HistoryStateRepository
+**Fichier** : `src\Catamailer.Infrastructure\HistoryStateRepository.cs`
+**Rôle** : Implémentation EF Core pour le dépôt des états systèmes.
+**Membres et Invocations :**
+- `Task<string?> GetStateAsync(string key)`
+- `Task SetStateAsync(string key, string value)`
 
 ### Interface : IOutlookApplicationWrapper
 **Fichier** : `src\Catamailer.Infrastructure\IOutlookApplicationWrapper.cs`
@@ -353,6 +387,23 @@ Généré le : 2026-09-07 18:17
   - *Appelle* ➡️ `IOutlookApplicationWrapper.GetSelectedEntryId()`
   - *Appelle* ➡️ `IOutlookApplicationWrapper.GetMailMetadata()`
   - *Appelle* ➡️ `OutlookSelectionProvider.GetSelectedMail()`
+
+### Class : StateAndSettingsRepositoriesTests
+**Fichier** : `tests\Catamailer.Infrastructure.Tests\StateAndSettingsRepositoriesTests.cs`
+**Rôle** : Classe de tests validant le comportement des dépôts de configuration et d'état.
+**Membres et Invocations :**
+- `Task HistoryStateRepository_ShouldPersistAndRetrieveState()`
+  - *Appelle* ➡️ `StateAndSettingsRepositoriesTests.GetInMemoryContext()`
+  - *Appelle* ➡️ `HistoryStateRepository.SetStateAsync()`
+  - *Appelle* ➡️ `HistoryStateRepository.GetStateAsync()`
+- `Task HistoryStateRepository_ShouldUpdateExistingState()`
+  - *Appelle* ➡️ `StateAndSettingsRepositoriesTests.GetInMemoryContext()`
+  - *Appelle* ➡️ `HistoryStateRepository.SetStateAsync()`
+  - *Appelle* ➡️ `HistoryStateRepository.GetStateAsync()`
+- `Task AppSettingsRepository_ShouldPersistAndRetrieveSetting()`
+  - *Appelle* ➡️ `StateAndSettingsRepositoriesTests.GetInMemoryContext()`
+  - *Appelle* ➡️ `AppSettingsRepository.SetSettingAsync()`
+  - *Appelle* ➡️ `AppSettingsRepository.GetSettingAsync()`
 
 ## Projet : Tools.AiDocGenerator.Tests
 ### Class : CatamailerTocBuilderTests
