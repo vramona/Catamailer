@@ -6,12 +6,14 @@
 //         - 2026-09-07 : Ajout de GetSelectedEntryId pour J2-S1-T2 (Phase Rouge).
 //         - 2026-09-07 : Ajout des méthodes CRUD pour les catégories J2-S1-T3 (Phase Rouge).
 //         - 2026-09-07 : Ajout de ReplaceCategoryOnAllItems pour J2-S1-T4 (Phase Rouge).
+//         - 2026-09-07 : Ajout de GetNextUnprocessedMailEntryIds pour J2-S2-T3 (Phase Rouge).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
 #nullable enable
 
 using System;
+using System.Collections.Generic;
 using Catamailer.Domain;
 
 namespace Catamailer.Infrastructure
@@ -72,5 +74,13 @@ namespace Catamailer.Infrastructure
         /// <param name="oldCategoryName">Le nom de la catégorie à rechercher et retirer.</param>
         /// <param name="newCategoryName">Le nom de la catégorie à appliquer.</param>
         void ReplaceCategoryOnAllItems(string oldCategoryName, string newCategoryName);
+
+        /// <summary>
+        /// Récupère un lot d'EntryIDs d'e-mails à traiter dans l'historique à partir du dernier EntryID connu.
+        /// </summary>
+        /// <param name="lastEntryId">Le dernier EntryID traité, ou null si début de l'historique.</param>
+        /// <param name="maxItems">Nombre maximal d'éléments à retourner.</param>
+        /// <returns>Une liste d'EntryIDs d'e-mails.</returns>
+        IEnumerable<string> GetNextUnprocessedMailEntryIds(string? lastEntryId, int maxItems);
     }
 }

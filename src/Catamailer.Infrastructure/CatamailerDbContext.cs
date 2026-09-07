@@ -1,5 +1,6 @@
 // Historique :
 // 2026-09-07 : Création du DbContext pour SQLite (J1-S1-T3).
+// 2026-09-07 : Ajout des entités SystemState et AppSetting (J2-S2-T1).
 
 using Catamailer.Domain;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,16 @@ namespace Catamailer.Infrastructure
         /// Obtient ou définit la collection des nœuds de catégories.
         /// </summary>
         public DbSet<CategoryNode> Categories { get; set; } = null!;
+
+        /// <summary>
+        /// Obtient ou définit la collection des états systèmes.
+        /// </summary>
+        public DbSet<SystemState> SystemStates { get; set; } = null!;
+
+        /// <summary>
+        /// Obtient ou définit la collection des paramètres d'application.
+        /// </summary>
+        public DbSet<AppSetting> AppSettings { get; set; } = null!;
 
         /// <summary>
         /// Initialise une nouvelle instance de la classe <see cref="CatamailerDbContext"/>.
@@ -51,6 +62,18 @@ namespace Catamailer.Infrastructure
                 {
                     childrenNavigation.SetPropertyAccessMode(PropertyAccessMode.Field);
                 }
+            });
+
+            // Configuration de l'entité SystemState
+            modelBuilder.Entity<SystemState>(entity =>
+            {
+                entity.HasKey(e => e.Key);
+            });
+
+            // Configuration de l'entité AppSetting
+            modelBuilder.Entity<AppSetting>(entity =>
+            {
+                entity.HasKey(e => e.Key);
             });
         }
     }

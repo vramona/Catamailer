@@ -36,9 +36,10 @@ L'application est furtive : elle vit dans la zone de notification (Tray Icon) et
 
 ### 5. Shadow Mode, Sécurité et Reprise d'Historique
 *   **Shadow Mode (Double Run) :** Le moteur tourne en parallèle de l'ancienne macro Excel. Il évalue le mail, attend, puis compare sa prédiction théorique avec les catégories réellement appliquées par VBA.
-*   **Verrou de sécurité :** Catamailer n'écrit pas dans Outlook tant que la télémétrie n'aura pas certifié 300 correspondances exactes sur 30 catégories distinctes. (Levée du verrou par recompilation).
+*   **Verrou de sécurité et Activation Manuelle :** Catamailer fonctionne en mode lecture seule / Shadow Mode par défaut. Aucune modification n'est appliquée à Outlook tant que l'utilisateur n'a pas activé explicitement l'écriture automatique depuis un menu de préférences.
+*   **Alerte d'Activation (Palier 300) :** Dès que la télémétrie enregistre 300 correspondances exactes sur au moins 30 catégories distinctes, l'IHM affiche une popup d'invitation à activer Catamailer. Si l'utilisateur refuse ou ignore l'activation, la notification réapparaît tous les 300 nouveaux messages qualifiés (palier 600, 900, etc.).
 *   **Règle de Conflit :** Une classification manuelle par l'utilisateur (mail déjà déplacé) annule l'action de déplacement automatique.
-*   **Pattern Debounce (30 minutes) :** Modifier une règle suspend l'analyse d'historique pendant 30 minutes. Le curseur (`LastEntryID` et `ReceivedTime`) permet ensuite une reprise propre en tâche de fond sans bloquer l'IHM.
+*   **Pattern Debounce Configurable :** Modifier une règle suspend l'analyse d'historique (rattrapage de stock) pendant un délai paramétrable (défaut : 30 minutes), accessible via l'IHM des préférences. Le traitement des e-mails entrants en temps réel n'est pas affecté. Le curseur (`LastEntryID` et `ReceivedTime`) permet ensuite une reprise propre en tâche de fond sans bloquer l'IHM.
 
 ---
 
