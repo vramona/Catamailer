@@ -28,7 +28,7 @@
 
 ### Step 2 - Reprise & Shadow Mode - feature/j2-outlook-integration_step-2-history
 - [x] ✅ **J2-S2-T1** - Modélisation des paramètres globaux (`IAppSettingsRepository`) et du curseur d'état (`IHistoryStateRepository`). (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-2-history - Commit : b6194c5f4fc39f2edf9e79815166edcfa6cd3891) (Cpx: 5 / 5)
-- [ ] ⚪ **J2-S2-T2** - `DebounceService` : Suspension de l'analyse d'historique basée sur la configuration globale.
+- [x] ✅ **J2-S2-T2** - `DebounceService` : Suspension de l'analyse d'historique basée sur la configuration globale. (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-2-history - Commit : <COMMIT_HASH>) (Cpx: 5 / 5)
 - [ ] ⚪ **J2-S2-T3** - Service Background de Reprise (`HistoryRunner`) exploitant le `LastEntryID`.
 - [ ] ⚪ **J2-S2-T4** - `ShadowModeService` : Validation croisée (C# vs VBA) et Télémétrie (Verrou 300/30).
 

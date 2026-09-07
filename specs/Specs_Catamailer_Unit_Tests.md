@@ -50,6 +50,9 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 - [x] ✅ `J2-S2-T1 - HistoryStateRepository_ShouldPersistAndRetrieveState` (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-2-history - Commit : b6194c5f4fc39f2edf9e79815166edcfa6cd3891)
 - [x] ✅ `J2-S2-T1 - HistoryStateRepository_ShouldUpdateExistingState` (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-2-history - Commit : b6194c5f4fc39f2edf9e79815166edcfa6cd3891)
 - [x] ✅ `J2-S2-T1 - AppSettingsRepository_ShouldPersistAndRetrieveSetting` (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-2-history - Commit : b6194c5f4fc39f2edf9e79815166edcfa6cd3891)
+- [x] ✅ `J2-S2-T2 - IsAnalysisSuspendedAsync_ShouldReturnFalse_WhenNoSuspensionRecorded` (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-2-history - Commit : <COMMIT_HASH>)
+- [x] ✅ `J2-S2-T2 - SuspendAnalysisAsync_ShouldSaveTargetTimeBasedOnConfiguredDelay` (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-2-history - Commit : <COMMIT_HASH>)
+- [x] ✅ `J2-S2-T2 - IsAnalysisSuspendedAsync_ShouldReturnFalse_WhenTimeHasPassed` (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-2-history - Commit : <COMMIT_HASH>)
 
 ---
 

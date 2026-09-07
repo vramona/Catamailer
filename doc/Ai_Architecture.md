@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-07 18:31
+Généré le : 2026-09-07 18:38
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -13,6 +13,16 @@ Généré le : 2026-09-07 18:31
 **Fichier** : `src\Catamailer.Application\ClassificationResult.cs`
 **Rôle** : Représente le résultat de l'évaluation de l'Étape 1 (Classification).
 **Membres et Invocations :**
+
+### Class : DebounceService
+**Fichier** : `src\Catamailer.Application\DebounceService.cs`
+**Rôle** : Service gérant la suspension temporaire de l'analyse d'historique lors des modifications de règles.
+**Membres et Invocations :**
+- `Task SuspendAnalysisAsync()`
+  - *Appelle* ➡️ `IAppSettingsRepository.GetSettingAsync()`
+  - *Appelle* ➡️ `IHistoryStateRepository.SetStateAsync()`
+- `Task<bool> IsAnalysisSuspendedAsync()`
+  - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
 
 ### Class : ExecutionEngine
 **Fichier** : `src\Catamailer.Application\ExecutionEngine.cs`
@@ -53,6 +63,11 @@ Généré le : 2026-09-07 18:31
 ### Interface : ICategoryRepository
 **Fichier** : `src\Catamailer.Domain\ICategoryRepository.cs`
 **Rôle** : Définit le contrat pour l'accès aux données de l'entité CategoryNode.
+**Membres et Invocations :**
+
+### Interface : IDebounceService
+**Fichier** : `src\Catamailer.Domain\IDebounceService.cs`
+**Rôle** : Définit le contrat permettant de gérer la suspension temporaire des traitements d'arrière-plan (Debounce).
 **Membres et Invocations :**
 
 ### Interface : IHistoryStateRepository
@@ -279,6 +294,21 @@ Généré le : 2026-09-07 18:31
   - *Appelle* ➡️ `ClassificationEngine.Classify()`
 - `void Classify_ShouldReturnCategory_WhenKeywordMatchesRecipient()`
   - *Appelle* ➡️ `ClassificationEngine.Classify()`
+
+### Class : DebounceServiceTests
+**Fichier** : `tests\Catamailer.Application.Tests\DebounceServiceTests.cs`
+**Rôle** : Classe de tests validant le comportement du service de Debounce de l'analyse d'historique.
+**Membres et Invocations :**
+- `Task IsAnalysisSuspendedAsync_ShouldReturnFalse_WhenNoSuspensionRecorded()`
+  - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
+  - *Appelle* ➡️ `DebounceService.IsAnalysisSuspendedAsync()`
+- `Task SuspendAnalysisAsync_ShouldSaveTargetTimeBasedOnConfiguredDelay()`
+  - *Appelle* ➡️ `IAppSettingsRepository.GetSettingAsync()`
+  - *Appelle* ➡️ `IHistoryStateRepository.SetStateAsync()`
+  - *Appelle* ➡️ `DebounceService.SuspendAnalysisAsync()`
+- `Task IsAnalysisSuspendedAsync_ShouldReturnFalse_WhenTimeHasPassed()`
+  - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
+  - *Appelle* ➡️ `DebounceService.IsAnalysisSuspendedAsync()`
 
 ### Class : ExecutionEngineTests
 **Fichier** : `tests\Catamailer.Application.Tests\ExecutionEngineTests.cs`
