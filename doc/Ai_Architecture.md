@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-07 18:44
+Généré le : 2026-09-07 18:56
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -39,6 +39,24 @@ Généré le : 2026-09-07 18:44
 - `Task<int> ProcessPendingHistoryAsync(int maxItemsToProcess)`
   - *Appelle* ➡️ `IDebounceService.IsAnalysisSuspendedAsync()`
   - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
+
+### Class : ShadowModeService
+**Fichier** : `src\Catamailer.Application\ShadowModeService.cs`
+**Rôle** : Service gérant la télémétrie Shadow Mode, le contrôle d'activation et les paliers de notification.
+**Membres et Invocations :**
+- `Task RecordPredictionAsync(string entryId, string predictedCategory, string actualCategory)`
+  - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
+  - *Appelle* ➡️ `IHistoryStateRepository.SetStateAsync()`
+- `Task<bool> IsAutoWriteEnabledAsync()`
+  - *Appelle* ➡️ `IAppSettingsRepository.GetSettingAsync()`
+- `Task SetAutoWriteEnabledAsync(bool enabled)`
+  - *Appelle* ➡️ `IAppSettingsRepository.SetSettingAsync()`
+- `Task<bool> ShouldPromptForActivationAsync()`
+  - *Appelle* ➡️ `ShadowModeService.IsAutoWriteEnabledAsync()`
+  - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
+- `Task AcknowledgeActivationPromptAsync()`
+  - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
+  - *Appelle* ➡️ `IHistoryStateRepository.SetStateAsync()`
 
 ## Projet : Catamailer.Domain
 ### Class : AppSetting
@@ -101,6 +119,11 @@ Généré le : 2026-09-07 18:44
 ### Interface : ISelectionProvider
 **Fichier** : `src\Catamailer.Domain\ISelectionProvider.cs`
 **Rôle** : Définit le contrat permettant de récupérer l'élément actuellement sélectionné dans le client de messagerie.
+**Membres et Invocations :**
+
+### Interface : IShadowModeService
+**Fichier** : `src\Catamailer.Domain\IShadowModeService.cs`
+**Rôle** : Définit le contrat du service de Shadow Mode et de contrôle des autorisations d'écriture dans Outlook.
 **Membres et Invocations :**
 
 ### Record : MailMetadata
@@ -354,6 +377,22 @@ Généré le : 2026-09-07 18:44
   - *Appelle* ➡️ `IDebounceService.IsAnalysisSuspendedAsync()`
   - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
   - *Appelle* ➡️ `HistoryRunner.ProcessPendingHistoryAsync()`
+
+### Class : ShadowModeServiceTests
+**Fichier** : `tests\Catamailer.Application.Tests\ShadowModeServiceTests.cs`
+**Rôle** : Tests unitaires pour le service ShadowModeService.
+**Membres et Invocations :**
+- `Task IsAutoWriteEnabledAsync_ShouldReturnFalse_ByDefault()`
+  - *Appelle* ➡️ `IAppSettingsRepository.GetSettingAsync()`
+  - *Appelle* ➡️ `ShadowModeService.IsAutoWriteEnabledAsync()`
+- `Task ShouldPromptForActivationAsync_ShouldReturnTrue_WhenPalierReached()`
+  - *Appelle* ➡️ `IAppSettingsRepository.GetSettingAsync()`
+  - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
+  - *Appelle* ➡️ `ShadowModeService.ShouldPromptForActivationAsync()`
+- `Task ShouldPromptForActivationAsync_ShouldReturnFalse_WhenPromptAlreadyAcknowledgedForCurrentPalier()`
+  - *Appelle* ➡️ `IAppSettingsRepository.GetSettingAsync()`
+  - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
+  - *Appelle* ➡️ `ShadowModeService.ShouldPromptForActivationAsync()`
 
 ## Projet : Catamailer.Domain.Tests
 ### Class : CategoryNodeTests

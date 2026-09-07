@@ -55,6 +55,9 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 - [x] ✅ `J2-S2-T2 - IsAnalysisSuspendedAsync_ShouldReturnFalse_WhenTimeHasPassed` (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-2-history - Commit : 87393971e1ad67d6c022fb3e98ef2c84080e1197)
 - [x] ✅ `J2-S2-T3 - ProcessPendingHistoryAsync_ShouldReturnZero_WhenAnalysisIsSuspended` (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-2-history - Commit : fa156733005656cd2e6669fbd1ae244822600e9e)
 - [x] ✅ `J2-S2-T3 - ProcessPendingHistoryAsync_ShouldFetchCursorAndProcess_WhenNotSuspended` (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-2-history - Commit : fa156733005656cd2e6669fbd1ae244822600e9e)
+- [x] ✅ `J2-S2-T4 - IsAutoWriteEnabledAsync_ShouldReturnFalse_ByDefault` (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-2-history - Commit : <COMMIT_HASH>)
+- [x] ✅ `J2-S2-T4 - ShouldPromptForActivationAsync_ShouldReturnTrue_WhenPalierReached` (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-2-history - Commit : <COMMIT_HASH>)
+- [x] ✅ `J2-S2-T4 - ShouldPromptForActivationAsync_ShouldReturnFalse_WhenPromptAlreadyAcknowledgedForCurrentPalier` (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-2-history - Commit : <COMMIT_HASH>)
 
 ---
 
