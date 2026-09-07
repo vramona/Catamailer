@@ -27,7 +27,7 @@
 - [x] ✅ **J2-S1-T4** - `MassUpdateService` : Renommage rétroactif des e-mails. (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-1-com - Commit : 00edec7a319adf68780fa47c75f4785839687971) (Cpx: 8 / 8)
 
 ### Step 2 - Reprise & Shadow Mode - feature/j2-outlook-integration_step-2-history
-- [x] ✅ **J2-S2-T1** - Modélisation des paramètres globaux (`IAppSettingsRepository`) et du curseur d'état (`IHistoryStateRepository`). (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-2-history - Commit : <COMMIT_HASH>) (Cpx: 5 / 5)
+- [x] ✅ **J2-S2-T1** - Modélisation des paramètres globaux (`IAppSettingsRepository`) et du curseur d'état (`IHistoryStateRepository`). (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-2-history - Commit : b6194c5f4fc39f2edf9e79815166edcfa6cd3891) (Cpx: 5 / 5)
 - [ ] ⚪ **J2-S2-T2** - `DebounceService` : Suspension de l'analyse d'historique basée sur la configuration globale.
 - [ ] ⚪ **J2-S2-T3** - Service Background de Reprise (`HistoryRunner`) exploitant le `LastEntryID`.
 - [ ] ⚪ **J2-S2-T4** - `ShadowModeService` : Validation croisée (C# vs VBA) et Télémétrie (Verrou 300/30).
