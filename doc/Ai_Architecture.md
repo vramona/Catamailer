@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-07 13:35
+Généré le : 2026-09-07 18:57
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -14,6 +14,16 @@ Généré le : 2026-09-07 13:35
 **Rôle** : Représente le résultat de l'évaluation de l'Étape 1 (Classification).
 **Membres et Invocations :**
 
+### Class : DebounceService
+**Fichier** : `src\Catamailer.Application\DebounceService.cs`
+**Rôle** : Service gérant la suspension temporaire de l'analyse d'historique lors des modifications de règles.
+**Membres et Invocations :**
+- `Task SuspendAnalysisAsync()`
+  - *Appelle* ➡️ `IAppSettingsRepository.GetSettingAsync()`
+  - *Appelle* ➡️ `IHistoryStateRepository.SetStateAsync()`
+- `Task<bool> IsAnalysisSuspendedAsync()`
+  - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
+
 ### Class : ExecutionEngine
 **Fichier** : `src\Catamailer.Application\ExecutionEngine.cs`
 **Rôle** : Moteur d'exécution de l'Étape 2 : évaluation de l'arbre booléen des conditions.
@@ -22,7 +32,38 @@ Généré le : 2026-09-07 13:35
   - *Appelle* ➡️ `ExecutionEngine.EvaluateCriterion()`
   - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
 
+### Class : HistoryRunner
+**Fichier** : `src\Catamailer.Application\HistoryRunner.cs`
+**Rôle** : Implémentation du service d'arrière-plan de rattrapage de l'historique des e-mails.
+**Membres et Invocations :**
+- `Task<int> ProcessPendingHistoryAsync(int maxItemsToProcess)`
+  - *Appelle* ➡️ `IDebounceService.IsAnalysisSuspendedAsync()`
+  - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
+
+### Class : ShadowModeService
+**Fichier** : `src\Catamailer.Application\ShadowModeService.cs`
+**Rôle** : Service gérant la télémétrie Shadow Mode, le contrôle d'activation et les paliers de notification.
+**Membres et Invocations :**
+- `Task RecordPredictionAsync(string entryId, string predictedCategory, string actualCategory)`
+  - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
+  - *Appelle* ➡️ `IHistoryStateRepository.SetStateAsync()`
+- `Task<bool> IsAutoWriteEnabledAsync()`
+  - *Appelle* ➡️ `IAppSettingsRepository.GetSettingAsync()`
+- `Task SetAutoWriteEnabledAsync(bool enabled)`
+  - *Appelle* ➡️ `IAppSettingsRepository.SetSettingAsync()`
+- `Task<bool> ShouldPromptForActivationAsync()`
+  - *Appelle* ➡️ `ShadowModeService.IsAutoWriteEnabledAsync()`
+  - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
+- `Task AcknowledgeActivationPromptAsync()`
+  - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
+  - *Appelle* ➡️ `IHistoryStateRepository.SetStateAsync()`
+
 ## Projet : Catamailer.Domain
+### Class : AppSetting
+**Fichier** : `src\Catamailer.Domain\AppSetting.cs`
+**Rôle** : Représente un paramètre de configuration globale de l'application.
+**Membres et Invocations :**
+
 ### Class : CategoryNode
 **Fichier** : `src\Catamailer.Domain\CategoryNode.cs`
 **Rôle** : Représente un nœud dans l'arbre hiérarchique des catégories, agissant comme vérité absolue (Master Data Management).
@@ -35,9 +76,59 @@ Généré le : 2026-09-07 13:35
 **Rôle** : Représente une règle de l'Étape 1 (Classification) liant un ensemble de mots-clés à une catégorie déduite.
 **Membres et Invocations :**
 
+### Interface : IAppSettingsRepository
+**Fichier** : `src\Catamailer.Domain\IAppSettingsRepository.cs`
+**Rôle** : Contrat pour la gestion des paramètres globaux de l'application.
+**Membres et Invocations :**
+
+### Interface : ICategoryManagerProvider
+**Fichier** : `src\Catamailer.Domain\ICategoryManagerProvider.cs`
+**Rôle** : Définit le contrat permettant de gérer les catégories au sein du fournisseur de messagerie (ex: Master Category List).
+**Membres et Invocations :**
+
 ### Interface : ICategoryRepository
 **Fichier** : `src\Catamailer.Domain\ICategoryRepository.cs`
 **Rôle** : Définit le contrat pour l'accès aux données de l'entité CategoryNode.
+**Membres et Invocations :**
+
+### Interface : IDebounceService
+**Fichier** : `src\Catamailer.Domain\IDebounceService.cs`
+**Rôle** : Définit le contrat permettant de gérer la suspension temporaire des traitements d'arrière-plan (Debounce).
+**Membres et Invocations :**
+
+### Interface : IHistoryRunner
+**Fichier** : `src\Catamailer.Domain\IHistoryRunner.cs`
+**Rôle** : Définit le contrat du service d'arrière-plan analysant le stock d'e-mails historiques.
+**Membres et Invocations :**
+
+### Interface : IHistoryStateRepository
+**Fichier** : `src\Catamailer.Domain\IHistoryStateRepository.cs`
+**Rôle** : Contrat pour la gestion des états systèmes internes.
+**Membres et Invocations :**
+
+### Interface : IMailProvider
+**Fichier** : `src\Catamailer.Domain\IMailProvider.cs`
+**Rôle** : Définit le contrat d'écoute et d'interaction avec le fournisseur de messagerie.
+**Membres et Invocations :**
+
+### Interface : IMassUpdateProvider
+**Fichier** : `src\Catamailer.Domain\IMassUpdateProvider.cs`
+**Rôle** : Définit le contrat permettant la mise à jour en masse (renommage rétroactif) des catégories sur les e-mails existants.
+**Membres et Invocations :**
+
+### Interface : ISelectionProvider
+**Fichier** : `src\Catamailer.Domain\ISelectionProvider.cs`
+**Rôle** : Définit le contrat permettant de récupérer l'élément actuellement sélectionné dans le client de messagerie.
+**Membres et Invocations :**
+
+### Interface : IShadowModeService
+**Fichier** : `src\Catamailer.Domain\IShadowModeService.cs`
+**Rôle** : Définit le contrat du service de Shadow Mode et de contrôle des autorisations d'écriture dans Outlook.
+**Membres et Invocations :**
+
+### Record : MailMetadata
+**Fichier** : `src\Catamailer.Domain\MailMetadata.cs`
+**Rôle** : Représente les métadonnées agnostiques extraites d'un e-mail.
 **Membres et Invocations :**
 
 ### Class : RuleAction
@@ -57,7 +148,19 @@ Généré le : 2026-09-07 13:35
 - `void AddCriterion(RuleCriterion criterion)` : Ajoute un critère de validation unitaire à ce nœud.
 - `void AddChildNode(RuleNode childNode)` : Ajoute un nœud enfant permettant d'imbriquer une nouvelle couche logique.
 
+### Class : SystemState
+**Fichier** : `src\Catamailer.Domain\SystemState.cs`
+**Rôle** : Représente un état système interne (ex: curseur d'avancement).
+**Membres et Invocations :**
+
 ## Projet : Catamailer.Infrastructure
+### Class : AppSettingsRepository
+**Fichier** : `src\Catamailer.Infrastructure\AppSettingsRepository.cs`
+**Rôle** : Implémentation EF Core pour le dépôt des paramètres d'application.
+**Membres et Invocations :**
+- `Task<string?> GetSettingAsync(string key)`
+- `Task SetSettingAsync(string key, string value)`
+
 ### Class : CatamailerDbContext
 **Fichier** : `src\Catamailer.Infrastructure\CatamailerDbContext.cs`
 **Rôle** : Contexte de base de données principal pour Catamailer (Entity Framework Core SQLite).
@@ -69,6 +172,54 @@ Généré le : 2026-09-07 13:35
 **Membres et Invocations :**
 - `Task AddAsync(CategoryNode category)`
 - `Task<CategoryNode?> GetByNameAsync(string name)`
+
+### Class : HistoryStateRepository
+**Fichier** : `src\Catamailer.Infrastructure\HistoryStateRepository.cs`
+**Rôle** : Implémentation EF Core pour le dépôt des états systèmes.
+**Membres et Invocations :**
+- `Task<string?> GetStateAsync(string key)`
+- `Task SetStateAsync(string key, string value)`
+
+### Interface : IOutlookApplicationWrapper
+**Fichier** : `src\Catamailer.Infrastructure\IOutlookApplicationWrapper.cs`
+**Rôle** : Interface d'abstraction pour l'application COM Outlook, facilitant les tests unitaires.
+**Membres et Invocations :**
+
+### Class : OutlookCategoryManagerProvider
+**Fichier** : `src\Catamailer.Infrastructure\OutlookCategoryManagerProvider.cs`
+**Rôle** : Implémentation du fournisseur de gestion des catégories via l'Interop COM Outlook.
+**Membres et Invocations :**
+- `void AddCategory(string name, string colorCode)`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.CategoryExists()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.AddCategory()`
+- `void UpdateCategoryColor(string name, string newColorCode)`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.CategoryExists()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.UpdateCategory()`
+- `void RemoveCategory(string name)`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.CategoryExists()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.RemoveCategory()`
+
+### Class : OutlookMailProvider
+**Fichier** : `src\Catamailer.Infrastructure\OutlookMailProvider.cs`
+**Rôle** : Implémentation du fournisseur de messagerie basée sur l'Interop COM Outlook.
+**Membres et Invocations :**
+- `void StartListening()`
+- `void StopListening()`
+
+### Class : OutlookMassUpdateProvider
+**Fichier** : `src\Catamailer.Infrastructure\OutlookMassUpdateProvider.cs`
+**Rôle** : Implémentation du fournisseur de mise à jour en masse via l'Interop COM Outlook.
+**Membres et Invocations :**
+- `void UpdateCategoryNameOnItems(string oldCategoryName, string newCategoryName)`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.ReplaceCategoryOnAllItems()`
+
+### Class : OutlookSelectionProvider
+**Fichier** : `src\Catamailer.Infrastructure\OutlookSelectionProvider.cs`
+**Rôle** : Implémentation du fournisseur de sélection basée sur l'Interop COM Outlook.
+**Membres et Invocations :**
+- `MailMetadata? GetSelectedMail()` : Récupère les métadonnées de l'e-mail actuellement sélectionné.
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.GetSelectedEntryId()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.GetMailMetadata()`
 
 ## Projet : Catamailer.Migrator
 ## Projet : Catamailer.UI
@@ -180,6 +331,21 @@ Généré le : 2026-09-07 13:35
 - `void Classify_ShouldReturnCategory_WhenKeywordMatchesRecipient()`
   - *Appelle* ➡️ `ClassificationEngine.Classify()`
 
+### Class : DebounceServiceTests
+**Fichier** : `tests\Catamailer.Application.Tests\DebounceServiceTests.cs`
+**Rôle** : Classe de tests validant le comportement du service de Debounce de l'analyse d'historique.
+**Membres et Invocations :**
+- `Task IsAnalysisSuspendedAsync_ShouldReturnFalse_WhenNoSuspensionRecorded()`
+  - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
+  - *Appelle* ➡️ `DebounceService.IsAnalysisSuspendedAsync()`
+- `Task SuspendAnalysisAsync_ShouldSaveTargetTimeBasedOnConfiguredDelay()`
+  - *Appelle* ➡️ `IAppSettingsRepository.GetSettingAsync()`
+  - *Appelle* ➡️ `IHistoryStateRepository.SetStateAsync()`
+  - *Appelle* ➡️ `DebounceService.SuspendAnalysisAsync()`
+- `Task IsAnalysisSuspendedAsync_ShouldReturnFalse_WhenTimeHasPassed()`
+  - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
+  - *Appelle* ➡️ `DebounceService.IsAnalysisSuspendedAsync()`
+
 ### Class : ExecutionEngineTests
 **Fichier** : `tests\Catamailer.Application.Tests\ExecutionEngineTests.cs`
 **Rôle** : Classe de test validant le comportement du moteur d'exécution (Étape 2).
@@ -198,6 +364,35 @@ Généré le : 2026-09-07 13:35
 - `void Evaluate_ShouldReturnTrue_WhenOrNodeHasOneValidCriterion()`
   - *Appelle* ➡️ `RuleNode.AddCriterion()`
   - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
+
+### Class : HistoryRunnerTests
+**Fichier** : `tests\Catamailer.Application.Tests\HistoryRunnerTests.cs`
+**Rôle** : Classe de tests unitaires pour la tâche J2-S2-T3 (HistoryRunner).
+**Membres et Invocations :**
+- `Task ProcessPendingHistoryAsync_ShouldReturnZero_WhenAnalysisIsSuspended()`
+  - *Appelle* ➡️ `IDebounceService.IsAnalysisSuspendedAsync()`
+  - *Appelle* ➡️ `HistoryRunner.ProcessPendingHistoryAsync()`
+  - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
+- `Task ProcessPendingHistoryAsync_ShouldFetchCursorAndProcess_WhenNotSuspended()`
+  - *Appelle* ➡️ `IDebounceService.IsAnalysisSuspendedAsync()`
+  - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
+  - *Appelle* ➡️ `HistoryRunner.ProcessPendingHistoryAsync()`
+
+### Class : ShadowModeServiceTests
+**Fichier** : `tests\Catamailer.Application.Tests\ShadowModeServiceTests.cs`
+**Rôle** : Tests unitaires pour le service ShadowModeService.
+**Membres et Invocations :**
+- `Task IsAutoWriteEnabledAsync_ShouldReturnFalse_ByDefault()`
+  - *Appelle* ➡️ `IAppSettingsRepository.GetSettingAsync()`
+  - *Appelle* ➡️ `ShadowModeService.IsAutoWriteEnabledAsync()`
+- `Task ShouldPromptForActivationAsync_ShouldReturnTrue_WhenPalierReached()`
+  - *Appelle* ➡️ `IAppSettingsRepository.GetSettingAsync()`
+  - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
+  - *Appelle* ➡️ `ShadowModeService.ShouldPromptForActivationAsync()`
+- `Task ShouldPromptForActivationAsync_ShouldReturnFalse_WhenPromptAlreadyAcknowledgedForCurrentPalier()`
+  - *Appelle* ➡️ `IAppSettingsRepository.GetSettingAsync()`
+  - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
+  - *Appelle* ➡️ `ShadowModeService.ShouldPromptForActivationAsync()`
 
 ## Projet : Catamailer.Domain.Tests
 ### Class : CategoryNodeTests
@@ -242,6 +437,68 @@ Généré le : 2026-09-07 13:35
 - `Task GetByNameAsync_ShouldReturnCategory_WhenExists()`
   - *Appelle* ➡️ `CategoryRepositoryTests.GetInMemoryContext()`
   - *Appelle* ➡️ `CategoryRepository.GetByNameAsync()`
+
+### Class : OutlookCategoryManagerProviderTests
+**Fichier** : `tests\Catamailer.Infrastructure.Tests\OutlookCategoryManagerProviderTests.cs`
+**Rôle** : Classe de tests validant le comportement du gestionnaire de catégories Outlook.
+**Membres et Invocations :**
+- `void AddCategory_ShouldCallWrapperAdd_WhenCategoryDoesNotExist()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.CategoryExists()`
+  - *Appelle* ➡️ `OutlookCategoryManagerProvider.AddCategory()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.AddCategory()`
+- `void UpdateCategoryColor_ShouldCallWrapperUpdate_WhenCategoryExists()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.CategoryExists()`
+  - *Appelle* ➡️ `OutlookCategoryManagerProvider.UpdateCategoryColor()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.UpdateCategory()`
+- `void RemoveCategory_ShouldCallWrapperRemove_WhenCategoryExists()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.CategoryExists()`
+  - *Appelle* ➡️ `OutlookCategoryManagerProvider.RemoveCategory()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.RemoveCategory()`
+
+### Class : OutlookMailProviderTests
+**Fichier** : `tests\Catamailer.Infrastructure.Tests\OutlookMailProviderTests.cs`
+**Rôle** : Classe de tests validant le comportement du fournisseur Outlook COM.
+**Membres et Invocations :**
+- `void StartListening_ShouldTriggerNewMailReceived_WhenOutlookRaisesNewMailEx()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.GetMailMetadata()`
+  - *Appelle* ➡️ `OutlookMailProvider.StartListening()`
+
+### Class : OutlookMassUpdateProviderTests
+**Fichier** : `tests\Catamailer.Infrastructure.Tests\OutlookMassUpdateProviderTests.cs`
+**Rôle** : Classe de tests validant le comportement du fournisseur de mise à jour en masse Outlook.
+**Membres et Invocations :**
+- `void UpdateCategoryNameOnItems_ShouldCallWrapperReplaceCategory()`
+  - *Appelle* ➡️ `OutlookMassUpdateProvider.UpdateCategoryNameOnItems()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.ReplaceCategoryOnAllItems()`
+
+### Class : OutlookSelectionProviderTests
+**Fichier** : `tests\Catamailer.Infrastructure.Tests\OutlookSelectionProviderTests.cs`
+**Rôle** : Classe de tests validant le comportement du fournisseur de sélection Outlook.
+**Membres et Invocations :**
+- `void GetSelectedMail_ShouldReturnNull_WhenNoMailIsSelected()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.GetSelectedEntryId()`
+  - *Appelle* ➡️ `OutlookSelectionProvider.GetSelectedMail()`
+- `void GetSelectedMail_ShouldReturnMetadata_WhenMailIsSelected()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.GetSelectedEntryId()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.GetMailMetadata()`
+  - *Appelle* ➡️ `OutlookSelectionProvider.GetSelectedMail()`
+
+### Class : StateAndSettingsRepositoriesTests
+**Fichier** : `tests\Catamailer.Infrastructure.Tests\StateAndSettingsRepositoriesTests.cs`
+**Rôle** : Classe de tests validant le comportement des dépôts de configuration et d'état.
+**Membres et Invocations :**
+- `Task HistoryStateRepository_ShouldPersistAndRetrieveState()`
+  - *Appelle* ➡️ `StateAndSettingsRepositoriesTests.GetInMemoryContext()`
+  - *Appelle* ➡️ `HistoryStateRepository.SetStateAsync()`
+  - *Appelle* ➡️ `HistoryStateRepository.GetStateAsync()`
+- `Task HistoryStateRepository_ShouldUpdateExistingState()`
+  - *Appelle* ➡️ `StateAndSettingsRepositoriesTests.GetInMemoryContext()`
+  - *Appelle* ➡️ `HistoryStateRepository.SetStateAsync()`
+  - *Appelle* ➡️ `HistoryStateRepository.GetStateAsync()`
+- `Task AppSettingsRepository_ShouldPersistAndRetrieveSetting()`
+  - *Appelle* ➡️ `StateAndSettingsRepositoriesTests.GetInMemoryContext()`
+  - *Appelle* ➡️ `AppSettingsRepository.SetSettingAsync()`
+  - *Appelle* ➡️ `AppSettingsRepository.GetSettingAsync()`
 
 ## Projet : Tools.AiDocGenerator.Tests
 ### Class : CatamailerTocBuilderTests
