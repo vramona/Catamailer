@@ -16,13 +16,13 @@
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\Catamailer.UI.styles.css'))</AssetFile>
       <Selectors><![CDATA[[]]]></Selectors>
       <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"cyax29ebv9"},{"Name":"integrity","Value":"sha256-tFt90KjmYUABupqKlVpelDiC7rvHX6NH3HEKl8fnS5M="},{"Name":"label","Value":"Catamailer.UI.styles.css"}]]]></EndpointProperties>
-      <ResponseHeaders><![CDATA[[{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"5439"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022tFt90KjmYUABupqKlVpelDiC7rvHX6NH3HEKl8fnS5M=\u0022"},{"Name":"Last-Modified","Value":"Mon, 07 Sep 2026 09:03:40 GMT"}]]]></ResponseHeaders>
+      <ResponseHeaders><![CDATA[[{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"5439"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022tFt90KjmYUABupqKlVpelDiC7rvHX6NH3HEKl8fnS5M=\u0022"},{"Name":"Last-Modified","Value":"Mon, 07 Sep 2026 10:56:41 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="Catamailer.UI.styles.css">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\Catamailer.UI.styles.css'))</AssetFile>
       <Selectors><![CDATA[[]]]></Selectors>
       <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-tFt90KjmYUABupqKlVpelDiC7rvHX6NH3HEKl8fnS5M="}]]]></EndpointProperties>
-      <ResponseHeaders><![CDATA[[{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"5439"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022tFt90KjmYUABupqKlVpelDiC7rvHX6NH3HEKl8fnS5M=\u0022"},{"Name":"Last-Modified","Value":"Mon, 07 Sep 2026 09:03:40 GMT"}]]]></ResponseHeaders>
+      <ResponseHeaders><![CDATA[[{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"5439"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022tFt90KjmYUABupqKlVpelDiC7rvHX6NH3HEKl8fnS5M=\u0022"},{"Name":"Last-Modified","Value":"Mon, 07 Sep 2026 10:56:41 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="index.html">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\index.html'))</AssetFile>

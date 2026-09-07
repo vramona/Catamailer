@@ -1,0 +1,16 @@
+C:\PERSO\sources\Catamailer\src\Catamailer.Application\bin\Debug\net10.0\Catamailer.Application.deps.json
+C:\PERSO\sources\Catamailer\src\Catamailer.Application\bin\Debug\net10.0\Catamailer.Application.dll
+C:\PERSO\sources\Catamailer\src\Catamailer.Application\bin\Debug\net10.0\Catamailer.Application.pdb
+C:\PERSO\sources\Catamailer\src\Catamailer.Application\bin\Debug\net10.0\Catamailer.Domain.dll
+C:\PERSO\sources\Catamailer\src\Catamailer.Application\bin\Debug\net10.0\Catamailer.Domain.pdb
+C:\PERSO\sources\Catamailer\src\Catamailer.Application\obj\Debug\net10.0\Catamailer.Application.csproj.AssemblyReference.cache
+C:\PERSO\sources\Catamailer\src\Catamailer.Application\obj\Debug\net10.0\Catamailer.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\PERSO\sources\Catamailer\src\Catamailer.Application\obj\Debug\net10.0\Catamailer.Application.AssemblyInfoInputs.cache
+C:\PERSO\sources\Catamailer\src\Catamailer.Application\obj\Debug\net10.0\Catamailer.Application.AssemblyInfo.cs
+C:\PERSO\sources\Catamailer\src\Catamailer.Application\obj\Debug\net10.0\Catamailer.Application.csproj.CoreCompileInputs.cache
+C:\PERSO\sources\Catamailer\src\Catamailer.Application\obj\Debug\net10.0\Catamailer.Application.sourcelink.json
+C:\PERSO\sources\Catamailer\src\Catamailer.Application\obj\Debug\net10.0\Catamail.2102E6AA.Up2Date
+C:\PERSO\sources\Catamailer\src\Catamailer.Application\obj\Debug\net10.0\Catamailer.Application.dll
+C:\PERSO\sources\Catamailer\src\Catamailer.Application\obj\Debug\net10.0\refint\Catamailer.Application.dll
+C:\PERSO\sources\Catamailer\src\Catamailer.Application\obj\Debug\net10.0\Catamailer.Application.pdb
+C:\PERSO\sources\Catamailer\src\Catamailer.Application\obj\Debug\net10.0\ref\Catamailer.Application.dll

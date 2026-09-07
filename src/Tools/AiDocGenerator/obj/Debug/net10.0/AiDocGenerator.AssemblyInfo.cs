@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AiDocGenerator")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0cff7cc12d1e2efae2903362c1c4d94cb1905306")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2a29406569a0c0234a6110e313ccf4989c830a75")]
 [assembly: System.Reflection.AssemblyProductAttribute("AiDocGenerator")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AiDocGenerator")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
