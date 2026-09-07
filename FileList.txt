@@ -1,0 +1,22 @@
+﻿
+Arborescence / Fichier        Taille     Date de MAJ     
+----------------------        ------     -----------     
+├── doc                                  2026-09-07 09:39
+├── GEM                                  2026-09-07 09:42
+│   └── GEM Catamailer.md     6,31 Ko    2026-09-07 09:15
+├── scripts                              2026-09-07 10:28
+│   ├── Build-DocFx.ps1       2,35 Ko    2026-09-07 10:28
+│   ├── Commit-Task.ps1       1,62 Ko    2026-09-07 10:27
+│   ├── Complete-Jalon.ps1    1,73 Ko    2026-09-07 10:27
+│   ├── Complete-Step.ps1     2,35 Ko    2026-09-07 10:27
+│   ├── Fix-MissingHash.ps1   859 octets 2026-09-07 10:27
+│   ├── Generate-AiDoc.ps1    1,13 Ko    2026-09-07 10:27
+│   ├── Generate-FileList.ps1 1,92 Ko    2026-09-07 10:26
+│   ├── Merge-Branch.ps1      539 octets 2026-09-07 10:26
+│   ├── Start-Jalon.ps1       1,13 Ko    2026-09-07 10:26
+│   └── Start-Step.ps1        1,38 Ko    2026-09-07 10:27
+└── specs                                2026-09-07 09:41
+    ├── Specs_Catamailer.md   6,31 Ko    2026-09-07 09:15
+    └── ToDoList.md           3,82 Ko    2026-09-07 09:26
+
+
