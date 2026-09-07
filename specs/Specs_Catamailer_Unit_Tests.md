@@ -12,10 +12,10 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 
 ## 🟢 JALON 1 - CORE ENGINE & SQLITE
 ### 🟢 J1-S1 : Modélisation Domain
-- [x] ✅ `J1-S1-T1 - CategoryNode_Creation_ShouldSetPropertiesCorrectly` (Validé le 07/09/2026 sur feature/j1-core-engine_step-1-domain - Commit : <COMMIT_HASH>)
-- [x] ✅ `J1-S1-T1 - AddChild_ShouldSetParentAndInheritColor_WhenNoColorSpecified` (Validé le 07/09/2026 sur feature/j1-core-engine_step-1-domain - Commit : <COMMIT_HASH>)
-- [x] ✅ `J1-S1-T1 - EffectiveColor_ShouldOverrideParentColor_WhenColorIsExplicitlySet` (Validé le 07/09/2026 sur feature/j1-core-engine_step-1-domain - Commit : <COMMIT_HASH>)
-- [x] ✅ `J1-S1-T1 - GetAscendanceChain_ShouldReturnFullHierarchy_FromRootToNode` (Validé le 07/09/2026 sur feature/j1-core-engine_step-1-domain - Commit : <COMMIT_HASH>)
+- [x] ✅ `J1-S1-T1 - CategoryNode_Creation_ShouldSetPropertiesCorrectly` (Validé le 07/09/2026 sur feature/j1-core-engine_step-1-domain - Commit : 6d50da818d2c0044ff9a3fbaf9cfed37724c4d38)
+- [x] ✅ `J1-S1-T1 - AddChild_ShouldSetParentAndInheritColor_WhenNoColorSpecified` (Validé le 07/09/2026 sur feature/j1-core-engine_step-1-domain - Commit : 6d50da818d2c0044ff9a3fbaf9cfed37724c4d38)
+- [x] ✅ `J1-S1-T1 - EffectiveColor_ShouldOverrideParentColor_WhenColorIsExplicitlySet` (Validé le 07/09/2026 sur feature/j1-core-engine_step-1-domain - Commit : 6d50da818d2c0044ff9a3fbaf9cfed37724c4d38)
+- [x] ✅ `J1-S1-T1 - GetAscendanceChain_ShouldReturnFullHierarchy_FromRootToNode` (Validé le 07/09/2026 sur feature/j1-core-engine_step-1-domain - Commit : 6d50da818d2c0044ff9a3fbaf9cfed37724c4d38)
 
 ### 🟢 J1-S2 : Moteurs d'Évaluation
 *À compléter lors du développement de J1-S2.*
