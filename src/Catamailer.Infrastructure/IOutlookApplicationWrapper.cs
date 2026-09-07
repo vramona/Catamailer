@@ -3,8 +3,11 @@
 //     Date de création : 2026-09-07
 //     Historique :
 //         - 2026-09-07 : Création initiale (Phase Rouge).
+//         - 2026-09-07 : Ajout de GetSelectedEntryId pour J2-S1-T2 (Phase Rouge).
 // </auto-generated>
 // ------------------------------------------------------------------------------
+
+#nullable enable
 
 using System;
 using Catamailer.Domain;
@@ -19,7 +22,7 @@ namespace Catamailer.Infrastructure
         /// <summary>
         /// Événement déclenché nativement par Outlook via NewMailEx.
         /// </summary>
-        event Action<string> OnNewMailEx;
+        event Action<string>? OnNewMailEx;
 
         /// <summary>
         /// Récupère les métadonnées d'un e-mail à partir de son EntryID.
@@ -27,5 +30,11 @@ namespace Catamailer.Infrastructure
         /// <param name="entryId">L'identifiant unique de l'e-mail.</param>
         /// <returns>Les métadonnées agnostiques de l'e-mail.</returns>
         MailMetadata GetMailMetadata(string entryId);
+
+        /// <summary>
+        /// Récupère l'EntryID de l'élément actuellement sélectionné dans l'explorateur actif.
+        /// </summary>
+        /// <returns>L'EntryID de l'élément sélectionné, ou null si la sélection est vide ou invalide.</returns>
+        string? GetSelectedEntryId();
     }
 }

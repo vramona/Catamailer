@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-07 17:48
+Généré le : 2026-09-07 17:56
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -43,6 +43,11 @@ Généré le : 2026-09-07 17:48
 ### Interface : IMailProvider
 **Fichier** : `src\Catamailer.Domain\IMailProvider.cs`
 **Rôle** : Définit le contrat d'écoute et d'interaction avec le fournisseur de messagerie.
+**Membres et Invocations :**
+
+### Interface : ISelectionProvider
+**Fichier** : `src\Catamailer.Domain\ISelectionProvider.cs`
+**Rôle** : Définit le contrat permettant de récupérer l'élément actuellement sélectionné dans le client de messagerie.
 **Membres et Invocations :**
 
 ### Record : MailMetadata
@@ -91,6 +96,14 @@ Généré le : 2026-09-07 17:48
 **Membres et Invocations :**
 - `void StartListening()`
 - `void StopListening()`
+
+### Class : OutlookSelectionProvider
+**Fichier** : `src\Catamailer.Infrastructure\OutlookSelectionProvider.cs`
+**Rôle** : Implémentation du fournisseur de sélection basée sur l'Interop COM Outlook.
+**Membres et Invocations :**
+- `MailMetadata? GetSelectedMail()` : Récupère les métadonnées de l'e-mail actuellement sélectionné.
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.GetSelectedEntryId()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.GetMailMetadata()`
 
 ## Projet : Catamailer.Migrator
 ## Projet : Catamailer.UI
@@ -272,6 +285,18 @@ Généré le : 2026-09-07 17:48
 - `void StartListening_ShouldTriggerNewMailReceived_WhenOutlookRaisesNewMailEx()`
   - *Appelle* ➡️ `IOutlookApplicationWrapper.GetMailMetadata()`
   - *Appelle* ➡️ `OutlookMailProvider.StartListening()`
+
+### Class : OutlookSelectionProviderTests
+**Fichier** : `tests\Catamailer.Infrastructure.Tests\OutlookSelectionProviderTests.cs`
+**Rôle** : Classe de tests validant le comportement du fournisseur de sélection Outlook.
+**Membres et Invocations :**
+- `void GetSelectedMail_ShouldReturnNull_WhenNoMailIsSelected()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.GetSelectedEntryId()`
+  - *Appelle* ➡️ `OutlookSelectionProvider.GetSelectedMail()`
+- `void GetSelectedMail_ShouldReturnMetadata_WhenMailIsSelected()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.GetSelectedEntryId()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.GetMailMetadata()`
+  - *Appelle* ➡️ `OutlookSelectionProvider.GetSelectedMail()`
 
 ## Projet : Tools.AiDocGenerator.Tests
 ### Class : CatamailerTocBuilderTests
