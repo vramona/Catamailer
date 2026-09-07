@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-07 13:35
+Généré le : 2026-09-07 17:48
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -40,6 +40,16 @@ Généré le : 2026-09-07 13:35
 **Rôle** : Définit le contrat pour l'accès aux données de l'entité CategoryNode.
 **Membres et Invocations :**
 
+### Interface : IMailProvider
+**Fichier** : `src\Catamailer.Domain\IMailProvider.cs`
+**Rôle** : Définit le contrat d'écoute et d'interaction avec le fournisseur de messagerie.
+**Membres et Invocations :**
+
+### Record : MailMetadata
+**Fichier** : `src\Catamailer.Domain\MailMetadata.cs`
+**Rôle** : Représente les métadonnées agnostiques extraites d'un e-mail.
+**Membres et Invocations :**
+
 ### Class : RuleAction
 **Fichier** : `src\Catamailer.Domain\RuleAction.cs`
 **Rôle** : Représente l'action finale à exécuter si un arbre de conditions est validé.
@@ -69,6 +79,18 @@ Généré le : 2026-09-07 13:35
 **Membres et Invocations :**
 - `Task AddAsync(CategoryNode category)`
 - `Task<CategoryNode?> GetByNameAsync(string name)`
+
+### Interface : IOutlookApplicationWrapper
+**Fichier** : `src\Catamailer.Infrastructure\IOutlookApplicationWrapper.cs`
+**Rôle** : Interface d'abstraction pour l'application COM Outlook, facilitant les tests unitaires.
+**Membres et Invocations :**
+
+### Class : OutlookMailProvider
+**Fichier** : `src\Catamailer.Infrastructure\OutlookMailProvider.cs`
+**Rôle** : Implémentation du fournisseur de messagerie basée sur l'Interop COM Outlook.
+**Membres et Invocations :**
+- `void StartListening()`
+- `void StopListening()`
 
 ## Projet : Catamailer.Migrator
 ## Projet : Catamailer.UI
@@ -242,6 +264,14 @@ Généré le : 2026-09-07 13:35
 - `Task GetByNameAsync_ShouldReturnCategory_WhenExists()`
   - *Appelle* ➡️ `CategoryRepositoryTests.GetInMemoryContext()`
   - *Appelle* ➡️ `CategoryRepository.GetByNameAsync()`
+
+### Class : OutlookMailProviderTests
+**Fichier** : `tests\Catamailer.Infrastructure.Tests\OutlookMailProviderTests.cs`
+**Rôle** : Classe de tests validant le comportement du fournisseur Outlook COM.
+**Membres et Invocations :**
+- `void StartListening_ShouldTriggerNewMailReceived_WhenOutlookRaisesNewMailEx()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.GetMailMetadata()`
+  - *Appelle* ➡️ `OutlookMailProvider.StartListening()`
 
 ## Projet : Tools.AiDocGenerator.Tests
 ### Class : CatamailerTocBuilderTests

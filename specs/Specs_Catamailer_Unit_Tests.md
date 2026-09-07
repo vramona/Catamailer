@@ -38,7 +38,9 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 ---
 
 ## 🟢 JALON 2 - OUTLOOK COM & SHADOW MODE
-*À compléter.*
+### 🟢 J2-S1 : Interop & Synchronisation
+
+- [x] ✅ `J2-S1-T1 - StartListening_ShouldTriggerNewMailReceived_WhenOutlookRaisesNewMailEx` (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-1-com - Commit : <COMMIT_HASH>) (Cpx: 5 / 5)
 
 ---
 
