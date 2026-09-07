@@ -1,7 +1,27 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-07 12:55
+Généré le : 2026-09-07 13:35
 
 ## Projet : Catamailer.Application
+### Class : ClassificationEngine
+**Fichier** : `src\Catamailer.Application\ClassificationEngine.cs`
+**Rôle** : Moteur d'évaluation de l'Étape 1 : déduction de la catégorie principale en fonction des dictionnaires de mots-clés.
+**Membres et Invocations :**
+- `ClassificationResult? Classify(string subject, string sender, IEnumerable<string> recipients, IEnumerable<DictionaryRule> rules)` : Évalue les métadonnées d'un e-mail par rapport à un ensemble de règles de dictionnaire.
+  - *Appelle* ➡️ `CategoryNode.GetAscendanceChain()`
+
+### Class : ClassificationResult
+**Fichier** : `src\Catamailer.Application\ClassificationResult.cs`
+**Rôle** : Représente le résultat de l'évaluation de l'Étape 1 (Classification).
+**Membres et Invocations :**
+
+### Class : ExecutionEngine
+**Fichier** : `src\Catamailer.Application\ExecutionEngine.cs`
+**Rôle** : Moteur d'exécution de l'Étape 2 : évaluation de l'arbre booléen des conditions.
+**Membres et Invocations :**
+- `bool Evaluate(string subject, string sender, RuleNode node)` : Évalue un nœud de règle composite par rapport aux métadonnées d'un e-mail.
+  - *Appelle* ➡️ `ExecutionEngine.EvaluateCriterion()`
+  - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
+
 ## Projet : Catamailer.Domain
 ### Class : CategoryNode
 **Fichier** : `src\Catamailer.Domain\CategoryNode.cs`
@@ -148,6 +168,37 @@ Généré le : 2026-09-07 12:55
 - `void InjectEntryIfNeeded(string tocPath, string name, string href)` : Injecte une nouvelle entrée dans un fichier toc.yml si elle n'existe pas déjà.
 
 ## Projet : Catamailer.Application.Tests
+### Class : ClassificationEngineTests
+**Fichier** : `tests\Catamailer.Application.Tests\ClassificationEngineTests.cs`
+**Rôle** : Classe de test validant le comportement du moteur de classification (Étape 1).
+**Membres et Invocations :**
+- `void Classify_ShouldReturnNull_WhenNoRulesProvided()`
+  - *Appelle* ➡️ `ClassificationEngine.Classify()`
+- `void Classify_ShouldReturnCategoryAndAscendanceChain_WhenKeywordMatches()`
+  - *Appelle* ➡️ `CategoryNode.AddChild()`
+  - *Appelle* ➡️ `ClassificationEngine.Classify()`
+- `void Classify_ShouldReturnCategory_WhenKeywordMatchesRecipient()`
+  - *Appelle* ➡️ `ClassificationEngine.Classify()`
+
+### Class : ExecutionEngineTests
+**Fichier** : `tests\Catamailer.Application.Tests\ExecutionEngineTests.cs`
+**Rôle** : Classe de test validant le comportement du moteur d'exécution (Étape 2).
+**Membres et Invocations :**
+- `void Evaluate_ShouldReturnFalse_WhenNodeIsEmpty()`
+  - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
+- `void Evaluate_ShouldReturnTrue_WhenSenderMatchesEqualsCriterion()`
+  - *Appelle* ➡️ `RuleNode.AddCriterion()`
+  - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
+- `void Evaluate_ShouldReturnFalse_WhenSenderDoesNotMatchEqualsCriterion()`
+  - *Appelle* ➡️ `RuleNode.AddCriterion()`
+  - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
+- `void Evaluate_ShouldReturnTrue_WhenSubjectMatchesContainsCriterion()`
+  - *Appelle* ➡️ `RuleNode.AddCriterion()`
+  - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
+- `void Evaluate_ShouldReturnTrue_WhenOrNodeHasOneValidCriterion()`
+  - *Appelle* ➡️ `RuleNode.AddCriterion()`
+  - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
+
 ## Projet : Catamailer.Domain.Tests
 ### Class : CategoryNodeTests
 **Fichier** : `tests\Catamailer.Domain.Tests\CategoryNodeTests.cs`
@@ -203,6 +254,8 @@ Généré le : 2026-09-07 12:55
 - **Build-DocFx.ps1** : `scripts\Build-DocFx.ps1`
 - **Commit-Task.ps1** : `scripts\Commit-Task.ps1`
   - Paramètre : `[string] $Message` *(Obligatoire)*
+  - *Appelle* ➡️ `Generate-AiDoc.ps1`
+  - *Appelle* ➡️ `Generate-FileList.ps1`
 - **Complete-Jalon.ps1** : `scripts\Complete-Jalon.ps1`
   - Paramètre : `[string] $JalonBranch` *(Obligatoire)*
   - Paramètre : `[string] $BaseBranch`

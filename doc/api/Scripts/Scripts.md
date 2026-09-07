@@ -10,6 +10,10 @@
 ### Paramètres
 - `[string] $Message` *(Obligatoire)*
 
+### Dépendances (Invocations)
+- *Appelle* ➡️ `Generate-AiDoc.ps1`
+- *Appelle* ➡️ `Generate-FileList.ps1`
+
 ---
 ## Script : Complete-Jalon.ps1
 **Chemin relatif** : `scripts\Complete-Jalon.ps1`

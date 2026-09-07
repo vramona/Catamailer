@@ -1,6 +1,9 @@
-﻿namespace Catamailer.UI;
+﻿// Historique :
+// 2026-09-07 : Qualification explicite de Application pour résoudre le conflit avec Catamailer.Application (J1-S2-T1).
 
-public partial class App : Application
+namespace Catamailer.UI;
+
+public partial class App : Microsoft.Maui.Controls.Application
 {
 	public App()
 	{
