@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-07 18:56
+Généré le : 2026-09-07 18:57
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
