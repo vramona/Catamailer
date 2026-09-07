@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Catamailer.Application/Catamailer.Application.csproj" />
+    <Project Path="src/Catamailer.Domain/Catamailer.Domain.csproj" />
+    <Project Path="src/Catamailer.Infrastructure/Catamailer.Infrastructure.csproj" />
+    <Project Path="src/Catamailer.Migrator/Catamailer.Migrator.csproj" />
+    <Project Path="src/Catamailer.UI/Catamailer.UI.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Catamailer.Application.Tests/Catamailer.Application.Tests.csproj" />
+    <Project Path="tests/Catamailer.Domain.Tests/Catamailer.Domain.Tests.csproj" />
+    <Project Path="tests/Catamailer.Infrastructure.Tests/Catamailer.Infrastructure.Tests.csproj" />
+  </Folder>
+</Solution>

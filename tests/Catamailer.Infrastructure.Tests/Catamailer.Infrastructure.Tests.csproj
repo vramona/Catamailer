@@ -18,4 +18,8 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Catamailer.Infrastructure\Catamailer.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>
