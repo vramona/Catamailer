@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Catamailer.UI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+7ef1fd788c9f5ff4d9b267a52c7f2c82c6f2dfa5")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+ef3e8e5e359605c87c03f580ad298aded58e1a9c")]
 [assembly: System.Reflection.AssemblyProductAttribute("Catamailer.UI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Catamailer.UI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

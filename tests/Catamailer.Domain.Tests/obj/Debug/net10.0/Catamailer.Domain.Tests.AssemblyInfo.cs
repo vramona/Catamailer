@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Catamailer.Domain.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2a29406569a0c0234a6110e313ccf4989c830a75")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ef3e8e5e359605c87c03f580ad298aded58e1a9c")]
 [assembly: System.Reflection.AssemblyProductAttribute("Catamailer.Domain.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Catamailer.Domain.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
