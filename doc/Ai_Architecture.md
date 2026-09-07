@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-07 17:56
+Généré le : 2026-09-07 18:06
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -33,6 +33,11 @@ Généré le : 2026-09-07 17:56
 ### Class : DictionaryRule
 **Fichier** : `src\Catamailer.Domain\DictionaryRule.cs`
 **Rôle** : Représente une règle de l'Étape 1 (Classification) liant un ensemble de mots-clés à une catégorie déduite.
+**Membres et Invocations :**
+
+### Interface : ICategoryManagerProvider
+**Fichier** : `src\Catamailer.Domain\ICategoryManagerProvider.cs`
+**Rôle** : Définit le contrat permettant de gérer les catégories au sein du fournisseur de messagerie (ex: Master Category List).
 **Membres et Invocations :**
 
 ### Interface : ICategoryRepository
@@ -89,6 +94,20 @@ Généré le : 2026-09-07 17:56
 **Fichier** : `src\Catamailer.Infrastructure\IOutlookApplicationWrapper.cs`
 **Rôle** : Interface d'abstraction pour l'application COM Outlook, facilitant les tests unitaires.
 **Membres et Invocations :**
+
+### Class : OutlookCategoryManagerProvider
+**Fichier** : `src\Catamailer.Infrastructure\OutlookCategoryManagerProvider.cs`
+**Rôle** : Implémentation du fournisseur de gestion des catégories via l'Interop COM Outlook.
+**Membres et Invocations :**
+- `void AddCategory(string name, string colorCode)`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.CategoryExists()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.AddCategory()`
+- `void UpdateCategoryColor(string name, string newColorCode)`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.CategoryExists()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.UpdateCategory()`
+- `void RemoveCategory(string name)`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.CategoryExists()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.RemoveCategory()`
 
 ### Class : OutlookMailProvider
 **Fichier** : `src\Catamailer.Infrastructure\OutlookMailProvider.cs`
@@ -277,6 +296,23 @@ Généré le : 2026-09-07 17:56
 - `Task GetByNameAsync_ShouldReturnCategory_WhenExists()`
   - *Appelle* ➡️ `CategoryRepositoryTests.GetInMemoryContext()`
   - *Appelle* ➡️ `CategoryRepository.GetByNameAsync()`
+
+### Class : OutlookCategoryManagerProviderTests
+**Fichier** : `tests\Catamailer.Infrastructure.Tests\OutlookCategoryManagerProviderTests.cs`
+**Rôle** : Classe de tests validant le comportement du gestionnaire de catégories Outlook.
+**Membres et Invocations :**
+- `void AddCategory_ShouldCallWrapperAdd_WhenCategoryDoesNotExist()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.CategoryExists()`
+  - *Appelle* ➡️ `OutlookCategoryManagerProvider.AddCategory()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.AddCategory()`
+- `void UpdateCategoryColor_ShouldCallWrapperUpdate_WhenCategoryExists()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.CategoryExists()`
+  - *Appelle* ➡️ `OutlookCategoryManagerProvider.UpdateCategoryColor()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.UpdateCategory()`
+- `void RemoveCategory_ShouldCallWrapperRemove_WhenCategoryExists()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.CategoryExists()`
+  - *Appelle* ➡️ `OutlookCategoryManagerProvider.RemoveCategory()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.RemoveCategory()`
 
 ### Class : OutlookMailProviderTests
 **Fichier** : `tests\Catamailer.Infrastructure.Tests\OutlookMailProviderTests.cs`

@@ -4,6 +4,7 @@
 //     Historique :
 //         - 2026-09-07 : Création initiale (Phase Rouge).
 //         - 2026-09-07 : Ajout de GetSelectedEntryId pour J2-S1-T2 (Phase Rouge).
+//         - 2026-09-07 : Ajout des méthodes CRUD pour les catégories J2-S1-T3 (Phase Rouge).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -36,5 +37,32 @@ namespace Catamailer.Infrastructure
         /// </summary>
         /// <returns>L'EntryID de l'élément sélectionné, ou null si la sélection est vide ou invalide.</returns>
         string? GetSelectedEntryId();
+
+        /// <summary>
+        /// Vérifie si une catégorie existe dans la Master Category List.
+        /// </summary>
+        /// <param name="name">Le nom de la catégorie.</param>
+        /// <returns>Vrai si elle existe, faux sinon.</returns>
+        bool CategoryExists(string name);
+
+        /// <summary>
+        /// Ajoute une catégorie à la Master Category List.
+        /// </summary>
+        /// <param name="name">Le nom de la catégorie.</param>
+        /// <param name="colorCode">Le code couleur.</param>
+        void AddCategory(string name, string colorCode);
+
+        /// <summary>
+        /// Met à jour la couleur d'une catégorie existante.
+        /// </summary>
+        /// <param name="name">Le nom de la catégorie.</param>
+        /// <param name="newColorCode">Le nouveau code couleur.</param>
+        void UpdateCategory(string name, string newColorCode);
+
+        /// <summary>
+        /// Supprime une catégorie de la Master Category List.
+        /// </summary>
+        /// <param name="name">Le nom de la catégorie.</param>
+        void RemoveCategory(string name);
     }
 }
