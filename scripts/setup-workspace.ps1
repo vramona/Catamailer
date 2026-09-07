@@ -44,4 +44,11 @@ dotnet add src/Catamailer.UI/Catamailer.UI.csproj reference src/Catamailer.Infra
 dotnet add src/Catamailer.UI/Catamailer.UI.csproj reference src/Catamailer.Application/Catamailer.Application.csproj
 dotnet add src/Catamailer.Migrator/Catamailer.Migrator.csproj reference src/Catamailer.Infrastructure/Catamailer.Infrastructure.csproj
 
+# Outillage
+dotnet new console -n AiDocGenerator -o src/Tools/AiDocGenerator -f net10.0 --force
+dotnet new xunit -n Tools.AiDocGenerator.Tests -o tests/Tools.AiDocGenerator.Tests -f net10.0 --force
+dotnet sln add src/Tools/AiDocGenerator/AiDocGenerator.csproj
+dotnet sln add tests/Tools.AiDocGenerator.Tests/Tools.AiDocGenerator.Tests.csproj
+dotnet add tests/Tools.AiDocGenerator.Tests/Tools.AiDocGenerator.Tests.csproj reference src/Tools/AiDocGenerator/AiDocGenerator.csproj
+
 Write-Host "Workspace initialisé avec succès."
