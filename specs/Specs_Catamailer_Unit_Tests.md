@@ -1,4 +1,4 @@
-﻿# Spécifications des Tests Unitaires - Catamailer
+# Spécifications des Tests Unitaires - Catamailer
 
 Ce document référence l'intégralité des tests unitaires (TDD) et d'intégration validant le comportement de la Clean Architecture de Catamailer.
 
@@ -6,7 +6,7 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 
 ## 🟢 JALON 0 - INITIALISATION & OUTILLAGE
 ### 🟢 J0-S1 : Workspace & Scripts
-- [x] ✅ `J0-S1-T3 - Build_ShouldReturnCatamailerSpecificToc` (Validé le 07/09/2026 sur master - Commit : <COMMIT_HASH>) (Cpx: 3 / 3)
+- [x] ✅ `J0-S1-T3 - Build_ShouldReturnCatamailerSpecificToc` (Validé le 07/09/2026 sur master - Commit : 26220b45c1709946ab997143e2a46159e24d948d) (Cpx: 3 / 3)
 
 ---
 

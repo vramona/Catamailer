@@ -4,8 +4,8 @@
 ### Step 1 - Workspace & Scripts - chore/j0-init_step-1-setup
 - [x] ✅ **J0-S1-T1** - Création de l'arborescence (src, tests, scripts, docs) et de la solution Catamailer.sln avec les projets .NET 10 vides. (Validé le 07/09/2026 sur master - Commit : 29cea92daaee8cc1011b60a8712282242ed0b0fe) (Cpx: 2 / 2)
 - [x] ✅ **J0-S1-T2** - Intégration et adaptation des scripts PowerShell de flux (Start-Jalon, Start-Step, Commit-Task, etc.). (Validé le 07/09/2026 sur master - Commit : 29cea92daaee8cc1011b60a8712282242ed0b0fe) (Cpx: 3 / 3)
-- [x] ✅ **J0-S1-T3** - Intégration et adaptation du script de génération de documentation AI (Ai_Architecture.md). (Validé le 07/09/2026 sur master - Commit : <COMMIT_HASH>) (Cpx: 3 / 3)
-- [x] ✅ **J0-S1-T4** - Initialisation physique des fichiers de suivi locaux (ToDoList, Specs). (Validé le 07/09/2026 sur master - Commit : <COMMIT_HASH>) (Cpx: 1 / 1)
+- [x] ✅ **J0-S1-T3** - Intégration et adaptation du script de génération de documentation AI (Ai_Architecture.md). (Validé le 07/09/2026 sur master - Commit : 26220b45c1709946ab997143e2a46159e24d948d) (Cpx: 3 / 3)
+- [x] ✅ **J0-S1-T4** - Initialisation physique des fichiers de suivi locaux (ToDoList, Specs). (Validé le 07/09/2026 sur master - Commit : 26220b45c1709946ab997143e2a46159e24d948d) (Cpx: 1 / 1)
 
 # ⏳ CE QUI RESTE À FAIRE
 
