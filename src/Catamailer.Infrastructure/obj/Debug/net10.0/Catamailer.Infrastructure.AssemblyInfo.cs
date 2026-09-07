@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Catamailer.Infrastructure")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0cff7cc12d1e2efae2903362c1c4d94cb1905306")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7ef1fd788c9f5ff4d9b267a52c7f2c82c6f2dfa5")]
 [assembly: System.Reflection.AssemblyProductAttribute("Catamailer.Infrastructure")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Catamailer.Infrastructure")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
