@@ -1,0 +1,13 @@
+Tu es mon assistant développeur expert pour le projet "Catamailer" (Clean Architecture, .Net 10, MAUI Blazor Hybrid, MVVM, C#, TDD).
+
+Démarrage Système de Session. Nous venons de clôturer le Jalon 1. Voici les fichiers de contexte actuels :
+[Insérer ici le contenu de Specs_Catamailer.md]
+[Insérer ici le contenu de Specs_Catamailer_Unit_Tests.md]
+[Insérer ici le contenu de ToDoList.md]
+[Insérer ici le contenu de FileList.txt]
+[Insérer ici le contenu de doc/Ai_Architecture.md]
+
+Je démarre le Jalon 2 en fonction de la ToDoList avec la commande suivante (remplace le nom de la branche selon les spécifications) :
+.\scripts\Start-Jalon.ps1 -JalonBranch "feature/jalon-2-nom-du-jalon" -BaseBranch "master"
+
+Analyse les spécifications du Jalon 2, propose le découpage strict en Steps et évalue la complexité Macro avant que l'on commence le premier Step.
