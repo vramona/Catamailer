@@ -26,9 +26,9 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 - [x] ✅ `J1-S1-T3 - GetByNameAsync_ShouldReturnCategory_WhenExists` (Validé le 07/09/2026 sur feature/j1-core-engine_step-1-domain - Commit : 1c3bba4f53bf603ecf5c749ce154869240b5ba06)
 
 ### 🟢 J1-S2 : Moteurs d'Évaluation
-- [x] ✅ `J1-S2-T1 - Classify_ShouldReturnNull_WhenNoRulesProvided` (Validé le 07/09/2026 sur feature/j1-core-engine_step-2-evaluation - Commit : <COMMIT_HASH>)
-- [x] ✅ `J1-S2-T1 - Classify_ShouldReturnCategoryAndAscendanceChain_WhenKeywordMatches` (Validé le 07/09/2026 sur feature/j1-core-engine_step-2-evaluation - Commit : <COMMIT_HASH>)
-- [x] ✅ `J1-S2-T1 - Classify_ShouldReturnCategory_WhenKeywordMatchesRecipient` (Validé le 07/09/2026 sur feature/j1-core-engine_step-2-evaluation - Commit : <COMMIT_HASH>)
+- [x] ✅ `J1-S2-T1 - Classify_ShouldReturnNull_WhenNoRulesProvided` (Validé le 07/09/2026 sur feature/j1-core-engine_step-2-evaluation - Commit : 4fd96526c05075f974eac1fcfc0ef7b0a1915478)
+- [x] ✅ `J1-S2-T1 - Classify_ShouldReturnCategoryAndAscendanceChain_WhenKeywordMatches` (Validé le 07/09/2026 sur feature/j1-core-engine_step-2-evaluation - Commit : 4fd96526c05075f974eac1fcfc0ef7b0a1915478)
+- [x] ✅ `J1-S2-T1 - Classify_ShouldReturnCategory_WhenKeywordMatchesRecipient` (Validé le 07/09/2026 sur feature/j1-core-engine_step-2-evaluation - Commit : 4fd96526c05075f974eac1fcfc0ef7b0a1915478)
 
 ---
 

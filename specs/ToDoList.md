@@ -16,7 +16,7 @@
 - [x] ✅ **J1-S1-T3** - DbContext SQLite (Création auto) et Repositories. (Validé le 07/09/2026 sur feature/j1-core-engine_step-1-domain - Commit : 1c3bba4f53bf603ecf5c749ce154869240b5ba06) (Cpx: 5 / 5)
 
 ### Step 2 - Moteurs d'Évaluation (TDD) - feature/j1-core-engine_step-2-evaluation
-- [x] ✅ **J1-S2-T1** - `ClassificationEngine` : Déduction de la catégorie et extraction de la chaîne d'ascendance. (Validé le 07/09/2026 sur feature/j1-core-engine_step-2-evaluation - Commit : <COMMIT_HASH>) (Cpx: 5 / 5)
+- [x] ✅ **J1-S2-T1** - `ClassificationEngine` : Déduction de la catégorie et extraction de la chaîne d'ascendance. (Validé le 07/09/2026 sur feature/j1-core-engine_step-2-evaluation - Commit : 4fd96526c05075f974eac1fcfc0ef7b0a1915478) (Cpx: 5 / 5)
 - [ ] ⚪ **J1-S2-T2** - `ExecutionEngine` : Évaluation de l'arbre booléen.
 
 ## Jalon 2 - Outlook COM & Shadow Mode - feature/j2-outlook-integration
