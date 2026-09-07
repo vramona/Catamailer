@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-07 11:57
+Généré le : 2026-09-07 12:55
 
 ## Projet : Catamailer.Application
 ## Projet : Catamailer.Domain
@@ -10,7 +10,46 @@ Généré le : 2026-09-07 11:57
 - `void AddChild(CategoryNode child)` : Ajoute un nœud enfant à cette catégorie et lie automatiquement ce nœud à ce parent.
 - `IEnumerable<CategoryNode> GetAscendanceChain()` : Récupère la chaîne d'ascendance complète depuis la racine jusqu'à ce nœud inclus.
 
+### Class : DictionaryRule
+**Fichier** : `src\Catamailer.Domain\DictionaryRule.cs`
+**Rôle** : Représente une règle de l'Étape 1 (Classification) liant un ensemble de mots-clés à une catégorie déduite.
+**Membres et Invocations :**
+
+### Interface : ICategoryRepository
+**Fichier** : `src\Catamailer.Domain\ICategoryRepository.cs`
+**Rôle** : Définit le contrat pour l'accès aux données de l'entité CategoryNode.
+**Membres et Invocations :**
+
+### Class : RuleAction
+**Fichier** : `src\Catamailer.Domain\RuleAction.cs`
+**Rôle** : Représente l'action finale à exécuter si un arbre de conditions est validé.
+**Membres et Invocations :**
+
+### Class : RuleCriterion
+**Fichier** : `src\Catamailer.Domain\RuleCriterion.cs`
+**Rôle** : Représente un critère de filtrage unitaire dans l'arbre d'exécution de l'Étape 2.
+**Membres et Invocations :**
+
+### Class : RuleNode
+**Fichier** : `src\Catamailer.Domain\RuleNode.cs`
+**Rôle** : Représente un nœud dans l'arbre composite des conditions d'exécution de l'Étape 2.
+**Membres et Invocations :**
+- `void AddCriterion(RuleCriterion criterion)` : Ajoute un critère de validation unitaire à ce nœud.
+- `void AddChildNode(RuleNode childNode)` : Ajoute un nœud enfant permettant d'imbriquer une nouvelle couche logique.
+
 ## Projet : Catamailer.Infrastructure
+### Class : CatamailerDbContext
+**Fichier** : `src\Catamailer.Infrastructure\CatamailerDbContext.cs`
+**Rôle** : Contexte de base de données principal pour Catamailer (Entity Framework Core SQLite).
+**Membres et Invocations :**
+
+### Class : CategoryRepository
+**Fichier** : `src\Catamailer.Infrastructure\CategoryRepository.cs`
+**Rôle** : Implémentation SQLite du dépôt pour les catégories utilisant Entity Framework Core.
+**Membres et Invocations :**
+- `Task AddAsync(CategoryNode category)`
+- `Task<CategoryNode?> GetByNameAsync(string name)`
+
 ## Projet : Catamailer.Migrator
 ## Projet : Catamailer.UI
 ### Class : App
@@ -123,7 +162,36 @@ Généré le : 2026-09-07 11:57
   - *Appelle* ➡️ `CategoryNode.AddChild()`
   - *Appelle* ➡️ `CategoryNode.GetAscendanceChain()`
 
+### Class : RuleModelsTests
+**Fichier** : `tests\Catamailer.Domain.Tests\RuleModelsTests.cs`
+**Rôle** : Classe de test validant la modélisation des entités de règles (DictionaryRule, RuleNode, RuleCriterion, RuleAction).
+**Membres et Invocations :**
+- `void DictionaryRule_Creation_ShouldSetProperties()`
+- `void RuleAction_Creation_ShouldSetActionTypeAndParameter()`
+- `void RuleCriterion_Creation_ShouldSetConditionFields()`
+- `void RuleNode_ShouldActAsComposite_HoldingCriteriaAndChildNodes()`
+  - *Appelle* ➡️ `RuleNode.AddCriterion()`
+  - *Appelle* ➡️ `RuleNode.AddChildNode()`
+
 ## Projet : Catamailer.Infrastructure.Tests
+### Class : CatamailerDbContextTests
+**Fichier** : `tests\Catamailer.Infrastructure.Tests\CatamailerDbContextTests.cs`
+**Rôle** : Classe de test validant l'intégration d'Entity Framework Core SQLite.
+**Membres et Invocations :**
+- `void EnsureCreated_ShouldCreateDatabaseAndTables()`
+- `void CanSaveAndRetrieve_CategoryNode()`
+
+### Class : CategoryRepositoryTests
+**Fichier** : `tests\Catamailer.Infrastructure.Tests\CategoryRepositoryTests.cs`
+**Rôle** : Classe de test validant le comportement du dépôt (Repository) des catégories.
+**Membres et Invocations :**
+- `Task AddAsync_ShouldPersistCategory()`
+  - *Appelle* ➡️ `CategoryRepositoryTests.GetInMemoryContext()`
+  - *Appelle* ➡️ `CategoryRepository.AddAsync()`
+- `Task GetByNameAsync_ShouldReturnCategory_WhenExists()`
+  - *Appelle* ➡️ `CategoryRepositoryTests.GetInMemoryContext()`
+  - *Appelle* ➡️ `CategoryRepository.GetByNameAsync()`
+
 ## Projet : Tools.AiDocGenerator.Tests
 ### Class : CatamailerTocBuilderTests
 **Fichier** : `tests\Tools.AiDocGenerator.Tests\CatamailerTocBuilderTests.cs`

@@ -12,7 +12,8 @@
 ## Jalon 1 - Core Engine & SQLite - feature/j1-core-engine
 ### Step 1 - Modélisation Domain - feature/j1-core-engine_step-1-domain
 - [x] ✅ **J1-S1-T1** - Modélisation `CategoryNode` (Arbre auto-référencé et héritage de couleurs). (Validé le 07/09/2026 sur feature/j1-core-engine_step-1-domain - Commit : 6d50da818d2c0044ff9a3fbaf9cfed37724c4d38) (Cpx: 3 / 3)
-- [x] ✅ **J1-S1-T2** - Modélisation Étape 1 & Étape 2 (`DictionaryRule`, `RuleNode`, `RuleAction`). (Validé le 07/09/2026 sur feature/j1-core-engine_step-1-domain - Commit : 2cf32ba2f8e288abfc13c6de1c2fb10daa1ea146) (Cpx: 5 / 5)- [ ] ⚪ **J1-S1-T3** - DbContext SQLite (Création auto) et Repositories.
+- [x] ✅ **J1-S1-T2** - Modélisation Étape 1 & Étape 2 (`DictionaryRule`, `RuleNode`, `RuleAction`). (Validé le 07/09/2026 sur feature/j1-core-engine_step-1-domain - Commit : 2cf32ba2f8e288abfc13c6de1c2fb10daa1ea146) (Cpx: 5 / 5)
+- [x] ✅ **J1-S1-T3** - DbContext SQLite (Création auto) et Repositories. (Validé le 07/09/2026 sur feature/j1-core-engine_step-1-domain - Commit : <COMMIT_HASH>) (Cpx: 5 / 5)
 
 ### Step 2 - Moteurs d'Évaluation (TDD) - feature/j1-core-engine_step-2-evaluation
 - [ ] ⚪ **J1-S2-T1** - `ClassificationEngine` : Déduction de la catégorie et extraction de la chaîne d'ascendance.

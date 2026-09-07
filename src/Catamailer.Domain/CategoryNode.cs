@@ -1,5 +1,6 @@
 // Historique :
 // 2026-09-07 : Création de l'entité CategoryNode (J1-S1-T1).
+// 2026-09-07 : Ajout du constructeur protégé pour compatibilité avec Entity Framework Core (J1-S1-T3).
 
 using System.Collections.Generic;
 using System.Linq;
@@ -16,12 +17,12 @@ namespace Catamailer.Domain
         /// <summary>
         /// Obtient le nom de la catégorie.
         /// </summary>
-        public string Name { get; }
+        public string Name { get; private set; }
 
         /// <summary>
         /// Obtient la couleur explicitement définie pour cette catégorie, ou null si elle doit hériter de son parent.
         /// </summary>
-        public string? Color { get; }
+        public string? Color { get; private set; }
 
         /// <summary>
         /// Obtient le parent de cette catégorie dans l'arbre.
@@ -37,6 +38,14 @@ namespace Catamailer.Domain
         /// Obtient la couleur effective de la catégorie, en héritant de son ascendance si aucune couleur explicite n'est définie.
         /// </summary>
         public string? EffectiveColor => Color ?? Parent?.EffectiveColor;
+
+        /// <summary>
+        /// Constructeur sans paramètre requis par Entity Framework Core pour la matérialisation.
+        /// </summary>
+        protected CategoryNode()
+        {
+            Name = null!; // EF Core se chargera d'affecter la valeur via réflexion.
+        }
 
         /// <summary>
         /// Initialise une nouvelle instance de la classe <see cref="CategoryNode"/>.
