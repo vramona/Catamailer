@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-07 18:57
+Généré le : 2026-09-08 11:48
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -94,6 +94,11 @@ Généré le : 2026-09-07 18:57
 ### Interface : IDebounceService
 **Fichier** : `src\Catamailer.Domain\IDebounceService.cs`
 **Rôle** : Définit le contrat permettant de gérer la suspension temporaire des traitements d'arrière-plan (Debounce).
+**Membres et Invocations :**
+
+### Interface : IGlobalHotkeyService
+**Fichier** : `src\Catamailer.Domain\IGlobalHotkeyService.cs`
+**Rôle** : Définit le contrat pour le service de gestion des raccourcis clavier globaux au niveau de l'OS.
 **Membres et Invocations :**
 
 ### Interface : IHistoryRunner
@@ -221,20 +226,36 @@ Généré le : 2026-09-07 18:57
   - *Appelle* ➡️ `IOutlookApplicationWrapper.GetSelectedEntryId()`
   - *Appelle* ➡️ `IOutlookApplicationWrapper.GetMailMetadata()`
 
+### Class : Win32GlobalHotkeyService
+**Fichier** : `src\Catamailer.Infrastructure\Win32GlobalHotkeyService.cs`
+**Rôle** : Implémentation Win32 du service de raccourcis globaux via P/Invoke (user32.dll et comctl32.dll).
+**Membres et Invocations :**
+- `void Initialize(IntPtr hwnd)` : Initialise le hook de la boucle de messages native. Doit être appelé une fois la fenêtre WinUI 3 créée.
+  - *Appelle* ➡️ `Win32GlobalHotkeyService.SetWindowSubclass()`
+- `bool RegisterHotkey(int id, uint modifiers, uint key)`
+  - *Appelle* ➡️ `Win32GlobalHotkeyService.RegisterHotKey()`
+- `bool UnregisterHotkey(int id)`
+  - *Appelle* ➡️ `Win32GlobalHotkeyService.UnregisterHotKey()`
+- `void Dispose()`
+  - *Appelle* ➡️ `Win32GlobalHotkeyService.UnregisterHotKey()`
+
 ## Projet : Catamailer.Migrator
 ## Projet : Catamailer.UI
 ### Class : App
 **Fichier** : `src\Catamailer.UI\App.xaml.cs`
+**Rôle** : Représente l'application principale MAUI. Gère le cycle de vie de la fenêtre, le démarrage en mode furtif (Headless) et les actions globales (Tray Icon).
 **Membres et Invocations :**
 
 ### Class : MainPage
 **Fichier** : `src\Catamailer.UI\MainPage.xaml.cs`
+**Rôle** : Page principale hébergeant exclusivement la vue Blazor.
 **Membres et Invocations :**
 
 ### Class : MauiProgram
 **Fichier** : `src\Catamailer.UI\MauiProgram.cs`
+**Rôle** : Classe statique responsable de l'amorçage et de la configuration de l'application MAUI Blazor.
 **Membres et Invocations :**
-- `MauiApp CreateMauiApp()`
+- `MauiApp CreateMauiApp()` : Crée et configure l'instance principale de l'application MAUI. Injecte les dépendances Blazor et initialise le composant de zone de notification (Tray Icon).
 
 ### Class : App
 **Fichier** : `src\Catamailer.UI\Platforms\Windows\App.xaml.cs`
@@ -499,6 +520,16 @@ Généré le : 2026-09-07 18:57
   - *Appelle* ➡️ `StateAndSettingsRepositoriesTests.GetInMemoryContext()`
   - *Appelle* ➡️ `AppSettingsRepository.SetSettingAsync()`
   - *Appelle* ➡️ `AppSettingsRepository.GetSettingAsync()`
+
+### Class : Win32GlobalHotkeyServiceTests
+**Fichier** : `tests\Catamailer.Infrastructure.Tests\Win32GlobalHotkeyServiceTests.cs`
+**Rôle** : Classe de tests validant le comportement du service de raccourcis globaux Win32.
+**Membres et Invocations :**
+- `void RegisterHotkey_StateShouldReflectRegistrationAttempt()`
+  - *Appelle* ➡️ `Win32GlobalHotkeyService.RegisterHotkey()`
+  - *Appelle* ➡️ `Win32GlobalHotkeyService.UnregisterHotkey()`
+- `void UnregisterHotkey_ShouldReturnFalse_WhenHotkeyDoesNotExist()`
+  - *Appelle* ➡️ `Win32GlobalHotkeyService.UnregisterHotkey()`
 
 ## Projet : Tools.AiDocGenerator.Tests
 ### Class : CatamailerTocBuilderTests

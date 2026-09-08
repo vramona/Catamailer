@@ -1,16 +1,19 @@
 ﻿
 Arborescence / Fichier                                Taille      Date de MAJ     
 ----------------------                                ------      -----------     
-├── doc                                                           2026-09-07 18:17
+├── .vscode                                                       2026-09-08 11:16
+│   ├── launch.json                                   516 octets  2026-09-08 11:15
+│   └── tasks.json                                    572 octets  2026-09-08 11:16
+├── doc                                                           2026-09-07 18:58
 │   ├── api                                                       2026-09-07 11:22
 │   │   ├── Scripts                                               2026-09-07 13:38
-│   │   │   ├── Scripts.md                            2,28 Ko     2026-09-07 18:57
-│   │   │   └── toc.yml                               49 octets   2026-09-07 18:57
+│   │   │   ├── Scripts.md                            2,28 Ko     2026-09-08 11:48
+│   │   │   └── toc.yml                               49 octets   2026-09-08 11:48
 │   │   ├── TestsReport                                           2026-09-07 11:22
-│   │   │   ├── TestResults.md                        92 octets   2026-09-07 18:57
-│   │   │   └── toc.yml                               59 octets   2026-09-07 18:57
-│   │   └── toc.yml                                   280 octets  2026-09-07 18:57
-│   └── Ai_Architecture.md                            28,19 Ko    2026-09-07 18:57
+│   │   │   ├── TestResults.md                        92 octets   2026-09-08 11:48
+│   │   │   └── toc.yml                               59 octets   2026-09-08 11:48
+│   │   └── toc.yml                                   280 octets  2026-09-08 11:48
+│   └── Ai_Architecture.md                            30,28 Ko    2026-09-08 11:48
 ├── GEM                                                           2026-09-07 13:38
 │   └── GEM Catamailer.md                             8,19 Ko     2026-09-07 13:38
 ├── scripts                                                       2026-09-07 13:38
@@ -28,59 +31,61 @@ Arborescence / Fichier                                Taille      Date de MAJ
 │   ├── Start-Step.ps1                                1,38 Ko     2026-09-07 10:27
 │   ├── Test-DocGen.ps1                               1,46 Ko     2026-09-07 10:35
 │   └── zip_source.ps1                                5,11 Ko     2026-09-07 10:34
-├── specs                                                         2026-09-07 18:17
-│   ├── Next Prompt.txt                               880 octets  2026-09-07 13:38
-│   ├── Specs_Catamailer.md                           6,96 Ko     2026-09-07 18:49
-│   ├── Specs_Catamailer_Unit_Tests.md                8,42 Ko     2026-09-07 18:56
-│   └── ToDoList.md                                   6,59 Ko     2026-09-07 18:56
+├── specs                                                         2026-09-07 18:58
+│   ├── Next Prompt.txt                               757 octets  2026-09-07 18:59
+│   ├── Specs_Catamailer.md                           6,96 Ko     2026-09-07 18:58
+│   ├── Specs_Catamailer_Unit_Tests.md                8,99 Ko     2026-09-08 11:48
+│   └── ToDoList.md                                   7,40 Ko     2026-09-08 11:48
 ├── src                                                           2026-09-07 10:58
-│   ├── Catamailer.Application                                    2026-09-07 18:53
+│   ├── Catamailer.Application                                    2026-09-07 18:58
 │   │   ├── Catamailer.Application.csproj             334 octets  2026-09-07 10:43
 │   │   ├── ClassificationEngine.cs                   2,25 Ko     2026-09-07 13:38
 │   │   ├── ClassificationResult.cs                   1,29 Ko     2026-09-07 13:38
-│   │   ├── DebounceService.cs                        3,18 Ko     2026-09-07 18:37
+│   │   ├── DebounceService.cs                        3,18 Ko     2026-09-07 18:58
 │   │   ├── ExecutionEngine.cs                        3,32 Ko     2026-09-07 13:38
-│   │   ├── HistoryRunner.cs                          2,14 Ko     2026-09-07 18:43
-│   │   └── ShadowModeService.cs                      4,75 Ko     2026-09-07 18:55
-│   ├── Catamailer.Domain                                         2026-09-07 18:53
+│   │   ├── HistoryRunner.cs                          2,14 Ko     2026-09-07 18:58
+│   │   └── ShadowModeService.cs                      4,75 Ko     2026-09-07 18:58
+│   ├── Catamailer.Domain                                         2026-09-08 11:27
 │   │   ├── ActionType.cs                             687 octets  2026-09-07 13:38
-│   │   ├── AppSetting.cs                             905 octets  2026-09-07 18:26
+│   │   ├── AppSetting.cs                             905 octets  2026-09-07 18:58
 │   │   ├── Catamailer.Domain.csproj                  219 octets  2026-09-07 10:43
 │   │   ├── CategoryNode.cs                           3,21 Ko     2026-09-07 13:38
 │   │   ├── DictionaryRule.cs                         1,22 Ko     2026-09-07 13:38
-│   │   ├── IAppSettingsRepository.cs                 1,14 Ko     2026-09-07 18:26
-│   │   ├── ICategoryManagerProvider.cs               1,41 Ko     2026-09-07 18:17
+│   │   ├── IAppSettingsRepository.cs                 1,14 Ko     2026-09-07 18:58
+│   │   ├── ICategoryManagerProvider.cs               1,41 Ko     2026-09-07 18:58
 │   │   ├── ICategoryRepository.cs                    1019 octets 2026-09-07 13:38
-│   │   ├── IDebounceService.cs                       1,15 Ko     2026-09-07 18:32
-│   │   ├── IHistoryRunner.cs                         985 octets  2026-09-07 18:41
-│   │   ├── IHistoryStateRepository.cs                1,13 Ko     2026-09-07 18:26
-│   │   ├── IMailProvider.cs                          1015 octets 2026-09-07 18:17
-│   │   ├── IMassUpdateProvider.cs                    1023 octets 2026-09-07 18:17
-│   │   ├── ISelectionProvider.cs                     925 octets  2026-09-07 18:17
-│   │   ├── IShadowModeService.cs                     1,90 Ko     2026-09-07 18:53
+│   │   ├── IDebounceService.cs                       1,15 Ko     2026-09-07 18:58
+│   │   ├── IGlobalHotkeyService.cs                   1,39 Ko     2026-09-08 11:27
+│   │   ├── IHistoryRunner.cs                         985 octets  2026-09-07 18:58
+│   │   ├── IHistoryStateRepository.cs                1,13 Ko     2026-09-07 18:58
+│   │   ├── IMailProvider.cs                          1015 octets 2026-09-07 18:58
+│   │   ├── IMassUpdateProvider.cs                    1023 octets 2026-09-07 18:58
+│   │   ├── ISelectionProvider.cs                     925 octets  2026-09-07 18:58
+│   │   ├── IShadowModeService.cs                     1,90 Ko     2026-09-07 18:58
 │   │   ├── LogicalOperator.cs                        613 octets  2026-09-07 13:38
 │   │   ├── MailField.cs                              760 octets  2026-09-07 13:38
-│   │   ├── MailMetadata.cs                           934 octets  2026-09-07 18:17
+│   │   ├── MailMetadata.cs                           934 octets  2026-09-07 18:58
 │   │   ├── MatchOperator.cs                          709 octets  2026-09-07 13:38
 │   │   ├── RuleAction.cs                             1,03 Ko     2026-09-07 13:38
 │   │   ├── RuleCriterion.cs                          1,25 Ko     2026-09-07 13:38
 │   │   ├── RuleNode.cs                               1,96 Ko     2026-09-07 13:38
-│   │   └── SystemState.cs                            869 octets  2026-09-07 18:25
-│   ├── Catamailer.Infrastructure                                 2026-09-07 18:27
-│   │   ├── AppSettingsRepository.cs                  1,70 Ko     2026-09-07 18:30
+│   │   └── SystemState.cs                            869 octets  2026-09-07 18:58
+│   ├── Catamailer.Infrastructure                                 2026-09-08 11:27
+│   │   ├── AppSettingsRepository.cs                  1,70 Ko     2026-09-07 18:58
 │   │   ├── Catamailer.Infrastructure.csproj          618 octets  2026-09-07 13:38
-│   │   ├── CatamailerDbContext.cs                    3,03 Ko     2026-09-07 18:26
+│   │   ├── CatamailerDbContext.cs                    3,03 Ko     2026-09-07 18:58
 │   │   ├── CategoryRepository.cs                     1,20 Ko     2026-09-07 13:38
-│   │   ├── HistoryStateRepository.cs                 1,68 Ko     2026-09-07 18:30
-│   │   ├── IOutlookApplicationWrapper.cs             3,88 Ko     2026-09-07 18:40
-│   │   ├── OutlookCategoryManagerProvider.cs         1,85 Ko     2026-09-07 18:17
-│   │   ├── OutlookMailProvider.cs                    1,73 Ko     2026-09-07 18:17
-│   │   ├── OutlookMassUpdateProvider.cs              1,33 Ko     2026-09-07 18:17
-│   │   └── OutlookSelectionProvider.cs               1,66 Ko     2026-09-07 18:17
+│   │   ├── HistoryStateRepository.cs                 1,68 Ko     2026-09-07 18:58
+│   │   ├── IOutlookApplicationWrapper.cs             3,88 Ko     2026-09-07 18:58
+│   │   ├── OutlookCategoryManagerProvider.cs         1,85 Ko     2026-09-07 18:58
+│   │   ├── OutlookMailProvider.cs                    1,73 Ko     2026-09-07 18:58
+│   │   ├── OutlookMassUpdateProvider.cs              1,33 Ko     2026-09-07 18:58
+│   │   ├── OutlookSelectionProvider.cs               1,66 Ko     2026-09-07 18:58
+│   │   └── Win32GlobalHotkeyService.cs               3,78 Ko     2026-09-08 11:33
 │   ├── Catamailer.Migrator                                       2026-09-07 13:02
 │   │   ├── Catamailer.Migrator.csproj                384 octets  2026-09-07 10:44
 │   │   └── Program.cs                                40 octets   2026-09-07 10:43
-│   ├── Catamailer.UI                                             2026-09-07 13:38
+│   ├── Catamailer.UI                                             2026-09-08 09:42
 │   │   ├── Components                                            2026-09-07 10:43
 │   │   │   ├── Layout                                            2026-09-07 10:43
 │   │   │   │   ├── MainLayout.razor                  374 octets  2026-09-07 10:43
@@ -121,15 +126,17 @@ Arborescence / Fichier                                Taille      Date de MAJ
 │   │   ├── Properties                                            2026-09-07 10:43
 │   │   │   └── launchSettings.json                   124 octets  2026-09-07 10:43
 │   │   ├── Resources                                             2026-09-07 10:43
-│   │   │   ├── AppIcon                                           2026-09-07 10:43
+│   │   │   ├── AppIcon                                           2026-09-08 10:37
 │   │   │   │   ├── appicon.svg                       231 octets  2026-09-07 10:43
-│   │   │   │   └── appiconfg.svg                     1,77 Ko     2026-09-07 10:43
+│   │   │   │   ├── appiconfg.svg                     1,77 Ko     2026-09-07 10:43
+│   │   │   │   └── catamailer.png                    118,87 Ko   2026-09-08 09:03
 │   │   │   ├── Fonts                                             2026-09-07 10:43
 │   │   │   │   └── OpenSans-Regular.ttf              104,77 Ko   2026-09-07 10:43
 │   │   │   ├── Images                                            2026-09-07 10:43
 │   │   │   │   └── dotnet_bot.svg                    12,56 Ko    2026-09-07 10:43
-│   │   │   ├── Raw                                               2026-09-07 10:43
-│   │   │   │   └── AboutAssets.txt                   687 octets  2026-09-07 10:43
+│   │   │   ├── Raw                                               2026-09-08 10:37
+│   │   │   │   ├── AboutAssets.txt                   687 octets  2026-09-07 10:43
+│   │   │   │   └── catamailer.ico                    49,44 Ko    2026-09-08 09:05
 │   │   │   └── Splash                                            2026-09-07 10:43
 │   │   │       └── splash.svg                        1,77 Ko     2026-09-07 10:43
 │   │   ├── wwwroot                                               2026-09-07 10:43
@@ -141,12 +148,13 @@ Arborescence / Fichier                                Taille      Date de MAJ
 │   │   │   │               └── bootstrap.min.css.map 576,07 Ko   2026-09-07 10:43
 │   │   │   ├── app.css                               3,69 Ko     2026-09-07 10:43
 │   │   │   └── index.html                            886 octets  2026-09-07 10:43
-│   │   ├── App.xaml                                  635 octets  2026-09-07 10:43
-│   │   ├── App.xaml.cs                               441 octets  2026-09-07 13:38
-│   │   ├── Catamailer.UI.csproj                      2,96 Ko     2026-09-07 13:38
-│   │   ├── MainPage.xaml                             644 octets  2026-09-07 10:43
-│   │   ├── MainPage.xaml.cs                          136 octets  2026-09-07 10:43
-│   │   └── MauiProgram.cs                            520 octets  2026-09-07 10:43
+│   │   ├── App.xaml                                  1,32 Ko     2026-09-08 11:08
+│   │   ├── App.xaml.cs                               4,44 Ko     2026-09-08 11:40
+│   │   ├── Catamailer.UI.csproj                      2,98 Ko     2026-09-08 09:44
+│   │   ├── Catamailer.UI.csproj.user                 264 octets  2026-09-08 09:42
+│   │   ├── MainPage.xaml                             712 octets  2026-09-08 11:08
+│   │   ├── MainPage.xaml.cs                          407 octets  2026-09-08 11:08
+│   │   └── MauiProgram.cs                            1,46 Ko     2026-09-08 11:34
 │   └── Tools                                                     2026-09-07 10:58
 │       └── AiDocGenerator                                        2026-09-07 13:38
 │           ├── Analyzers                                         2026-09-07 10:58
@@ -161,31 +169,40 @@ Arborescence / Fichier                                Taille      Date de MAJ
 │           ├── AiDocGenerator.csproj                 671 octets  2026-09-07 10:59
 │           └── Program.cs                            9,54 Ko     2026-09-07 11:05
 ├── tests                                                         2026-09-07 10:59
-│   ├── Catamailer.Application.Tests                              2026-09-07 18:53
-│   │   ├── Catamailer.Application.Tests.csproj       919 octets  2026-09-07 18:36
+│   ├── Catamailer.Application.Tests                              2026-09-07 18:58
+│   │   ├── Catamailer.Application.Tests.csproj       919 octets  2026-09-07 18:58
 │   │   ├── ClassificationEngineTests.cs              2,74 Ko     2026-09-07 13:38
-│   │   ├── DebounceServiceTests.cs                   3,53 Ko     2026-09-07 18:33
+│   │   ├── DebounceServiceTests.cs                   3,53 Ko     2026-09-07 18:58
 │   │   ├── ExecutionEngineTests.cs                   3,13 Ko     2026-09-07 13:38
-│   │   ├── HistoryRunnerTests.cs                     2,22 Ko     2026-09-07 18:41
-│   │   └── ShadowModeServiceTests.cs                 3,38 Ko     2026-09-07 18:53
+│   │   ├── HistoryRunnerTests.cs                     2,22 Ko     2026-09-07 18:58
+│   │   └── ShadowModeServiceTests.cs                 3,38 Ko     2026-09-07 18:58
 │   ├── Catamailer.Domain.Tests                                   2026-09-07 13:38
 │   │   ├── Catamailer.Domain.Tests.csproj            756 octets  2026-09-07 10:43
 │   │   ├── CategoryNodeTests.cs                      2,53 Ko     2026-09-07 13:38
 │   │   └── RuleModelsTests.cs                        2,78 Ko     2026-09-07 13:38
-│   ├── Catamailer.Infrastructure.Tests                           2026-09-07 18:27
-│   │   ├── Catamailer.Infrastructure.Tests.csproj    1,49 Ko     2026-09-07 18:29
+│   ├── Catamailer.Infrastructure.Tests                           2026-09-08 11:28
+│   │   ├── Catamailer.Infrastructure.Tests.csproj    1,49 Ko     2026-09-07 18:58
 │   │   ├── CatamailerDbContextTests.cs               1,96 Ko     2026-09-07 13:38
 │   │   ├── CategoryRepositoryTests.cs                2,06 Ko     2026-09-07 13:38
-│   │   ├── OutlookCategoryManagerProviderTests.cs    2,41 Ko     2026-09-07 18:17
-│   │   ├── OutlookMailProviderTests.cs               2,08 Ko     2026-09-07 18:17
-│   │   ├── OutlookMassUpdateProviderTests.cs         1,27 Ko     2026-09-07 18:17
-│   │   ├── OutlookSelectionProviderTests.cs          2,17 Ko     2026-09-07 18:17
-│   │   └── StateAndSettingsRepositoriesTests.cs      2,67 Ko     2026-09-07 18:27
+│   │   ├── OutlookCategoryManagerProviderTests.cs    2,41 Ko     2026-09-07 18:58
+│   │   ├── OutlookMailProviderTests.cs               2,08 Ko     2026-09-07 18:58
+│   │   ├── OutlookMassUpdateProviderTests.cs         1,27 Ko     2026-09-07 18:58
+│   │   ├── OutlookSelectionProviderTests.cs          2,17 Ko     2026-09-07 18:58
+│   │   ├── StateAndSettingsRepositoriesTests.cs      2,67 Ko     2026-09-07 18:58
+│   │   └── Win32GlobalHotkeyServiceTests.cs          2,01 Ko     2026-09-08 11:46
 │   └── Tools.AiDocGenerator.Tests                                2026-09-07 13:38
 │       ├── CatamailerTocBuilderTests.cs              977 octets  2026-09-07 11:00
 │       └── Tools.AiDocGenerator.Tests.csproj         1,00 Ko     2026-09-07 11:00
+├── visuals                                                       2026-09-08 09:06
+│   ├── 9fe1bb6f-4104-45a6-b7b9-3ff4ac3d8a43.jpg      101,39 Ko   2026-09-08 08:49
+│   ├── c278ec5f-1df3-42f6-b193-cd81e229dc8a.jpg      68,28 Ko    2026-09-08 08:49
+│   ├── Catamailer.ico                                49,44 Ko    2026-09-08 09:05
+│   ├── Catamailer.pdn                                239,92 Ko   2026-09-08 09:03
+│   ├── Catamailer.png                                118,87 Ko   2026-09-08 09:03
+│   ├── Gemini_Generated_Image_5214x05214x05214.png   5,70 Mo     2026-09-08 08:54
+│   └── Gemini_Generated_Image_xxc2nmxxc2nmxxc2.png   5,19 Mo     2026-09-08 08:56
 ├── .gitignore                                        8,30 Ko     2026-09-07 13:38
 ├── Catamailer.slnx                                   967 octets  2026-09-07 10:59
-└── FileList.txt                                      0 octets    2026-09-07 18:57
+└── FileList.txt                                      0 octets    2026-09-08 11:48
 
 

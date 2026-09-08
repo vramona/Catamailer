@@ -62,7 +62,10 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 ---
 
 ## 🟢 JALON 3 - TRAY APP, GLOBAL HOTKEYS & UI
-*À compléter.*
+### 🟢 J3-S1 : Host & Hotkeys
+- [x] ✅ `J3-S1-T1 - App_ShouldStartHidden_AndRegisterTrayIcon` (Validé le 08/09/2026 sur feature/j3-tray-ui_step-1-host - Commit : c7161baebfa314a65a8d7fef263e91a6583e8804) (Cpx: 3 / 3)
+- [x] ✅ `J3-S1-T2 - RegisterHotkey_ShouldReturnTrue_WhenHotkeyIsAvailable` (Validé le 08/09/2026 sur feature/j3-tray-ui_step-1-host - Commit : 4a5b88b8e70c9201a863d0e9ac33c541ea287541)
+- [x] ✅ `J3-S1-T2 - UnregisterHotkey_ShouldReturnFalse_WhenHotkeyDoesNotExist` (Validé le 08/09/2026 sur feature/j3-tray-ui_step-1-host - Commit : 4a5b88b8e70c9201a863d0e9ac33c541ea287541)
 
 ---
 
