@@ -1,8 +1,11 @@
 ﻿// Historique :
 // 2026-09-08 : Configuration du démarrage et ajout de H.NotifyIcon (J3-S1-T1).
+// 2026-09-08 : Injection de IGlobalHotkeyService (J3-S1-T2).
 
 using Microsoft.Extensions.Logging;
-using H.NotifyIcon; // CORRECTION : L'espace de noms ne prend pas le suffixe .Maui
+using H.NotifyIcon;
+using Catamailer.Domain;
+using Catamailer.Infrastructure;
 
 namespace Catamailer.UI;
 
@@ -26,6 +29,9 @@ public static class MauiProgram
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
             });
+
+        // Injection des services d'infrastructure
+        builder.Services.AddSingleton<IGlobalHotkeyService, Win32GlobalHotkeyService>();
 
         builder.Services.AddMauiBlazorWebView();
 

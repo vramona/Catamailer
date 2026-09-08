@@ -2,11 +2,15 @@
 // 2026-09-08 : Implémentation du démarrage masqué (Headless) (J3-S1-T1).
 // 2026-09-08 : Refonte totale du TrayIcon vers App.xaml via MVVM (Commandes) pour résoudre la perte d'événements (J3-S1-T1).
 // 2026-09-08 : Interception de l'événement natif Closing pour masquer la fenêtre au lieu de tuer l'application (J3-S1-T1).
+// 2026-09-08 : Initialisation du Hook de raccourcis Win32 sur la fenêtre native (J3-S1-T2).
+// 2026-09-08 : Ajout d'un raccourci de test (Ctrl+Alt+K) pour valider l'interception fonctionnelle (J3-S1-T2).
 
 using System;
 using System.Windows.Input;
 using H.NotifyIcon;
 using Microsoft.Maui.Controls;
+using Catamailer.Domain;
+using Catamailer.Infrastructure;
 #if WINDOWS
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
@@ -24,28 +28,16 @@ public partial class App : Microsoft.Maui.Controls.Application
     private Microsoft.Maui.Controls.Window? _mainWindow;
     private TaskbarIcon? _trayIcon;
 
-    /// <summary>
-    /// Commande liée à l'action "Ouvrir le Dashboard" du menu.
-    /// </summary>
     public ICommand OpenCommand { get; }
-
-    /// <summary>
-    /// Commande liée à l'action "Quitter" du menu.
-    /// </summary>
     public ICommand ExitCommand { get; }
 
-    /// <summary>
-    /// Initialise une nouvelle instance de la classe <see cref="App"/>.
-    /// </summary>
     public App()
     {
-        // Initialisation des commandes MVVM avant InitializeComponent pour le Binding
         OpenCommand = new Command(ExecuteOpen);
         ExitCommand = new Command(ExecuteExit);
 
         InitializeComponent();
 
-        // Récupération de l'icône depuis les ressources globales et application du contexte de Binding
         if (Resources.TryGetValue("GlobalTrayIcon", out var resource) && resource is TaskbarIcon icon)
         {
             _trayIcon = icon;
@@ -54,10 +46,6 @@ public partial class App : Microsoft.Maui.Controls.Application
         }
     }
 
-    /// <summary>
-    /// Surcharge la création de la fenêtre principale.
-    /// Intercepte la création sous Windows pour la masquer instantanément et modifier son comportement de fermeture.
-    /// </summary>
     protected override Microsoft.Maui.Controls.Window CreateWindow(Microsoft.Maui.IActivationState? activationState)
     {
         _mainWindow = new Microsoft.Maui.Controls.Window(new MainPage());
@@ -72,14 +60,34 @@ public partial class App : Microsoft.Maui.Controls.Application
                 var windowId = Win32Interop.GetWindowIdFromWindow(windowHandle);
                 var appWindow = AppWindow.GetFromWindowId(windowId);
                 
-                // Interception de la fermeture pour masquer la fenêtre au lieu de la détruire
+                // Initialisation du Hook Win32 pour intercepter les raccourcis globaux
+                var hotkeyService = _mainWindow.Handler?.MauiContext?.Services.GetService<IGlobalHotkeyService>() as Win32GlobalHotkeyService;
+                if (hotkeyService != null)
+                {
+                    hotkeyService.Initialize(windowHandle);
+
+                    // Abonnement pour valider le déclenchement
+                    hotkeyService.HotkeyPressed += (sender, id) =>
+                    {
+                        if (id == 1) // Identifiant de notre raccourci de test
+                        {
+                            Microsoft.Maui.Controls.Application.Current?.Dispatcher.Dispatch(() =>
+                            {
+                                ExecuteOpen(); // Ouvre la fenêtre via le raccourci
+                            });
+                        }
+                    };
+
+                    // 0x0003 = MOD_ALT (1) | MOD_CONTROL (2), 0x4B = K
+                    hotkeyService.RegisterHotkey(1, 0x0003, 0x4B);
+                }
+
                 appWindow.Closing += (sender, args) =>
                 {
-                    args.Cancel = true; // Empêche la destruction de la fenêtre
-                    appWindow.Hide();   // Masque la fenêtre (retourne en TrayIcon)
+                    args.Cancel = true; 
+                    appWindow.Hide();   
                 };
 
-                // Utilisation du Dispatcher pour masquer la fenêtre APRÈS que le framework MAUI l'ait forcée à s'afficher au démarrage
                 Microsoft.Maui.Controls.Application.Current?.Dispatcher.Dispatch(() =>
                 {
                     appWindow.Hide();
@@ -91,9 +99,6 @@ public partial class App : Microsoft.Maui.Controls.Application
         return _mainWindow;
     }
 
-    /// <summary>
-    /// Logique d'affichage de la fenêtre principale.
-    /// </summary>
     private void ExecuteOpen()
     {
 #if WINDOWS
@@ -109,19 +114,13 @@ public partial class App : Microsoft.Maui.Controls.Application
 #endif
     }
 
-    /// <summary>
-    /// Logique de terminaison du processus.
-    /// </summary>
     private void ExecuteExit()
     {
         try
         {
             _trayIcon?.Dispose();
         }
-        catch
-        {
-            // Ignorer l'erreur au moment du kill process
-        }
+        catch { }
         
         Environment.Exit(0);
     }
