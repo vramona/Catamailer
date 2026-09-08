@@ -34,7 +34,7 @@
 
 ## Jalon 3 - Intégration Système et IHM - feature/j3-tray-ui
 ### Step 1 : Application Hôte et Zone de Notification - feature/j3-tray-ui_step-1-host
-- ✅ **J3-S1-T1 - Démarrage Headless et Tray Icon de base** : Configurer le projet MAUI pour démarrer de façon invisible (Headless) et afficher une icône native avec `H.NotifyIcon` dans la zone de notification Windows. Ajout d'un menu contextuel basique (Ouvrir / Quitter) via des Commandes MVVM (App.xaml). Configuration du profil de lancement (launch.json/tasks.json). (Validé le 08/09/2026 sur feature/j3-tray-ui_step-1-host - Commit : <COMMIT_HASH>) (Cpx: 5 / 5).
+- ✅ **J3-S1-T1 - Démarrage Headless et Tray Icon de base** : Configurer le projet MAUI pour démarrer de façon invisible (Headless) et afficher une icône native avec `H.NotifyIcon` dans la zone de notification Windows. Ajout d'un menu contextuel basique (Ouvrir / Quitter) via des Commandes MVVM (App.xaml). Configuration du profil de lancement (launch.json/tasks.json). (Validé le 08/09/2026 sur feature/j3-tray-ui_step-1-host - Commit : c7161baebfa314a65a8d7fef263e91a6583e8804) (Cpx: 5 / 5).
 - [ ] ⚪ **J3-S1-T2** - `GlobalHotkeyService` (Hook Win32).
 
 ### Step 2 - Quick Actions (Modales) - feature/j3-tray-ui_step-2-quickactions
