@@ -32,9 +32,9 @@
 - [x] ✅ **J2-S2-T3** - Service Background de Reprise (`HistoryRunner`) exploitant le `LastEntryID`. (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-2-history - Commit : fa156733005656cd2e6669fbd1ae244822600e9e) (Cpx: 5 / 5)
 - [x] ✅ **J2-S2-T4** - `ShadowModeService` : Comptage de télémétrie, gestion de l'activation globale `IsAutoWriteEnabled` et paliers de notification (300/600/900...). (Validé le 07/09/2026 sur feature/j2-outlook-integration_step-2-history - Commit : 8263a638c0d82f23d2cdbdfa8dda8cbf44385aed) (Cpx: 8 / 8)
 
-## Jalon 3 - Tray App, Global Hotkeys & UI - feature/j3-tray-ui
-### Step 1 - Host & Hotkeys - feature/j3-tray-ui_step-1-host
-- [ ] ⚪ **J3-S1-T1** - Host MAUI Blazor Hybrid (Démarrage masqué) et Tray Icon avec Menu contextuel.
+## Jalon 3 - Intégration Système et IHM - feature/j3-tray-ui
+### Step 1 : Application Hôte et Zone de Notification - feature/j3-tray-ui_step-1-host
+- ✅ **J3-S1-T1 - Démarrage Headless et Tray Icon de base** : Configurer le projet MAUI pour démarrer de façon invisible (Headless) et afficher une icône native avec `H.NotifyIcon` dans la zone de notification Windows. Ajout d'un menu contextuel basique (Ouvrir / Quitter) via des Commandes MVVM (App.xaml). Configuration du profil de lancement (launch.json/tasks.json). (Validé le 08/09/2026 sur feature/j3-tray-ui_step-1-host - Commit : <COMMIT_HASH>) (Cpx: 5 / 5).
 - [ ] ⚪ **J3-S1-T2** - `GlobalHotkeyService` (Hook Win32).
 
 ### Step 2 - Quick Actions (Modales) - feature/j3-tray-ui_step-2-quickactions

@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Lancer Catamailer.UI (Windows)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-windows",
+            "program": "${workspaceFolder}/src/Catamailer.UI/bin/Debug/net10.0-windows10.0.19041.0/win-x64/Catamailer.UI.exe",
+            "cwd": "${workspaceFolder}/src/Catamailer.UI",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        }
+    ]
+}

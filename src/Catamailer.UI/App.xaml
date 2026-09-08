@@ -2,16 +2,26 @@
 <Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:Catamailer.UI"
+             xmlns:tb="clr-namespace:H.NotifyIcon;assembly=H.NotifyIcon.Maui"
              x:Class="Catamailer.UI.App">
+    
+    <!-- Historique : -->
+    <!-- 2026-09-08 : Refonte globale. Déclaration du TrayIcon en ressource applicative via Commandes MVVM (J3-S1-T1). -->
+
     <Application.Resources>
         <ResourceDictionary>
-
-            <!--
-                For information about styling .NET MAUI pages
-                please refer to the documentation:
-                https://go.microsoft.com/fwlink/?linkid=2282329
-            -->
-
+            <!-- Déclaration globale indépendante de toute fenêtre -->
+            <tb:TaskbarIcon x:Key="GlobalTrayIcon"
+                            IconSource="catamailer.ico"
+                            ToolTipText="Catamailer - Assistant de messagerie">
+                <FlyoutBase.ContextFlyout>
+                    <MenuFlyout>
+                        <MenuFlyoutItem Text="Ouvrir le Dashboard" Command="{Binding OpenCommand}" />
+                        <MenuFlyoutSeparator />
+                        <MenuFlyoutItem Text="Quitter" Command="{Binding ExitCommand}" />
+                    </MenuFlyout>
+                </FlyoutBase.ContextFlyout>
+            </tb:TaskbarIcon>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

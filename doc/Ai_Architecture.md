@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-07 18:57
+Généré le : 2026-09-08 11:18
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -225,16 +225,19 @@ Généré le : 2026-09-07 18:57
 ## Projet : Catamailer.UI
 ### Class : App
 **Fichier** : `src\Catamailer.UI\App.xaml.cs`
+**Rôle** : Représente l'application principale MAUI. Gère le cycle de vie de la fenêtre, le démarrage en mode furtif (Headless) et les actions globales (Tray Icon).
 **Membres et Invocations :**
 
 ### Class : MainPage
 **Fichier** : `src\Catamailer.UI\MainPage.xaml.cs`
+**Rôle** : Page principale hébergeant exclusivement la vue Blazor.
 **Membres et Invocations :**
 
 ### Class : MauiProgram
 **Fichier** : `src\Catamailer.UI\MauiProgram.cs`
+**Rôle** : Classe statique responsable de l'amorçage et de la configuration de l'application MAUI Blazor.
 **Membres et Invocations :**
-- `MauiApp CreateMauiApp()`
+- `MauiApp CreateMauiApp()` : Crée et configure l'instance principale de l'application MAUI. Injecte les dépendances Blazor et initialise le composant de zone de notification (Tray Icon).
 
 ### Class : App
 **Fichier** : `src\Catamailer.UI\Platforms\Windows\App.xaml.cs`
