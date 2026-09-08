@@ -38,7 +38,7 @@
 - ✅ **J3-S1-T2 - GlobalHotkeyService (Hook Win32)** : Création de `IGlobalHotkeyService` et implémentation `Win32GlobalHotkeyService` avec P/Invoke (`RegisterHotKey`, `UnregisterHotKey`) et Subclassing (`SetWindowSubclass`) pour intercepter `WM_HOTKEY` (0x0312). Injection, initialisation sur le handle natif, et validation fonctionnelle. (Validé le 08/09/2026 sur feature/j3-tray-ui_step-1-host - Commit : 4a5b88b8e70c9201a863d0e9ac33c541ea287541) (Cpx: 5 / 5).
 
 ### Step 2 - Quick Actions (Modales) - feature/j3-tray-ui_step-2-quickactions
-- ✅ **J3-S2-T1 - Écran Quick Categorize** : Création du `QuickCategorizeViewModel` (moteur de recherche, filtrage, sélection), intégration dans l'IHM via `QuickCategorizeModal.razor`, initialisation de la base SQLite et ajout de `GetAllAsync` dans le dépôt métier avec Include. (Validé le 08/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : <COMMIT_HASH>) (Cpx: 8 / 10).
+- ✅ **J3-S2-T1 - Écran Quick Categorize** : Création du `QuickCategorizeViewModel` (moteur de recherche, filtrage, sélection), intégration dans l'IHM via `QuickCategorizeModal.razor`, initialisation de la base SQLite et ajout de `GetAllAsync` dans le dépôt métier avec Include. (Validé le 08/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : 740d643e59e21240fd8065f2a27d0ab624cced68) (Cpx: 8 / 10).
 - [ ] ⚪ **J3-S2-T2** - Écran "Quick Rule Builder" : Création pré-remplie d'une règle (Étape 1).
 
 ### Step 3 - Configuration Rules (UI) - feature/j3-tray-ui_step-3-config
