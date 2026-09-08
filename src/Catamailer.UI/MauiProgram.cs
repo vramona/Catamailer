@@ -1,11 +1,21 @@
 ﻿// Historique :
 // 2026-09-08 : Configuration du démarrage et ajout de H.NotifyIcon (J3-S1-T1).
 // 2026-09-08 : Injection de IGlobalHotkeyService (J3-S1-T2).
+// 2026-09-08 : Injection de QuickCategorizeViewModel (J3-S2-T1).
+// 2026-09-08 : Ajout des injections pour EF Core et l'Infrastructure (J3-S2-T1).
+// 2026-09-08 : Initialisation automatique du schéma SQLite au démarrage (J3-S2-T1).
+// 2026-09-08 : Ajout d'un jeu de données de test (Seed) avec héritage pour validation UI (J3-S2-T1).
 
+using System.IO;
+using System.Linq;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Maui.Storage;
 using H.NotifyIcon;
 using Catamailer.Domain;
 using Catamailer.Infrastructure;
+using Catamailer.Application.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Catamailer.UI;
 
@@ -30,8 +40,17 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
             });
 
+        // Configuration de la base de données SQLite dans le dossier local de l'application
+        string dbPath = Path.Combine(FileSystem.AppDataDirectory, "catamailer.db");
+        builder.Services.AddDbContext<CatamailerDbContext>(options =>
+            options.UseSqlite($"Data Source={dbPath}"));
+
         // Injection des services d'infrastructure
+        builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
         builder.Services.AddSingleton<IGlobalHotkeyService, Win32GlobalHotkeyService>();
+        
+        // Injection des ViewModels (Transient pour réinitialiser l'état à chaque appel)
+        builder.Services.AddTransient<QuickCategorizeViewModel>();
 
         builder.Services.AddMauiBlazorWebView();
 
@@ -40,6 +59,30 @@ public static class MauiProgram
         builder.Logging.AddDebug();
 #endif
 
-        return builder.Build();
+        var app = builder.Build();
+
+        // Initialisation du schéma de la base de données et injection des données de test
+        using (var scope = app.Services.CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<CatamailerDbContext>();
+            dbContext.Database.EnsureCreated();
+
+            if (!dbContext.Categories.Any())
+            {
+                var urgent = new CategoryNode("Urgent", "#dc3545");
+                var alpha = new CategoryNode("Projet Alpha", "#0d6efd");
+                var alphaDesign = new CategoryNode("Projet Alpha - Design"); // Sans couleur
+                
+                alpha.AddChild(alphaDesign); // Héritage de la couleur de "Projet Alpha"
+
+                var beta = new CategoryNode("Projet Beta", "#198754");
+                var aLire = new CategoryNode("A Lire", "#ffc107");
+
+                dbContext.Categories.AddRange(urgent, alpha, alphaDesign, beta, aLire);
+                dbContext.SaveChanges();
+            }
+        }
+
+        return app;
     }
 }

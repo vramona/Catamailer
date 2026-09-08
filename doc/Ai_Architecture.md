@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-08 11:48
+Généré le : 2026-09-08 18:03
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -57,6 +57,15 @@ Généré le : 2026-09-08 11:48
 - `Task AcknowledgeActivationPromptAsync()`
   - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
   - *Appelle* ➡️ `IHistoryStateRepository.SetStateAsync()`
+
+### Class : QuickCategorizeViewModel
+**Fichier** : `src\Catamailer.Application\ViewModels\QuickCategorizeViewModel.cs`
+**Rôle** : ViewModel responsable de la logique de l'écran Quick Categorize (Recherche, Tris, Actions).
+**Membres et Invocations :**
+- `Task InitializeAsync()` : Initialise le ViewModel en chargeant l'intégralité des catégories existantes.
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+- `Task UpdateSearchAsync(string searchText)` : Met à jour les résultats filtrés en fonction du texte de recherche fourni. La recherche ignore la casse et retourne l'intégralité des éléments si le texte est vide.
+- `void SelectCategory(CategoryNode category)` : Définit la catégorie sélectionnée par l'utilisateur.
 
 ## Projet : Catamailer.Domain
 ### Class : AppSetting
@@ -177,6 +186,7 @@ Généré le : 2026-09-08 11:48
 **Membres et Invocations :**
 - `Task AddAsync(CategoryNode category)`
 - `Task<CategoryNode?> GetByNameAsync(string name)`
+- `Task<IEnumerable<CategoryNode>> GetAllAsync()`
 
 ### Class : HistoryStateRepository
 **Fichier** : `src\Catamailer.Infrastructure\HistoryStateRepository.cs`
@@ -256,6 +266,7 @@ Généré le : 2026-09-08 11:48
 **Rôle** : Classe statique responsable de l'amorçage et de la configuration de l'application MAUI Blazor.
 **Membres et Invocations :**
 - `MauiApp CreateMauiApp()` : Crée et configure l'instance principale de l'application MAUI. Injecte les dépendances Blazor et initialise le composant de zone de notification (Tray Icon).
+  - *Appelle* ➡️ `CategoryNode.AddChild()`
 
 ### Class : App
 **Fichier** : `src\Catamailer.UI\Platforms\Windows\App.xaml.cs`
@@ -264,14 +275,12 @@ Généré le : 2026-09-08 11:48
 
 
 ### Composants Razor
+- **QuickCategorizeModal** : `src\Catamailer.UI\Components\QuickCategorizeModal.razor`
 - **Routes** : `src\Catamailer.UI\Components\Routes.razor`
 - **_Imports** : `src\Catamailer.UI\Components\_Imports.razor`
 - **MainLayout** : `src\Catamailer.UI\Components\Layout\MainLayout.razor`
-- **NavMenu** : `src\Catamailer.UI\Components\Layout\NavMenu.razor`
-- **Counter** (Route: `/counter`) : `src\Catamailer.UI\Components\Pages\Counter.razor`
 - **Home** (Route: `/`) : `src\Catamailer.UI\Components\Pages\Home.razor`
 - **NotFound** (Route: `/not-found`) : `src\Catamailer.UI\Components\Pages\NotFound.razor`
-- **Weather** (Route: `/weather`) : `src\Catamailer.UI\Components\Pages\Weather.razor`
 
 ## Projet : AiDocGenerator
 ### Class : CSharpAnalyzer
@@ -414,6 +423,17 @@ Généré le : 2026-09-08 11:48
   - *Appelle* ➡️ `IAppSettingsRepository.GetSettingAsync()`
   - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
   - *Appelle* ➡️ `ShadowModeService.ShouldPromptForActivationAsync()`
+
+### Class : QuickCategorizeViewModelTests
+**Fichier** : `tests\Catamailer.Application.Tests\ViewModels\QuickCategorizeViewModelTests.cs`
+**Rôle** : Tests unitaires validant la logique de recherche et de tri de la modale Quick Categorize.
+**Membres et Invocations :**
+- `Task UpdateSearchAsync_ShouldFilterCategories_IgnoringCase()`
+  - *Appelle* ➡️ `QuickCategorizeViewModel.InitializeAsync()`
+  - *Appelle* ➡️ `QuickCategorizeViewModel.UpdateSearchAsync()`
+- `Task UpdateSearchAsync_ShouldReturnEmpty_WhenNoMatchFound()`
+  - *Appelle* ➡️ `QuickCategorizeViewModel.InitializeAsync()`
+  - *Appelle* ➡️ `QuickCategorizeViewModel.UpdateSearchAsync()`
 
 ## Projet : Catamailer.Domain.Tests
 ### Class : CategoryNodeTests

@@ -67,6 +67,10 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 - [x] ✅ `J3-S1-T2 - RegisterHotkey_ShouldReturnTrue_WhenHotkeyIsAvailable` (Validé le 08/09/2026 sur feature/j3-tray-ui_step-1-host - Commit : 4a5b88b8e70c9201a863d0e9ac33c541ea287541)
 - [x] ✅ `J3-S1-T2 - UnregisterHotkey_ShouldReturnFalse_WhenHotkeyDoesNotExist` (Validé le 08/09/2026 sur feature/j3-tray-ui_step-1-host - Commit : 4a5b88b8e70c9201a863d0e9ac33c541ea287541)
 
+### 🟢 J3-S2 : Quick Actions (Modales)
+- [x] ✅ `J3-S2-T1 - UpdateSearchAsync_ShouldFilterCategories_IgnoringCase` (Validé le 08/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : <COMMIT_HASH>)
+- [x] ✅ `J3-S2-T1 - UpdateSearchAsync_ShouldReturnEmpty_WhenNoMatchFound` (Validé le 08/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : <COMMIT_HASH>)
+
 ---
 
 ## 🟢 JALON 4 - INBOX NOTES, AGENDA & ACTIONS INTERNES
