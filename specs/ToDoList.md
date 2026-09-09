@@ -45,7 +45,7 @@
 
 ## Jalon 3 - Intégration Système et IHM - feature/j3-tray-ui
 ### Step 3 - Configuration Rules (UI) - feature/j3-tray-ui_step-3-config
-- [x] ✅ **J3-S3-T0** - Refactoring Initialisation (Extraction DatabaseBootstrapper et DummyCategorySeeder). (Validé le 09/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : <COMMIT_HASH>) (Cpx: 2 / 2).
+- [x] ✅ **J3-S3-T0** - Refactoring Initialisation (Extraction DatabaseBootstrapper et DummyCategorySeeder). (Validé le 09/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : 8716510d2f4d94ed1122bb8e05ed4c7a8745ecd5) (Cpx: 2 / 2).
 - [x] ✅ **J3-S3-T1** - Dashboard Shadow Mode. (Validé le 09/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : d0eead0a537423fd2b38f45da235aed9610bb599) (Cpx: 5 / 5).
 - [ ] ⚪ **J3-S3-T2** - Éditeur de Référentiel (TreeView Catégories).
 - [ ] ⚪ **J3-S3-T3** - Éditeur Dictionnaires et Builder Visuel (Étape 2).
