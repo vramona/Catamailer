@@ -7,16 +7,19 @@
 // 2026-09-08 : Ajout d'un jeu de données de test (Seed) avec héritage pour validation UI (J3-S2-T1).
 // 2026-09-08 : Injection de QuickRuleBuilderViewModel et d'un DummySelectionProvider (J3-S2-T2).
 // 2026-09-09 : Adaptation à la refonte de MailMetadata (J3-S2-T2-ST1).
+// 2026-09-09 : Injection de IRuleRepository et ClassificationEngine (J3-S2-T2-ST2).
 
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Maui.Storage;
 using H.NotifyIcon;
 using Catamailer.Domain;
 using Catamailer.Infrastructure;
+using Catamailer.Application;
 using Catamailer.Application.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -34,6 +37,19 @@ public class DummySelectionProvider : ISelectionProvider
             "assistant@important.com",
             new List<string>(),
             new List<string> { "team@important.com" });
+    }
+}
+
+// Dépôt factice pour fournir des règles en l'absence de base de données implémentée pour DictionaryRule
+public class DummyRuleRepository : IRuleRepository
+{
+    public Task<IEnumerable<DictionaryRule>> GetAllDictionaryRulesAsync()
+    {
+        var dummyRule = new DictionaryRule(
+            new CategoryNode("Urgent"), 
+            subjectKeywords: new[] { "Urgent" });
+            
+        return Task.FromResult<IEnumerable<DictionaryRule>>(new List<DictionaryRule> { dummyRule });
     }
 }
 
@@ -63,8 +79,12 @@ public static class MauiProgram
         builder.Services.AddDbContext<CatamailerDbContext>(options =>
             options.UseSqlite($"Data Source={dbPath}"));
 
+        // Injection des services de domaine et d'application
+        builder.Services.AddTransient<ClassificationEngine>();
+
         // Injection des services d'infrastructure
         builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+        builder.Services.AddScoped<IRuleRepository, DummyRuleRepository>();
         builder.Services.AddSingleton<IGlobalHotkeyService, Win32GlobalHotkeyService>();
         
         // Faux fournisseur pour le test de l'IHM (à remplacer par OutlookSelectionProvider en prod)

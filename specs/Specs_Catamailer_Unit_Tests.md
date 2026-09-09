@@ -79,6 +79,9 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 - [x] ✅ `J3-S2-T2-ST1 - InitializeAsync_ShouldPopulateFields_FromSelectedMail` (Validé le 09/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : 73be44ce1ca1e95da0a28a6931f56ddd9cdbd57d)
 - [x] ✅ `J3-S2-T2-ST1 - InitializeAsync_ShouldLeaveFieldsEmpty_WhenNoMailSelected` (Validé le 09/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : 73be44ce1ca1e95da0a28a6931f56ddd9cdbd57d)
 - [x] ✅ `J3-S2-T2-ST1 - BuildRule_ShouldReturnPopulatedDictionaryRule` (Validé le 09/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : 73be44ce1ca1e95da0a28a6931f56ddd9cdbd57d)
+- [x] ✅ `J3-S2-T2-ST2 - InitializeAsync_ShouldPopulateSelectableOptions_FromSelectedMail` (Validé le 09/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : <COMMIT_HASH>)
+- [x] ✅ `J3-S2-T2-ST2 - InitializeAsync_ShouldIdentifyTriggeredCategories_WhenRulesMatch` (Validé le 09/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : <COMMIT_HASH>)
+- [x] ✅ `J3-S2-T2-ST2 - BuildRule_ShouldOnlyIncludeSelectedOptions` (Validé le 09/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : <COMMIT_HASH>)
 
 ---
 

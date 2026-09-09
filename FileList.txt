@@ -7,13 +7,13 @@ Arborescence / Fichier                                Taille      Date de MAJ
 ├── doc                                                           2026-09-08 11:48
 │   ├── api                                                       2026-09-07 11:22
 │   │   ├── Scripts                                               2026-09-07 13:38
-│   │   │   ├── Scripts.md                            2,28 Ko     2026-09-09 07:34
-│   │   │   └── toc.yml                               49 octets   2026-09-09 07:34
+│   │   │   ├── Scripts.md                            2,28 Ko     2026-09-09 07:54
+│   │   │   └── toc.yml                               49 octets   2026-09-09 07:54
 │   │   ├── TestsReport                                           2026-09-07 11:22
-│   │   │   ├── TestResults.md                        92 octets   2026-09-09 07:34
-│   │   │   └── toc.yml                               59 octets   2026-09-09 07:34
-│   │   └── toc.yml                                   280 octets  2026-09-09 07:34
-│   └── Ai_Architecture.md                            33,63 Ko    2026-09-09 07:34
+│   │   │   ├── TestResults.md                        92 octets   2026-09-09 07:54
+│   │   │   └── toc.yml                               59 octets   2026-09-09 07:54
+│   │   └── toc.yml                                   280 octets  2026-09-09 07:54
+│   └── Ai_Architecture.md                            35,00 Ko    2026-09-09 07:54
 ├── GEM                                                           2026-09-07 13:38
 │   └── GEM Catamailer.md                             8,19 Ko     2026-09-07 13:38
 ├── scripts                                                       2026-09-07 13:38
@@ -34,13 +34,13 @@ Arborescence / Fichier                                Taille      Date de MAJ
 ├── specs                                                         2026-09-08 11:48
 │   ├── Next Prompt.txt                               757 octets  2026-09-08 11:48
 │   ├── Specs_Catamailer.md                           7,24 Ko     2026-09-08 18:03
-│   ├── Specs_Catamailer_Unit_Tests.md                10,98 Ko    2026-09-09 07:34
-│   └── ToDoList.md                                   8,07 Ko     2026-09-09 07:31
+│   ├── Specs_Catamailer_Unit_Tests.md                11,74 Ko    2026-09-09 07:54
+│   └── ToDoList.md                                   8,20 Ko     2026-09-09 07:54
 ├── src                                                           2026-09-07 10:58
 │   ├── Catamailer.Application                                    2026-09-08 12:18
 │   │   ├── ViewModels                                            2026-09-08 18:23
 │   │   │   ├── QuickCategorizeViewModel.cs           3,10 Ko     2026-09-08 15:51
-│   │   │   └── QuickRuleBuilderViewModel.cs          3,52 Ko     2026-09-09 07:26
+│   │   │   └── QuickRuleBuilderViewModel.cs          6,15 Ko     2026-09-09 07:45
 │   │   ├── Catamailer.Application.csproj             334 octets  2026-09-07 10:43
 │   │   ├── ClassificationEngine.cs                   3,09 Ko     2026-09-09 07:15
 │   │   ├── ClassificationResult.cs                   1,29 Ko     2026-09-07 13:38
@@ -48,7 +48,7 @@ Arborescence / Fichier                                Taille      Date de MAJ
 │   │   ├── ExecutionEngine.cs                        3,32 Ko     2026-09-07 13:38
 │   │   ├── HistoryRunner.cs                          2,14 Ko     2026-09-07 18:58
 │   │   └── ShadowModeService.cs                      4,75 Ko     2026-09-07 18:58
-│   ├── Catamailer.Domain                                         2026-09-08 11:48
+│   ├── Catamailer.Domain                                         2026-09-09 07:44
 │   │   ├── ActionType.cs                             687 octets  2026-09-07 13:38
 │   │   ├── AppSetting.cs                             905 octets  2026-09-07 18:58
 │   │   ├── Catamailer.Domain.csproj                  219 octets  2026-09-07 10:43
@@ -63,6 +63,7 @@ Arborescence / Fichier                                Taille      Date de MAJ
 │   │   ├── IHistoryStateRepository.cs                1,13 Ko     2026-09-07 18:58
 │   │   ├── IMailProvider.cs                          1015 octets 2026-09-07 18:58
 │   │   ├── IMassUpdateProvider.cs                    1023 octets 2026-09-07 18:58
+│   │   ├── IRuleRepository.cs                        654 octets  2026-09-09 07:45
 │   │   ├── ISelectionProvider.cs                     925 octets  2026-09-07 18:58
 │   │   ├── IShadowModeService.cs                     1,90 Ko     2026-09-07 18:58
 │   │   ├── LogicalOperator.cs                        613 octets  2026-09-07 13:38
@@ -98,7 +99,7 @@ Arborescence / Fichier                                Taille      Date de MAJ
 │   │   │   │   └── NotFound.razor                    128 octets  2026-09-07 10:43
 │   │   │   ├── QuickCategorizeModal.razor            1,97 Ko     2026-09-08 15:27
 │   │   │   ├── QuickCategorizeModal.razor.css        1008 octets 2026-09-08 17:39
-│   │   │   ├── QuickRuleBuilderModal.razor           2,58 Ko     2026-09-09 07:27
+│   │   │   ├── QuickRuleBuilderModal.razor           7,08 Ko     2026-09-09 07:50
 │   │   │   ├── Routes.razor                          304 octets  2026-09-07 10:43
 │   │   │   └── _Imports.razor                        414 octets  2026-09-08 15:58
 │   │   ├── Platforms                                             2026-09-07 10:43
@@ -156,7 +157,7 @@ Arborescence / Fichier                                Taille      Date de MAJ
 │   │   ├── Catamailer.UI.csproj.user                 264 octets  2026-09-08 09:42
 │   │   ├── MainPage.xaml                             712 octets  2026-09-08 11:48
 │   │   ├── MainPage.xaml.cs                          407 octets  2026-09-08 11:48
-│   │   └── MauiProgram.cs                            4,50 Ko     2026-09-09 07:27
+│   │   └── MauiProgram.cs                            5,35 Ko     2026-09-09 07:50
 │   └── Tools                                                     2026-09-07 10:58
 │       └── AiDocGenerator                                        2026-09-07 13:38
 │           ├── Analyzers                                         2026-09-07 10:58
@@ -174,7 +175,7 @@ Arborescence / Fichier                                Taille      Date de MAJ
 │   ├── Catamailer.Application.Tests                              2026-09-08 18:22
 │   │   ├── ViewModels                                            2026-09-08 18:22
 │   │   │   ├── QuickCategorizeViewModelTests.cs      2,42 Ko     2026-09-08 12:25
-│   │   │   └── QuickRuleBuilderViewModelTests.cs     3,03 Ko     2026-09-09 07:26
+│   │   │   └── QuickRuleBuilderViewModelTests.cs     5,79 Ko     2026-09-09 07:43
 │   │   ├── Catamailer.Application.Tests.csproj       919 octets  2026-09-07 18:58
 │   │   ├── ClassificationEngineTests.cs              3,23 Ko     2026-09-09 07:16
 │   │   ├── DebounceServiceTests.cs                   3,53 Ko     2026-09-07 18:58
@@ -208,6 +209,6 @@ Arborescence / Fichier                                Taille      Date de MAJ
 │   └── Gemini_Generated_Image_xxc2nmxxc2nmxxc2.png   5,19 Mo     2026-09-08 11:48
 ├── .gitignore                                        8,30 Ko     2026-09-07 13:38
 ├── Catamailer.slnx                                   967 octets  2026-09-07 10:59
-└── FileList.txt                                      0 octets    2026-09-09 07:34
+└── FileList.txt                                      0 octets    2026-09-09 07:54
 
 

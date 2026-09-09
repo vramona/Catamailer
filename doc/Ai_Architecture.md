@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-09 07:34
+Généré le : 2026-09-09 07:54
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -67,15 +67,22 @@ Généré le : 2026-09-09 07:34
 - `Task UpdateSearchAsync(string searchText)` : Met à jour les résultats filtrés en fonction du texte de recherche fourni. La recherche ignore la casse et retourne l'intégralité des éléments si le texte est vide.
 - `void SelectCategory(CategoryNode category)` : Définit la catégorie sélectionnée par l'utilisateur.
 
+### Class : SelectableOption
+**Fichier** : `src\Catamailer.Application\ViewModels\QuickRuleBuilderViewModel.cs`
+**Rôle** : Représente une option sélectionnable dans l'IHM (case à cocher).
+**Membres et Invocations :**
+
 ### Class : QuickRuleBuilderViewModel
 **Fichier** : `src\Catamailer.Application\ViewModels\QuickRuleBuilderViewModel.cs`
 **Rôle** : ViewModel responsable de la logique de l'écran Quick Rule Builder (Étape 1).
 **Membres et Invocations :**
-- `Task InitializeAsync()` : Initialise le ViewModel en récupérant les métadonnées de l'e-mail sélectionné et les catégories.
+- `Task InitializeAsync()` : Initialise le ViewModel en récupérant les métadonnées, en construisant les options de filtrage et en identifiant les catégories déjà déclenchées.
   - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
   - *Appelle* ➡️ `ISelectionProvider.GetSelectedMail()`
+  - *Appelle* ➡️ `ClassificationEngine.Classify()`
 - `void SelectCategory(CategoryNode category)` : Définit la catégorie cible pour la règle en cours de création.
-- `DictionaryRule? BuildRule()` : Construit l'objet DictionaryRule final à partir des champs saisis.
+- `DictionaryRule? BuildRule()` : Construit l'objet DictionaryRule final en incluant uniquement les options cochées.
 
 ## Projet : Catamailer.Domain
 ### Class : AppSetting
@@ -138,6 +145,11 @@ Généré le : 2026-09-09 07:34
 ### Interface : IMassUpdateProvider
 **Fichier** : `src\Catamailer.Domain\IMassUpdateProvider.cs`
 **Rôle** : Définit le contrat permettant la mise à jour en masse (renommage rétroactif) des catégories sur les e-mails existants.
+**Membres et Invocations :**
+
+### Interface : IRuleRepository
+**Fichier** : `src\Catamailer.Domain\IRuleRepository.cs`
+**Rôle** : Définit le contrat pour l'accès aux données des règles de classification et d'exécution.
 **Membres et Invocations :**
 
 ### Interface : ISelectionProvider
@@ -275,6 +287,11 @@ Généré le : 2026-09-09 07:34
 **Fichier** : `src\Catamailer.UI\MauiProgram.cs`
 **Membres et Invocations :**
 - `MailMetadata? GetSelectedMail()`
+
+### Class : DummyRuleRepository
+**Fichier** : `src\Catamailer.UI\MauiProgram.cs`
+**Membres et Invocations :**
+- `Task<IEnumerable<DictionaryRule>> GetAllDictionaryRulesAsync()`
 
 ### Class : MauiProgram
 **Fichier** : `src\Catamailer.UI\MauiProgram.cs`
@@ -457,13 +474,21 @@ Généré le : 2026-09-09 07:34
 ### Class : QuickRuleBuilderViewModelTests
 **Fichier** : `tests\Catamailer.Application.Tests\ViewModels\QuickRuleBuilderViewModelTests.cs`
 **Membres et Invocations :**
-- `Task InitializeAsync_ShouldPopulateFields_FromSelectedMail()`
+- `Task InitializeAsync_ShouldPopulateSelectableOptions_FromSelectedMail()`
   - *Appelle* ➡️ `ISelectionProvider.GetSelectedMail()`
+  - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
+  - *Appelle* ➡️ `QuickRuleBuilderViewModelTests.CreateViewModel()`
   - *Appelle* ➡️ `QuickRuleBuilderViewModel.InitializeAsync()`
-- `Task InitializeAsync_ShouldLeaveFieldsEmpty_WhenNoMailSelected()`
+- `Task InitializeAsync_ShouldIdentifyTriggeredCategories_WhenRulesMatch()`
   - *Appelle* ➡️ `ISelectionProvider.GetSelectedMail()`
+  - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
+  - *Appelle* ➡️ `QuickRuleBuilderViewModelTests.CreateViewModel()`
   - *Appelle* ➡️ `QuickRuleBuilderViewModel.InitializeAsync()`
-- `void BuildRule_ShouldReturnPopulatedDictionaryRule()`
+- `void BuildRule_ShouldOnlyIncludeSelectedOptions()`
+  - *Appelle* ➡️ `ISelectionProvider.GetSelectedMail()`
+  - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
+  - *Appelle* ➡️ `QuickRuleBuilderViewModelTests.CreateViewModel()`
+  - *Appelle* ➡️ `QuickRuleBuilderViewModel.InitializeAsync()`
   - *Appelle* ➡️ `QuickRuleBuilderViewModel.SelectCategory()`
   - *Appelle* ➡️ `QuickRuleBuilderViewModel.BuildRule()`
 

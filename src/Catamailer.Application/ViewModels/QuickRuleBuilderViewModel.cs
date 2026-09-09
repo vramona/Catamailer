@@ -2,13 +2,31 @@
 // 2026-09-08 : Création du ViewModel QuickRuleBuilderViewModel (J3-S2-T2).
 // 2026-09-08 : Ajout du chargement de la liste des catégories pour l'IHM (J3-S2-T2).
 // 2026-09-09 : Adaptation à la nouvelle signature de DictionaryRule (J3-S2-T2-ST1).
+// 2026-09-09 : Ajout des options de sélection et détection des catégories déclenchées (J3-S2-T2-ST2).
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Catamailer.Domain;
 
 namespace Catamailer.Application.ViewModels;
+
+/// <summary>
+/// Représente une option sélectionnable dans l'IHM (case à cocher).
+/// </summary>
+public class SelectableOption
+{
+    /// <summary>
+    /// La valeur textuelle de l'option.
+    /// </summary>
+    public string Value { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Indique si l'utilisateur a coché cette option.
+    /// </summary>
+    public bool IsSelected { get; set; }
+}
 
 /// <summary>
 /// ViewModel responsable de la logique de l'écran Quick Rule Builder (Étape 1).
@@ -17,50 +35,93 @@ public class QuickRuleBuilderViewModel
 {
     private readonly ISelectionProvider _selectionProvider;
     private readonly ICategoryRepository _categoryRepository;
+    private readonly IRuleRepository _ruleRepository;
+    private readonly ClassificationEngine _classificationEngine;
 
     /// <summary>
-    /// Obtient ou définit le mot-clé extrait du sujet de l'e-mail.
+    /// Option de sélection pour le sujet de l'e-mail.
     /// </summary>
-    public string SubjectKeyword { get; set; } = string.Empty;
+    public SelectableOption? SubjectOption { get; private set; }
 
     /// <summary>
-    /// Obtient ou définit le mot-clé extrait de l'expéditeur de l'e-mail.
+    /// Options de sélection pour les expéditeurs (Sender et OnBehalfOf).
     /// </summary>
-    public string SenderKeyword { get; set; } = string.Empty;
+    public List<SelectableOption> SenderOptions { get; private set; } = new();
 
     /// <summary>
-    /// Obtient la liste des catégories disponibles pour la règle.
+    /// Options de sélection pour les destinataires externes.
+    /// </summary>
+    public List<SelectableOption> RecipientOptions { get; private set; } = new();
+
+    /// <summary>
+    /// Obtient la liste globale des catégories disponibles.
     /// </summary>
     public IEnumerable<CategoryNode> Categories { get; private set; } = Array.Empty<CategoryNode>();
 
     /// <summary>
-    /// Obtient la catégorie cible sélectionnée pour la règle.
+    /// Obtient la liste des catégories qui sont déjà déclenchées par l'e-mail courant.
+    /// </summary>
+    public IEnumerable<CategoryNode> TriggeredCategories { get; private set; } = Array.Empty<CategoryNode>();
+
+    /// <summary>
+    /// Obtient la catégorie cible actuellement sélectionnée pour la règle.
     /// </summary>
     public CategoryNode? SelectedCategory { get; private set; }
 
     /// <summary>
     /// Initialise une nouvelle instance du <see cref="QuickRuleBuilderViewModel"/>.
     /// </summary>
-    /// <param name="selectionProvider">Le fournisseur permettant de récupérer l'e-mail sélectionné.</param>
-    /// <param name="categoryRepository">Le dépôt de catégories.</param>
-    public QuickRuleBuilderViewModel(ISelectionProvider selectionProvider, ICategoryRepository categoryRepository)
+    public QuickRuleBuilderViewModel(
+        ISelectionProvider selectionProvider, 
+        ICategoryRepository categoryRepository,
+        IRuleRepository ruleRepository,
+        ClassificationEngine classificationEngine)
     {
         _selectionProvider = selectionProvider ?? throw new ArgumentNullException(nameof(selectionProvider));
         _categoryRepository = categoryRepository ?? throw new ArgumentNullException(nameof(categoryRepository));
+        _ruleRepository = ruleRepository ?? throw new ArgumentNullException(nameof(ruleRepository));
+        _classificationEngine = classificationEngine ?? throw new ArgumentNullException(nameof(classificationEngine));
     }
 
     /// <summary>
-    /// Initialise le ViewModel en récupérant les métadonnées de l'e-mail sélectionné et les catégories.
+    /// Initialise le ViewModel en récupérant les métadonnées, en construisant les options de filtrage 
+    /// et en identifiant les catégories déjà déclenchées.
     /// </summary>
     public async Task InitializeAsync()
     {
         Categories = await _categoryRepository.GetAllAsync();
+        var rules = await _ruleRepository.GetAllDictionaryRulesAsync();
 
         var mail = _selectionProvider.GetSelectedMail();
         if (mail != null)
         {
-            SubjectKeyword = mail.Subject ?? string.Empty;
-            SenderKeyword = mail.Sender ?? string.Empty;
+            if (!string.IsNullOrWhiteSpace(mail.Subject))
+            {
+                SubjectOption = new SelectableOption { Value = mail.Subject, IsSelected = false };
+            }
+
+            if (!string.IsNullOrWhiteSpace(mail.Sender))
+            {
+                SenderOptions.Add(new SelectableOption { Value = mail.Sender, IsSelected = false });
+            }
+            if (!string.IsNullOrWhiteSpace(mail.OnBehalfOf))
+            {
+                SenderOptions.Add(new SelectableOption { Value = mail.OnBehalfOf, IsSelected = false });
+            }
+
+            if (mail.ExternalRecipients != null)
+            {
+                foreach (var recipient in mail.ExternalRecipients)
+                {
+                    RecipientOptions.Add(new SelectableOption { Value = recipient, IsSelected = false });
+                }
+            }
+
+            var classificationResult = _classificationEngine.Classify(mail, rules);
+            if (classificationResult != null)
+            {
+                TriggeredCategories = classificationResult.AppliedCategories;
+            }
         }
     }
 
@@ -74,7 +135,7 @@ public class QuickRuleBuilderViewModel
     }
 
     /// <summary>
-    /// Construit l'objet DictionaryRule final à partir des champs saisis.
+    /// Construit l'objet DictionaryRule final en incluant uniquement les options cochées.
     /// </summary>
     /// <returns>La règle générée, ou null si aucune catégorie n'a été sélectionnée.</returns>
     public DictionaryRule? BuildRule()
@@ -84,9 +145,17 @@ public class QuickRuleBuilderViewModel
             return null;
         }
 
-        var subjectKws = string.IsNullOrWhiteSpace(SubjectKeyword) ? null : new[] { SubjectKeyword };
-        var senderKws = string.IsNullOrWhiteSpace(SenderKeyword) ? null : new[] { SenderKeyword };
+        var subjectKws = SubjectOption != null && SubjectOption.IsSelected 
+            ? new[] { SubjectOption.Value } 
+            : null;
+        
+        var senderKws = SenderOptions.Where(o => o.IsSelected).Select(o => o.Value).ToList();
+        var recipientKws = RecipientOptions.Where(o => o.IsSelected).Select(o => o.Value).ToList();
 
-        return new DictionaryRule(SelectedCategory, subjectKeywords: subjectKws, senderKeywords: senderKws);
+        return new DictionaryRule(
+            SelectedCategory, 
+            subjectKeywords: subjectKws, 
+            senderKeywords: senderKws.Any() ? senderKws : null,
+            recipientKeywords: recipientKws.Any() ? recipientKws : null);
     }
 }
