@@ -7,13 +7,13 @@ Arborescence / Fichier                                Taille      Date de MAJ
 ├── doc                                                           2026-09-08 11:48
 │   ├── api                                                       2026-09-07 11:22
 │   │   ├── Scripts                                               2026-09-07 13:38
-│   │   │   ├── Scripts.md                            2,28 Ko     2026-09-09 07:54
-│   │   │   └── toc.yml                               49 octets   2026-09-09 07:54
+│   │   │   ├── Scripts.md                            2,28 Ko     2026-09-09 08:00
+│   │   │   └── toc.yml                               49 octets   2026-09-09 08:00
 │   │   ├── TestsReport                                           2026-09-07 11:22
-│   │   │   ├── TestResults.md                        92 octets   2026-09-09 07:54
-│   │   │   └── toc.yml                               59 octets   2026-09-09 07:54
-│   │   └── toc.yml                                   280 octets  2026-09-09 07:54
-│   └── Ai_Architecture.md                            35,00 Ko    2026-09-09 07:54
+│   │   │   ├── TestResults.md                        92 octets   2026-09-09 08:00
+│   │   │   └── toc.yml                               59 octets   2026-09-09 08:00
+│   │   └── toc.yml                                   280 octets  2026-09-09 08:00
+│   └── Ai_Architecture.md                            35,00 Ko    2026-09-09 08:00
 ├── GEM                                                           2026-09-07 13:38
 │   └── GEM Catamailer.md                             8,19 Ko     2026-09-07 13:38
 ├── scripts                                                       2026-09-07 13:38
@@ -34,8 +34,8 @@ Arborescence / Fichier                                Taille      Date de MAJ
 ├── specs                                                         2026-09-08 11:48
 │   ├── Next Prompt.txt                               757 octets  2026-09-08 11:48
 │   ├── Specs_Catamailer.md                           7,24 Ko     2026-09-08 18:03
-│   ├── Specs_Catamailer_Unit_Tests.md                11,74 Ko    2026-09-09 07:54
-│   └── ToDoList.md                                   8,20 Ko     2026-09-09 07:54
+│   ├── Specs_Catamailer_Unit_Tests.md                11,82 Ko    2026-09-09 07:54
+│   └── ToDoList.md                                   8,28 Ko     2026-09-09 07:58
 ├── src                                                           2026-09-07 10:58
 │   ├── Catamailer.Application                                    2026-09-08 12:18
 │   │   ├── ViewModels                                            2026-09-08 18:23
@@ -209,6 +209,6 @@ Arborescence / Fichier                                Taille      Date de MAJ
 │   └── Gemini_Generated_Image_xxc2nmxxc2nmxxc2.png   5,19 Mo     2026-09-08 11:48
 ├── .gitignore                                        8,30 Ko     2026-09-07 13:38
 ├── Catamailer.slnx                                   967 octets  2026-09-07 10:59
-└── FileList.txt                                      0 octets    2026-09-09 07:54
+└── FileList.txt                                      0 octets    2026-09-09 08:00
 
 
