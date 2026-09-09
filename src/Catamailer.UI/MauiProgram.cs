@@ -5,9 +5,12 @@
 // 2026-09-08 : Ajout des injections pour EF Core et l'Infrastructure (J3-S2-T1).
 // 2026-09-08 : Initialisation automatique du schéma SQLite au démarrage (J3-S2-T1).
 // 2026-09-08 : Ajout d'un jeu de données de test (Seed) avec héritage pour validation UI (J3-S2-T1).
+// 2026-09-08 : Injection de QuickRuleBuilderViewModel et d'un DummySelectionProvider (J3-S2-T2).
+// 2026-09-09 : Adaptation à la refonte de MailMetadata (J3-S2-T2-ST1).
 
 using System.IO;
 using System.Linq;
+using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Maui.Storage;
@@ -18,6 +21,21 @@ using Catamailer.Application.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Catamailer.UI;
+
+// Fournisseur factice pour valider l'IHM sans dépendre d'Outlook en phase de développement
+public class DummySelectionProvider : ISelectionProvider
+{
+    public MailMetadata? GetSelectedMail()
+    {
+        return new MailMetadata(
+            "dummy-id", 
+            "[Urgent] Réunion Projet Alpha", 
+            "client@important.com", 
+            "assistant@important.com",
+            new List<string>(),
+            new List<string> { "team@important.com" });
+    }
+}
 
 /// <summary>
 /// Classe statique responsable de l'amorçage et de la configuration de l'application MAUI Blazor.
@@ -49,8 +67,12 @@ public static class MauiProgram
         builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
         builder.Services.AddSingleton<IGlobalHotkeyService, Win32GlobalHotkeyService>();
         
+        // Faux fournisseur pour le test de l'IHM (à remplacer par OutlookSelectionProvider en prod)
+        builder.Services.AddScoped<ISelectionProvider, DummySelectionProvider>();
+        
         // Injection des ViewModels (Transient pour réinitialiser l'état à chaque appel)
         builder.Services.AddTransient<QuickCategorizeViewModel>();
+        builder.Services.AddTransient<QuickRuleBuilderViewModel>();
 
         builder.Services.AddMauiBlazorWebView();
 

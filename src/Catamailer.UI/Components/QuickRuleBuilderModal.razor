@@ -1,0 +1,78 @@
+@using Catamailer.Application.ViewModels
+@using Catamailer.Domain
+@using System.Linq
+@inject QuickRuleBuilderViewModel ViewModel
+
+<!-- Historique : -->
+<!-- 2026-09-08 : Création du composant UI Quick Rule Builder (J3-S2-T2). -->
+<!-- 2026-09-09 : Adaptation aux nouvelles listes de DictionaryRule (J3-S2-T2-ST1). -->
+
+<div class="quick-rule-builder-container p-4 border rounded bg-white shadow-sm">
+    <h5 class="mb-4">Création de Règle Rapide (Étape 1)</h5>
+
+    <div class="mb-3">
+        <label class="form-label text-muted">Sujet (Mot-clé) :</label>
+        <input type="text" class="form-control" @bind="ViewModel.SubjectKeyword" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label text-muted">Expéditeur (Mot-clé) :</label>
+        <input type="text" class="form-control" @bind="ViewModel.SenderKeyword" />
+    </div>
+
+    <div class="mb-4">
+        <label class="form-label text-muted">Catégorie cible :</label>
+        <select class="form-select" @onchange="OnCategorySelected">
+            <option value="">-- Sélectionner une catégorie --</option>
+            @if (ViewModel.Categories != null)
+            {
+                @foreach (var category in ViewModel.Categories)
+                {
+                    <option value="@category.Name">@category.Name</option>
+                }
+            }
+        </select>
+    </div>
+
+    <button class="btn btn-primary w-100" @onclick="OnBuildRule">Créer la règle</button>
+
+    @if (_successMessage != null)
+    {
+        <div class="alert alert-success mt-3 mb-0">
+            @_successMessage
+        </div>
+    }
+</div>
+
+@code {
+    private string? _successMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ViewModel.InitializeAsync();
+    }
+
+    private void OnCategorySelected(ChangeEventArgs e)
+    {
+        var categoryName = e.Value?.ToString();
+        var category = ViewModel.Categories.FirstOrDefault(c => c.Name == categoryName);
+        if (category != null)
+        {
+            ViewModel.SelectCategory(category);
+        }
+    }
+
+    private void OnBuildRule()
+    {
+        var rule = ViewModel.BuildRule();
+        if (rule != null)
+        {
+            var allKws = rule.SubjectKeywords.Concat(rule.SenderKeywords).Concat(rule.RecipientKeywords);
+            _successMessage = $"Règle créée : assignation de [{rule.TargetCategory.Name}] sur détection de ({string.Join(" OU ", allKws)}).";
+        }
+        else
+        {
+            _successMessage = "Veuillez sélectionner une catégorie.";
+        }
+    }
+}

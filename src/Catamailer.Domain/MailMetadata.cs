@@ -3,8 +3,11 @@
 //     Date de création : 2026-09-07
 //     Historique :
 //         - 2026-09-07 : Création initiale (Phase Rouge).
+//         - 2026-09-09 : Ajout de OnBehalfOf et scission Internal/External Recipients (J3-S2-T2-ST1).
 // </auto-generated>
 // ------------------------------------------------------------------------------
+
+#nullable enable
 
 using System.Collections.Generic;
 
@@ -15,7 +18,15 @@ namespace Catamailer.Domain
     /// </summary>
     /// <param name="EntryId">L'identifiant unique de l'e-mail dans le système source.</param>
     /// <param name="Subject">Le sujet de l'e-mail.</param>
-    /// <param name="Sender">L'adresse de l'expéditeur.</param>
-    /// <param name="Recipients">La liste des adresses des destinataires.</param>
-    public record MailMetadata(string EntryId, string Subject, string Sender, IEnumerable<string> Recipients);
+    /// <param name="Sender">L'adresse de l'expéditeur principal.</param>
+    /// <param name="OnBehalfOf">L'adresse de la personne pour le compte de qui l'e-mail est envoyé, le cas échéant.</param>
+    /// <param name="InternalRecipients">La liste des adresses des destinataires internes.</param>
+    /// <param name="ExternalRecipients">La liste des adresses des destinataires externes.</param>
+    public record MailMetadata(
+        string EntryId, 
+        string Subject, 
+        string Sender, 
+        string? OnBehalfOf, 
+        IEnumerable<string> InternalRecipients,
+        IEnumerable<string> ExternalRecipients);
 }
