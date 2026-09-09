@@ -1,12 +1,12 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-08 11:48
+Généré le : 2026-09-09 07:59
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
 **Fichier** : `src\Catamailer.Application\ClassificationEngine.cs`
-**Rôle** : Moteur d'évaluation de l'Étape 1 : déduction de la catégorie principale en fonction des dictionnaires de mots-clés.
+**Rôle** : Moteur d'évaluation de l'Étape 1 : déduction de la catégorie principale en fonction des dictionnaires de mots-clés contextuels.
 **Membres et Invocations :**
-- `ClassificationResult? Classify(string subject, string sender, IEnumerable<string> recipients, IEnumerable<DictionaryRule> rules)` : Évalue les métadonnées d'un e-mail par rapport à un ensemble de règles de dictionnaire.
+- `ClassificationResult? Classify(MailMetadata metadata, IEnumerable<DictionaryRule> rules)` : Évalue les métadonnées d'un e-mail par rapport à un ensemble de règles de dictionnaire.
   - *Appelle* ➡️ `CategoryNode.GetAscendanceChain()`
 
 ### Class : ClassificationResult
@@ -58,6 +58,32 @@ Généré le : 2026-09-08 11:48
   - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
   - *Appelle* ➡️ `IHistoryStateRepository.SetStateAsync()`
 
+### Class : QuickCategorizeViewModel
+**Fichier** : `src\Catamailer.Application\ViewModels\QuickCategorizeViewModel.cs`
+**Rôle** : ViewModel responsable de la logique de l'écran Quick Categorize (Recherche, Tris, Actions).
+**Membres et Invocations :**
+- `Task InitializeAsync()` : Initialise le ViewModel en chargeant l'intégralité des catégories existantes.
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+- `Task UpdateSearchAsync(string searchText)` : Met à jour les résultats filtrés en fonction du texte de recherche fourni. La recherche ignore la casse et retourne l'intégralité des éléments si le texte est vide.
+- `void SelectCategory(CategoryNode category)` : Définit la catégorie sélectionnée par l'utilisateur.
+
+### Class : SelectableOption
+**Fichier** : `src\Catamailer.Application\ViewModels\QuickRuleBuilderViewModel.cs`
+**Rôle** : Représente une option sélectionnable dans l'IHM (case à cocher).
+**Membres et Invocations :**
+
+### Class : QuickRuleBuilderViewModel
+**Fichier** : `src\Catamailer.Application\ViewModels\QuickRuleBuilderViewModel.cs`
+**Rôle** : ViewModel responsable de la logique de l'écran Quick Rule Builder (Étape 1).
+**Membres et Invocations :**
+- `Task InitializeAsync()` : Initialise le ViewModel en récupérant les métadonnées, en construisant les options de filtrage et en identifiant les catégories déjà déclenchées.
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
+  - *Appelle* ➡️ `ISelectionProvider.GetSelectedMail()`
+  - *Appelle* ➡️ `ClassificationEngine.Classify()`
+- `void SelectCategory(CategoryNode category)` : Définit la catégorie cible pour la règle en cours de création.
+- `DictionaryRule? BuildRule()` : Construit l'objet DictionaryRule final en incluant uniquement les options cochées.
+
 ## Projet : Catamailer.Domain
 ### Class : AppSetting
 **Fichier** : `src\Catamailer.Domain\AppSetting.cs`
@@ -73,7 +99,7 @@ Généré le : 2026-09-08 11:48
 
 ### Class : DictionaryRule
 **Fichier** : `src\Catamailer.Domain\DictionaryRule.cs`
-**Rôle** : Représente une règle de l'Étape 1 (Classification) liant un ensemble de mots-clés à une catégorie déduite.
+**Rôle** : Représente une règle de l'Étape 1 (Classification) liant des mots-clés spécifiques (Sujet, Expéditeur, Destinataire) à une catégorie déduite.
 **Membres et Invocations :**
 
 ### Interface : IAppSettingsRepository
@@ -119,6 +145,11 @@ Généré le : 2026-09-08 11:48
 ### Interface : IMassUpdateProvider
 **Fichier** : `src\Catamailer.Domain\IMassUpdateProvider.cs`
 **Rôle** : Définit le contrat permettant la mise à jour en masse (renommage rétroactif) des catégories sur les e-mails existants.
+**Membres et Invocations :**
+
+### Interface : IRuleRepository
+**Fichier** : `src\Catamailer.Domain\IRuleRepository.cs`
+**Rôle** : Définit le contrat pour l'accès aux données des règles de classification et d'exécution.
 **Membres et Invocations :**
 
 ### Interface : ISelectionProvider
@@ -177,6 +208,7 @@ Généré le : 2026-09-08 11:48
 **Membres et Invocations :**
 - `Task AddAsync(CategoryNode category)`
 - `Task<CategoryNode?> GetByNameAsync(string name)`
+- `Task<IEnumerable<CategoryNode>> GetAllAsync()`
 
 ### Class : HistoryStateRepository
 **Fichier** : `src\Catamailer.Infrastructure\HistoryStateRepository.cs`
@@ -222,7 +254,7 @@ Généré le : 2026-09-08 11:48
 **Fichier** : `src\Catamailer.Infrastructure\OutlookSelectionProvider.cs`
 **Rôle** : Implémentation du fournisseur de sélection basée sur l'Interop COM Outlook.
 **Membres et Invocations :**
-- `MailMetadata? GetSelectedMail()` : Récupère les métadonnées de l'e-mail actuellement sélectionné.
+- `MailMetadata? GetSelectedMail()` : Récupère les métadonnées de l'e-mail actuellement sélectionné. (Le IOutlookApplicationWrapper devra être adapté pour instancier la nouvelle version de MailMetadata).
   - *Appelle* ➡️ `IOutlookApplicationWrapper.GetSelectedEntryId()`
   - *Appelle* ➡️ `IOutlookApplicationWrapper.GetMailMetadata()`
 
@@ -251,11 +283,22 @@ Généré le : 2026-09-08 11:48
 **Rôle** : Page principale hébergeant exclusivement la vue Blazor.
 **Membres et Invocations :**
 
+### Class : DummySelectionProvider
+**Fichier** : `src\Catamailer.UI\MauiProgram.cs`
+**Membres et Invocations :**
+- `MailMetadata? GetSelectedMail()`
+
+### Class : DummyRuleRepository
+**Fichier** : `src\Catamailer.UI\MauiProgram.cs`
+**Membres et Invocations :**
+- `Task<IEnumerable<DictionaryRule>> GetAllDictionaryRulesAsync()`
+
 ### Class : MauiProgram
 **Fichier** : `src\Catamailer.UI\MauiProgram.cs`
 **Rôle** : Classe statique responsable de l'amorçage et de la configuration de l'application MAUI Blazor.
 **Membres et Invocations :**
 - `MauiApp CreateMauiApp()` : Crée et configure l'instance principale de l'application MAUI. Injecte les dépendances Blazor et initialise le composant de zone de notification (Tray Icon).
+  - *Appelle* ➡️ `CategoryNode.AddChild()`
 
 ### Class : App
 **Fichier** : `src\Catamailer.UI\Platforms\Windows\App.xaml.cs`
@@ -264,14 +307,13 @@ Généré le : 2026-09-08 11:48
 
 
 ### Composants Razor
+- **QuickCategorizeModal** : `src\Catamailer.UI\Components\QuickCategorizeModal.razor`
+- **QuickRuleBuilderModal** : `src\Catamailer.UI\Components\QuickRuleBuilderModal.razor`
 - **Routes** : `src\Catamailer.UI\Components\Routes.razor`
 - **_Imports** : `src\Catamailer.UI\Components\_Imports.razor`
 - **MainLayout** : `src\Catamailer.UI\Components\Layout\MainLayout.razor`
-- **NavMenu** : `src\Catamailer.UI\Components\Layout\NavMenu.razor`
-- **Counter** (Route: `/counter`) : `src\Catamailer.UI\Components\Pages\Counter.razor`
 - **Home** (Route: `/`) : `src\Catamailer.UI\Components\Pages\Home.razor`
 - **NotFound** (Route: `/not-found`) : `src\Catamailer.UI\Components\Pages\NotFound.razor`
-- **Weather** (Route: `/weather`) : `src\Catamailer.UI\Components\Pages\Weather.razor`
 
 ## Projet : AiDocGenerator
 ### Class : CSharpAnalyzer
@@ -345,11 +387,14 @@ Généré le : 2026-09-08 11:48
 **Rôle** : Classe de test validant le comportement du moteur de classification (Étape 1).
 **Membres et Invocations :**
 - `void Classify_ShouldReturnNull_WhenNoRulesProvided()`
+  - *Appelle* ➡️ `ClassificationEngineTests.CreateDummyMetadata()`
   - *Appelle* ➡️ `ClassificationEngine.Classify()`
-- `void Classify_ShouldReturnCategoryAndAscendanceChain_WhenKeywordMatches()`
+- `void Classify_ShouldReturnCategoryAndAscendanceChain_WhenSubjectKeywordMatches()`
   - *Appelle* ➡️ `CategoryNode.AddChild()`
+  - *Appelle* ➡️ `ClassificationEngineTests.CreateDummyMetadata()`
   - *Appelle* ➡️ `ClassificationEngine.Classify()`
 - `void Classify_ShouldReturnCategory_WhenKeywordMatchesRecipient()`
+  - *Appelle* ➡️ `ClassificationEngineTests.CreateDummyMetadata()`
   - *Appelle* ➡️ `ClassificationEngine.Classify()`
 
 ### Class : DebounceServiceTests
@@ -414,6 +459,38 @@ Généré le : 2026-09-08 11:48
   - *Appelle* ➡️ `IAppSettingsRepository.GetSettingAsync()`
   - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
   - *Appelle* ➡️ `ShadowModeService.ShouldPromptForActivationAsync()`
+
+### Class : QuickCategorizeViewModelTests
+**Fichier** : `tests\Catamailer.Application.Tests\ViewModels\QuickCategorizeViewModelTests.cs`
+**Rôle** : Tests unitaires validant la logique de recherche et de tri de la modale Quick Categorize.
+**Membres et Invocations :**
+- `Task UpdateSearchAsync_ShouldFilterCategories_IgnoringCase()`
+  - *Appelle* ➡️ `QuickCategorizeViewModel.InitializeAsync()`
+  - *Appelle* ➡️ `QuickCategorizeViewModel.UpdateSearchAsync()`
+- `Task UpdateSearchAsync_ShouldReturnEmpty_WhenNoMatchFound()`
+  - *Appelle* ➡️ `QuickCategorizeViewModel.InitializeAsync()`
+  - *Appelle* ➡️ `QuickCategorizeViewModel.UpdateSearchAsync()`
+
+### Class : QuickRuleBuilderViewModelTests
+**Fichier** : `tests\Catamailer.Application.Tests\ViewModels\QuickRuleBuilderViewModelTests.cs`
+**Membres et Invocations :**
+- `Task InitializeAsync_ShouldPopulateSelectableOptions_FromSelectedMail()`
+  - *Appelle* ➡️ `ISelectionProvider.GetSelectedMail()`
+  - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
+  - *Appelle* ➡️ `QuickRuleBuilderViewModelTests.CreateViewModel()`
+  - *Appelle* ➡️ `QuickRuleBuilderViewModel.InitializeAsync()`
+- `Task InitializeAsync_ShouldIdentifyTriggeredCategories_WhenRulesMatch()`
+  - *Appelle* ➡️ `ISelectionProvider.GetSelectedMail()`
+  - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
+  - *Appelle* ➡️ `QuickRuleBuilderViewModelTests.CreateViewModel()`
+  - *Appelle* ➡️ `QuickRuleBuilderViewModel.InitializeAsync()`
+- `void BuildRule_ShouldOnlyIncludeSelectedOptions()`
+  - *Appelle* ➡️ `ISelectionProvider.GetSelectedMail()`
+  - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
+  - *Appelle* ➡️ `QuickRuleBuilderViewModelTests.CreateViewModel()`
+  - *Appelle* ➡️ `QuickRuleBuilderViewModel.InitializeAsync()`
+  - *Appelle* ➡️ `QuickRuleBuilderViewModel.SelectCategory()`
+  - *Appelle* ➡️ `QuickRuleBuilderViewModel.BuildRule()`
 
 ## Projet : Catamailer.Domain.Tests
 ### Class : CategoryNodeTests

@@ -1,5 +1,27 @@
 ﻿@page "/"
+@using Catamailer.UI.Components
 
-<h1>Hello, world!</h1>
+<!-- Historique : -->
+<!-- 2026-09-08 : Nettoyage de l'interface par défaut (J3-S2). -->
+<!-- 2026-09-08 : Ajout temporaire du composant QuickCategorizeModal pour validation visuelle (J3-S2-T1). -->
+<!-- 2026-09-08 : Ajout du composant QuickRuleBuilderModal pour validation visuelle (J3-S2-T2). -->
 
-Welcome to your new app.
+<h1>Dashboard Catamailer</h1>
+
+<p>En attente d'implémentation (Shadow Mode Logs).</p>
+
+<hr class="my-4" />
+
+<h3>Zone de Test : Modales (Quick Actions)</h3>
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="p-3 border rounded bg-light h-100">
+            <QuickCategorizeModal />
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="p-3 border rounded bg-light h-100">
+            <QuickRuleBuilderModal />
+        </div>
+    </div>
+</div>

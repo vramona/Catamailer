@@ -7,8 +7,6 @@
 - [x] ✅ **J0-S1-T3** - Intégration et adaptation du script de génération de documentation AI (Ai_Architecture.md). (Validé le 07/09/2026 sur master - Commit : 26220b45c1709946ab997143e2a46159e24d948d) (Cpx: 3 / 3)
 - [x] ✅ **J0-S1-T4** - Initialisation physique des fichiers de suivi locaux (ToDoList, Specs). (Validé le 07/09/2026 sur master - Commit : 26220b45c1709946ab997143e2a46159e24d948d) (Cpx: 1 / 1)
 
-# ⏳ CE QUI RESTE À FAIRE
-
 ## Jalon 1 - Core Engine & SQLite - feature/j1-core-engine
 ### Step 1 - Modélisation Domain - feature/j1-core-engine_step-1-domain
 - [x] ✅ **J1-S1-T1** - Modélisation `CategoryNode` (Arbre auto-référencé et héritage de couleurs). (Validé le 07/09/2026 sur feature/j1-core-engine_step-1-domain - Commit : 6d50da818d2c0044ff9a3fbaf9cfed37724c4d38) (Cpx: 3 / 3)
@@ -38,9 +36,14 @@
 - ✅ **J3-S1-T2 - GlobalHotkeyService (Hook Win32)** : Création de `IGlobalHotkeyService` et implémentation `Win32GlobalHotkeyService` avec P/Invoke (`RegisterHotKey`, `UnregisterHotKey`) et Subclassing (`SetWindowSubclass`) pour intercepter `WM_HOTKEY` (0x0312). Injection, initialisation sur le handle natif, et validation fonctionnelle. (Validé le 08/09/2026 sur feature/j3-tray-ui_step-1-host - Commit : 4a5b88b8e70c9201a863d0e9ac33c541ea287541) (Cpx: 5 / 5).
 
 ### Step 2 - Quick Actions (Modales) - feature/j3-tray-ui_step-2-quickactions
-- [ ] ⚪ **J3-S2-T1** - Écran "Quick Categorize" : Autocomplete, Tris intelligents (Récents/Suggestions), Actions (Thread/Sender).
-- [ ] ⚪ **J3-S2-T2** - Écran "Quick Rule Builder" : Création pré-remplie d'une règle (Étape 1).
+- ✅ **J3-S2-T1 - Écran Quick Categorize** : Création du `QuickCategorizeViewModel` (moteur de recherche, filtrage, sélection), intégration dans l'IHM via `QuickCategorizeModal.razor`, initialisation de la base SQLite et ajout de `GetAllAsync` dans le dépôt métier avec Include. (Validé le 08/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : 740d643e59e21240fd8065f2a27d0ab624cced68) (Cpx: 8 / 10).
+- [x] ✅ **J3-S2-T2** - Écran "Quick Rule Builder" : Création pré-remplie d'une règle (Étape 1).
+- [x] ✅ **J3-S2-T2-ST1** - Refonte Core : Modification de `MailMetadata`, `DictionaryRule`, `ClassificationEngine`, et `OutlookSelectionProvider`. (Validé le 09/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : 73be44ce1ca1e95da0a28a6931f56ddd9cdbd57d) (Cpx: 12 / 13).
+- [x] ✅ **J3-S2-T2-ST2** - Écran "Quick Rule Builder" : IHM 2 colonnes (Arbre des catégories et cases à cocher des métadonnées). (Validé le 09/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : 77ab5b1d1b41156996a84ce536280719680f3526) (Cpx: 8 / 8).
 
+# ⏳ CE QUI RESTE À FAIRE
+
+## Jalon 3 - Intégration Système et IHM - feature/j3-tray-ui
 ### Step 3 - Configuration Rules (UI) - feature/j3-tray-ui_step-3-config
 - [ ] ⚪ **J3-S3-T1** - Dashboard Shadow Mode.
 - [ ] ⚪ **J3-S3-T2** - Éditeur de Référentiel (TreeView Catégories).

@@ -67,6 +67,22 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 - [x] ✅ `J3-S1-T2 - RegisterHotkey_ShouldReturnTrue_WhenHotkeyIsAvailable` (Validé le 08/09/2026 sur feature/j3-tray-ui_step-1-host - Commit : 4a5b88b8e70c9201a863d0e9ac33c541ea287541)
 - [x] ✅ `J3-S1-T2 - UnregisterHotkey_ShouldReturnFalse_WhenHotkeyDoesNotExist` (Validé le 08/09/2026 sur feature/j3-tray-ui_step-1-host - Commit : 4a5b88b8e70c9201a863d0e9ac33c541ea287541)
 
+### 🟢 J3-S2 : Quick Actions (Modales)
+- [x] ✅ `J3-S2-T1 - UpdateSearchAsync_ShouldFilterCategories_IgnoringCase` (Validé le 08/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : 740d643e59e21240fd8065f2a27d0ab624cced68)
+- [x] ✅ `J3-S2-T1 - UpdateSearchAsync_ShouldReturnEmpty_WhenNoMatchFound` (Validé le 08/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : 740d643e59e21240fd8065f2a27d0ab624cced68)
+- [x] ✅ `J3-S2-T2-ST1 - DictionaryRule_Creation_ShouldSetProperties` (Validé le 09/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : 73be44ce1ca1e95da0a28a6931f56ddd9cdbd57d)
+- [x] ✅ `J3-S2-T2-ST1 - Classify_ShouldReturnNull_WhenNoRulesProvided` (Validé le 09/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : 73be44ce1ca1e95da0a28a6931f56ddd9cdbd57d)
+- [x] ✅ `J3-S2-T2-ST1 - Classify_ShouldReturnCategoryAndAscendanceChain_WhenSubjectKeywordMatches` (Validé le 09/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : 73be44ce1ca1e95da0a28a6931f56ddd9cdbd57d)
+- [x] ✅ `J3-S2-T2-ST1 - Classify_ShouldReturnCategory_WhenKeywordMatchesRecipient` (Validé le 09/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : 73be44ce1ca1e95da0a28a6931f56ddd9cdbd57d)
+- [x] ✅ `J3-S2-T2-ST1 - StartListening_ShouldTriggerNewMailReceived_WhenOutlookRaisesNewMailEx` (Validé le 09/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : 73be44ce1ca1e95da0a28a6931f56ddd9cdbd57d) (Cpx: 5 / 5)
+- [x] ✅ `J3-S2-T2-ST1 - GetSelectedMail_ShouldReturnMetadata_WhenMailIsSelected` (Validé le 09/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : 73be44ce1ca1e95da0a28a6931f56ddd9cdbd57d)
+- [x] ✅ `J3-S2-T2-ST1 - InitializeAsync_ShouldPopulateFields_FromSelectedMail` (Validé le 09/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : 73be44ce1ca1e95da0a28a6931f56ddd9cdbd57d)
+- [x] ✅ `J3-S2-T2-ST1 - InitializeAsync_ShouldLeaveFieldsEmpty_WhenNoMailSelected` (Validé le 09/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : 73be44ce1ca1e95da0a28a6931f56ddd9cdbd57d)
+- [x] ✅ `J3-S2-T2-ST1 - BuildRule_ShouldReturnPopulatedDictionaryRule` (Validé le 09/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : 73be44ce1ca1e95da0a28a6931f56ddd9cdbd57d)
+- [x] ✅ `J3-S2-T2-ST2 - InitializeAsync_ShouldPopulateSelectableOptions_FromSelectedMail` (Validé le 09/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : 77ab5b1d1b41156996a84ce536280719680f3526)
+- [x] ✅ `J3-S2-T2-ST2 - InitializeAsync_ShouldIdentifyTriggeredCategories_WhenRulesMatch` (Validé le 09/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : 77ab5b1d1b41156996a84ce536280719680f3526)
+- [x] ✅ `J3-S2-T2-ST2 - BuildRule_ShouldOnlyIncludeSelectedOptions` (Validé le 09/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : 77ab5b1d1b41156996a84ce536280719680f3526)
+
 ---
 
 ## 🟢 JALON 4 - INBOX NOTES, AGENDA & ACTIONS INTERNES

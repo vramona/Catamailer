@@ -1,0 +1,60 @@
+@using Catamailer.Application.ViewModels
+@using Catamailer.Domain
+@inject QuickCategorizeViewModel ViewModel
+
+<!-- Historique : -->
+<!-- 2026-09-08 : Création du composant UI Quick Categorize (J3-S2-T1). -->
+<!-- 2026-09-08 : Correction de la propriété de couleur vers EffectiveColor (J3-S2-T1). -->
+<!-- 2026-09-08 : Ajout de la gestion du clic sur une catégorie (J3-S2-T1). -->
+
+<div class="quick-categorize-container">
+    <input type="text"
+           class="form-control search-input"
+           placeholder="Rechercher une catégorie (ex: alpha)..."
+           @bind="ViewModel.SearchText"
+           @bind:event="oninput"
+           @bind:after="OnSearchTextChanged" 
+           autofocus />
+
+    <div class="categories-list mt-3">
+        @if (ViewModel.FilteredCategories != null && ViewModel.FilteredCategories.Any())
+        {
+            foreach (var category in ViewModel.FilteredCategories)
+            {
+                <span class="badge me-2 mb-2 p-2 category-chip" 
+                      style="background-color: @(category.EffectiveColor ?? "#6c757d") !important;"
+                      @onclick="() => OnCategoryClicked(category)">
+                    @category.Name
+                </span>
+            }
+        }
+        else
+        {
+            <span class="text-muted">Aucune catégorie trouvée pour "@ViewModel.SearchText".</span>
+        }
+    </div>
+
+    @if (ViewModel.SelectedCategory != null)
+    {
+        <div class="alert alert-success mt-3">
+            <strong>Catégorie sélectionnée :</strong> @ViewModel.SelectedCategory.Name
+        </div>
+    }
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await ViewModel.InitializeAsync();
+    }
+
+    private async Task OnSearchTextChanged()
+    {
+        await ViewModel.UpdateSearchAsync(ViewModel.SearchText);
+    }
+
+    private void OnCategoryClicked(CategoryNode category)
+    {
+        ViewModel.SelectCategory(category);
+    }
+}

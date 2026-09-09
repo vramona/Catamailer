@@ -5,7 +5,7 @@
 ## PARTIE 1 : DÉCOUPAGE FONCTIONNEL ET RÈGLES DE GESTION
 
 ### 1. Gestion Référentielle des Catégories (Master Data Management)
-Catamailer agit comme la source de vérité absolue pour les catégories Outlook.
+*   **Synchronisation Outlook :** Une fois les catégories importées depuis Outlook, Catamailer agit comme la source de vérité absolue. Toute modification dans Catamailer met à jour la *Master Category List* d'Outlook. Toute détection par Catamailer de catégories inconnues dans Outlook fera l'objet d'une proposition d'import filtrable dans l'application.
 *   **Arborescence :** Les catégories sont structurées hiérarchiquement (Familles > Sous-catégories).
 *   **Héritage des couleurs :** Une sous-catégorie hérite de la couleur de son parent, sauf surcharge explicite.
 *   **Tagging en chaîne (Auto-propagation) :** Appliquer une sous-catégorie (ex: `CCOEN-Voyage`) applique automatiquement toute sa chaîne de parenté (`CCOEN` + `CCOEN-Voyage`). L'affichage dans Outlook reste plat.

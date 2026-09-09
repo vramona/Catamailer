@@ -3,6 +3,7 @@
 //     Date de création : 2026-09-07
 //     Historique :
 //         - 2026-09-07 : Création initiale (Phase Rouge).
+//         - 2026-09-09 : Adaptation à la refonte de MailMetadata (J3-S2-T2-ST1).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -46,6 +47,8 @@ namespace Catamailer.Infrastructure.Tests
                 expectedEntryId, 
                 "Selected Subject", 
                 "sender@sel.com", 
+                null,
+                new List<string>(),
                 new List<string>()
             );
 

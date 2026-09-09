@@ -1,5 +1,6 @@
 // Historique :
 // 2026-09-07 : Création des tests pour la modélisation des règles (J1-S1-T2).
+// 2026-09-09 : Adaptation à la refonte de DictionaryRule (J3-S2-T2-ST1).
 
 using System.Linq;
 using Xunit;
@@ -16,15 +17,18 @@ namespace Catamailer.Domain.Tests
         {
             // Arrange
             var targetCategory = new CategoryNode("Factures");
-            var keywords = new[] { "invoice", "facture", "reçu" };
+            var subjectKeywords = new[] { "invoice", "facture" };
+            var senderKeywords = new[] { "billing@corp.com" };
 
             // Act
-            var rule = new DictionaryRule(targetCategory, keywords);
+            var rule = new DictionaryRule(targetCategory, subjectKeywords: subjectKeywords, senderKeywords: senderKeywords);
 
             // Assert
             Assert.Equal(targetCategory, rule.TargetCategory);
-            Assert.Equal(3, rule.Keywords.Count);
-            Assert.Contains("facture", rule.Keywords);
+            Assert.Equal(2, rule.SubjectKeywords.Count);
+            Assert.Single(rule.SenderKeywords);
+            Assert.Empty(rule.RecipientKeywords);
+            Assert.Contains("facture", rule.SubjectKeywords);
         }
 
         [Fact]
