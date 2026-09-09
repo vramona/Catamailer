@@ -8,7 +8,8 @@
 //         - 2026-09-08 : Injection de QuickRuleBuilderViewModel et d'un DummySelectionProvider (J3-S2-T2).
 //         - 2026-09-09 : Injection de IRuleRepository et ClassificationEngine (J3-S2-T2-ST2).
 //         - 2026-09-09 : Injection de ShadowModeDashboardViewModel et IShadowModeService (J3-S3-T1).
-//         - 2026-09-09 : Refactoring de l'initialisation et extraction des Dummies (J3-S3-T0 - Phase Orange).
+//         - 2026-09-09 : Refactoring de l'initialisation et extraction des Dummies (J3-S3-T0).
+//         - 2026-09-09 : Injection de CategoryTreeViewModel (J3-S3-T2 - Phase Bleue).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -72,6 +73,7 @@ namespace Catamailer.UI
             builder.Services.AddTransient<QuickCategorizeViewModel>();
             builder.Services.AddTransient<QuickRuleBuilderViewModel>();
             builder.Services.AddTransient<ShadowModeDashboardViewModel>();
+            builder.Services.AddTransient<CategoryTreeViewModel>();
 
             builder.Services.AddMauiBlazorWebView();
 

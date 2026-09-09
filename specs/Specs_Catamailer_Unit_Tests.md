@@ -88,6 +88,7 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 - [x] ✅ `J3-S3-T1 - InitializeAsync_ShouldLoadTelemetryStats_FromService` (Validé le 09/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : d0eead0a537423fd2b38f45da235aed9610bb599)
 - [x] ✅ `J3-S3-T1 - ToggleAutoWriteAsync_ShouldUpdateService_AndRefreshStats` (Validé le 09/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : d0eead0a537423fd2b38f45da235aed9610bb599)
 - [x] ✅ `J3-S3-T1 - BuildRule_ShouldOnlyIncludeSelectedOptions` (Refacto Async) (Validé le 09/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : d0eead0a537423fd2b38f45da235aed9610bb599)
+- [x] ✅ `J3-S3-T2 - InitializeAsync_ShouldLoadOnlyRootCategories` (Validé le 09/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : <COMMIT_HASH>) (Cpx: 8 / 8)
 
 ---
 

@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-09 19:50
+Généré le : 2026-09-09 20:50
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -60,6 +60,13 @@ Généré le : 2026-09-09 19:50
 - `Task<(int MatchCount, int CategoryCount, bool IsAutoWriteEnabled)> GetTelemetryStatsAsync()`
   - *Appelle* ➡️ `ShadowModeService.IsAutoWriteEnabledAsync()`
   - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
+
+### Class : CategoryTreeViewModel
+**Fichier** : `src\Catamailer.Application\ViewModels\CategoryTreeViewModel.cs`
+**Rôle** : ViewModel responsable de la gestion et de l'affichage de l'arborescence des catégories.
+**Membres et Invocations :**
+- `Task InitializeAsync()` : Charge l'ensemble des catégories depuis le dépôt et construit la liste des nœuds racines.
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
 
 ### Class : QuickCategorizeViewModel
 **Fichier** : `src\Catamailer.Application\ViewModels\QuickCategorizeViewModel.cs`
@@ -336,11 +343,15 @@ Généré le : 2026-09-09 19:50
 
 
 ### Composants Razor
+- **CategoryTreeNode** : `src\Catamailer.UI\Components\CategoryTreeNode.razor`
+- **CategoryTreeView** : `src\Catamailer.UI\Components\CategoryTreeView.razor`
 - **QuickCategorizeModal** : `src\Catamailer.UI\Components\QuickCategorizeModal.razor`
 - **QuickRuleBuilderModal** : `src\Catamailer.UI\Components\QuickRuleBuilderModal.razor`
 - **Routes** : `src\Catamailer.UI\Components\Routes.razor`
 - **_Imports** : `src\Catamailer.UI\Components\_Imports.razor`
+- **TestQuickActionsPage** (Route: `/test-quick-actions`) : `src\Catamailer.UI\Dummies\TestQuickActionsPage.razor`
 - **MainLayout** : `src\Catamailer.UI\Components\Layout\MainLayout.razor`
+- **CategoryEditor** (Route: `/category-editor`) : `src\Catamailer.UI\Components\Pages\CategoryEditor.razor`
 - **Home** (Route: `/`) : `src\Catamailer.UI\Components\Pages\Home.razor`
 - **NotFound** (Route: `/not-found`) : `src\Catamailer.UI\Components\Pages\NotFound.razor`
 
@@ -492,6 +503,15 @@ Généré le : 2026-09-09 19:50
   - *Appelle* ➡️ `IAppSettingsRepository.GetSettingAsync()`
   - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
   - *Appelle* ➡️ `ShadowModeService.GetTelemetryStatsAsync()`
+
+### Class : CategoryTreeViewModelTests
+**Fichier** : `tests\Catamailer.Application.Tests\ViewModels\CategoryTreeViewModelTests.cs`
+**Rôle** : Tests unitaires pour la classe CategoryTreeViewModel.
+**Membres et Invocations :**
+- `Task InitializeAsync_ShouldLoadOnlyRootCategories()`
+  - *Appelle* ➡️ `CategoryNode.AddChild()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `CategoryTreeViewModel.InitializeAsync()`
 
 ### Class : QuickCategorizeViewModelTests
 **Fichier** : `tests\Catamailer.Application.Tests\ViewModels\QuickCategorizeViewModelTests.cs`

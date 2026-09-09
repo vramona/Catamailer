@@ -9,6 +9,8 @@
 <!-- 2026-09-08 : Ajout du composant QuickRuleBuilderModal pour validation visuelle (J3-S2-T2). -->
 <!-- 2026-09-09 : Ajout du panneau de statistiques Shadow Mode et toggle (J3-S3-T1). -->
 <!-- 2026-09-09 : Refactoring CSS pour harmonisation des polices et correction du toggle (J3-S3-T1). -->
+<!-- 2026-09-09 : Ajout du point d'entrée vers l'éditeur de référentiel (J3-S3-T2). -->
+<!-- 2026-09-09 : Extraction des modales de test vers une page dédiée (J3-S3-T2 - Phase Orange). -->
 
 <h1 class="cata-page-title">Dashboard Catamailer</h1>
 
@@ -45,17 +47,17 @@
 
 <hr class="my-4" />
 
-<h3 class="cata-section-title">Zone de Test : Modales (Quick Actions)</h3>
-<div class="row">
-    <div class="col-md-6 mb-4">
-        <div class="p-3 border rounded bg-light h-100">
-            <QuickCategorizeModal />
-        </div>
+<h3 class="cata-section-title">Configuration</h3>
+<div class="row mb-4">
+    <div class="col-md-4">
+        <a href="/category-editor" class="btn btn-outline-dark w-100 py-3 shadow-sm text-start fw-medium fs-5 mb-3">
+            Éditeur de Référentiel
+        </a>
     </div>
-    <div class="col-md-6 mb-4">
-        <div class="p-3 border rounded bg-light h-100">
-            <QuickRuleBuilderModal />
-        </div>
+    <div class="col-md-4">
+        <a href="/test-quick-actions" class="btn btn-outline-secondary w-100 py-3 shadow-sm text-start fw-medium fs-5 mb-3">
+            Zone de Test (Modales)
+        </a>
     </div>
 </div>
 

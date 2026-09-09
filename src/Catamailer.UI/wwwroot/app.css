@@ -5,6 +5,7 @@
 //         - 2026-09-07 : Création initiale.
 //         - 2026-09-09 : Ajout des classes de typographie et refonte du toggle Shadow Mode (J3-S3-T1 - Phase Orange).
 //         - 2026-09-09 : Correction du chevauchement du toggle via redimensionnement natif em (J3-S3-T1).
+//         - 2026-09-09 : Ajout des classes cata-tree pour l'alignement au pixel du TreeView (J3-S3-T2 - Phase Orange).
 // </auto-generated>
 // ------------------------------------------------------------------------------ */
 
@@ -163,4 +164,56 @@ h1:focus {
     margin-left: 0.75rem; /* Espace propre avec le label */
     padding-top: 0;
     cursor: pointer;
+}
+
+/* ==========================================================================
+   Tree View (Éditeur de Référentiel)
+   ========================================================================== */
+
+.cata-tree {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.cata-tree-node {
+    position: relative;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    padding-left: 1.2rem;
+}
+
+/* La ligne verticale pointillée dessinée pour les enfants */
+.cata-tree .cata-tree {
+    margin-left: 0.75rem; /* Décale le sous-arbre pour laisser la place à l'icône de toggle */
+    padding-left: 1.25rem;
+    border-left: 1px dashed #ccc; /* Ligne verticale */
+}
+
+/* Le raccord horizontal vers l'élément enfant */
+.cata-tree .cata-tree .cata-tree-node::before {
+    content: '';
+    position: absolute;
+    top: 0.7rem; /* S'aligne sur le centre vertical de la ligne */
+    left: 0;
+    width: 1rem;
+    border-top: 1px dashed #ccc;
+}
+
+/* Suppression de la bordure sur le dernier élément pour éviter qu'elle ne descende trop bas */
+.cata-tree .cata-tree .cata-tree-node:last-child {
+    border-left: 1px solid white; /* Masque la bordure parent qui dépasse */
+    margin-left: -1px; /* Compense la bordure transparente */
+}
+
+.cata-tree-node-content {
+    display: flex;
+    align-items: center;
+}
+
+/* Réservation d'un espace fixe pour l'icône de toggle afin que les badges soient toujours alignés */
+.cata-tree-toggle-spacer {
+    display: inline-block;
+    width: 1.5rem;
+    text-align: center;
 }
