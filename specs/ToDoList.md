@@ -41,7 +41,7 @@
 - ✅ **J3-S2-T1 - Écran Quick Categorize** : Création du `QuickCategorizeViewModel` (moteur de recherche, filtrage, sélection), intégration dans l'IHM via `QuickCategorizeModal.razor`, initialisation de la base SQLite et ajout de `GetAllAsync` dans le dépôt métier avec Include. (Validé le 08/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : 740d643e59e21240fd8065f2a27d0ab624cced68) (Cpx: 8 / 10).
 - [ ] ⚪ **J3-S2-T2** - Écran "Quick Rule Builder" : Création pré-remplie d'une règle (Étape 1).
 - [x] ✅ **J3-S2-T2-ST1** - Refonte Core : Modification de `MailMetadata`, `DictionaryRule`, `ClassificationEngine`, et `OutlookSelectionProvider`. (Validé le 09/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : 73be44ce1ca1e95da0a28a6931f56ddd9cdbd57d) (Cpx: 12 / 13).
-- [x] ✅ **J3-S2-T2-ST2** - Écran "Quick Rule Builder" : IHM 2 colonnes (Arbre des catégories et cases à cocher des métadonnées). (Validé le 09/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : <COMMIT_HASH>) (Cpx: 8 / 8).
+- [x] ✅ **J3-S2-T2-ST2** - Écran "Quick Rule Builder" : IHM 2 colonnes (Arbre des catégories et cases à cocher des métadonnées). (Validé le 09/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : 77ab5b1d1b41156996a84ce536280719680f3526) (Cpx: 8 / 8).
 
 ### Step 3 - Configuration Rules (UI) - feature/j3-tray-ui_step-3-config
 - [ ] ⚪ **J3-S3-T1** - Dashboard Shadow Mode.
