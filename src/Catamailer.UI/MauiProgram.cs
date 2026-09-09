@@ -8,6 +8,7 @@
 // 2026-09-08 : Injection de QuickRuleBuilderViewModel et d'un DummySelectionProvider (J3-S2-T2).
 // 2026-09-09 : Adaptation à la refonte de MailMetadata (J3-S2-T2-ST1).
 // 2026-09-09 : Injection de IRuleRepository et ClassificationEngine (J3-S2-T2-ST2).
+// 2026-09-09 : Injection de ShadowModeDashboardViewModel et IShadowModeService (J3-S3-T1).
 
 using System.IO;
 using System.Linq;
@@ -81,10 +82,13 @@ public static class MauiProgram
 
         // Injection des services de domaine et d'application
         builder.Services.AddTransient<ClassificationEngine>();
+        builder.Services.AddScoped<IShadowModeService, ShadowModeService>(); // Ajouté pour J3-S3-T1
 
         // Injection des services d'infrastructure
         builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
         builder.Services.AddScoped<IRuleRepository, DummyRuleRepository>();
+        builder.Services.AddScoped<IAppSettingsRepository, AppSettingsRepository>(); // Nécessaire pour ShadowModeService
+        builder.Services.AddScoped<IHistoryStateRepository, HistoryStateRepository>(); // Nécessaire pour ShadowModeService
         builder.Services.AddSingleton<IGlobalHotkeyService, Win32GlobalHotkeyService>();
         
         // Faux fournisseur pour le test de l'IHM (à remplacer par OutlookSelectionProvider en prod)
@@ -93,6 +97,7 @@ public static class MauiProgram
         // Injection des ViewModels (Transient pour réinitialiser l'état à chaque appel)
         builder.Services.AddTransient<QuickCategorizeViewModel>();
         builder.Services.AddTransient<QuickRuleBuilderViewModel>();
+        builder.Services.AddTransient<ShadowModeDashboardViewModel>();
 
         builder.Services.AddMauiBlazorWebView();
 

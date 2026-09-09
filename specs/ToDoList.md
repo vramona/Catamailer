@@ -45,7 +45,7 @@
 
 ## Jalon 3 - Intégration Système et IHM - feature/j3-tray-ui
 ### Step 3 - Configuration Rules (UI) - feature/j3-tray-ui_step-3-config
-- [ ] ⚪ **J3-S3-T1** - Dashboard Shadow Mode.
+- [x] ✅ **J3-S3-T1** - Dashboard Shadow Mode. (Validé le 09/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : <COMMIT_HASH>) (Cpx: 5 / 5).
 - [ ] ⚪ **J3-S3-T2** - Éditeur de Référentiel (TreeView Catégories).
 - [ ] ⚪ **J3-S3-T3** - Éditeur Dictionnaires et Builder Visuel (Étape 2).
 - [ ] ⚪ **J3-S3-T4** - Écran de Préférences Générales (Paramétrage du délai de Debounce).

@@ -1,18 +1,51 @@
 ﻿@page "/"
+@using Catamailer.Application.ViewModels
 @using Catamailer.UI.Components
+@inject ShadowModeDashboardViewModel ViewModel
 
 <!-- Historique : -->
 <!-- 2026-09-08 : Nettoyage de l'interface par défaut (J3-S2). -->
 <!-- 2026-09-08 : Ajout temporaire du composant QuickCategorizeModal pour validation visuelle (J3-S2-T1). -->
 <!-- 2026-09-08 : Ajout du composant QuickRuleBuilderModal pour validation visuelle (J3-S2-T2). -->
+<!-- 2026-09-09 : Ajout du panneau de statistiques Shadow Mode et toggle (J3-S3-T1). -->
+<!-- 2026-09-09 : Refactoring CSS pour harmonisation des polices et correction du toggle (J3-S3-T1). -->
 
-<h1>Dashboard Catamailer</h1>
+<h1 class="cata-page-title">Dashboard Catamailer</h1>
 
-<p>En attente d'implémentation (Shadow Mode Logs).</p>
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow-sm border-primary">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0 cata-card-header">Télémétrie - Shadow Mode</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center mb-4">
+                    <div class="col-md-6">
+                        <div class="cata-stat-value text-primary">@ViewModel.MatchCount</div>
+                        <div class="cata-stat-label text-muted">Correspondances exactes</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="cata-stat-value text-success">@ViewModel.CategoryCount</div>
+                        <div class="cata-stat-label text-muted">Catégories qualifiées</div>
+                    </div>
+                </div>
+                <hr />
+                <div class="form-check form-switch toggle-large d-flex justify-content-center mt-4">
+                    <input class="form-check-input" type="checkbox" id="autoWriteToggle"
+                           checked="@ViewModel.IsAutoWriteEnabled"
+                           @onchange="OnToggleChanged">
+                    <label class="form-check-label" for="autoWriteToggle">
+                        Activer le classement automatique dans Outlook
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <hr class="my-4" />
 
-<h3>Zone de Test : Modales (Quick Actions)</h3>
+<h3 class="cata-section-title">Zone de Test : Modales (Quick Actions)</h3>
 <div class="row">
     <div class="col-md-6 mb-4">
         <div class="p-3 border rounded bg-light h-100">
@@ -25,3 +58,18 @@
         </div>
     </div>
 </div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await ViewModel.InitializeAsync();
+    }
+
+    private async Task OnToggleChanged(ChangeEventArgs e)
+    {
+        if (e.Value is bool isChecked)
+        {
+            await ViewModel.ToggleAutoWriteAsync(isChecked);
+        }
+    }
+}

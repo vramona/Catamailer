@@ -3,6 +3,7 @@
 //     Date de création : 2026-09-07
 //     Historique :
 //         - 2026-09-07 : Création initiale pour J2-S2-T4 (Phase Rouge).
+//         - 2026-09-09 : Ajout de GetTelemetryStatsAsync pour le Dashboard (J3-S3-T1 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -44,5 +45,11 @@ namespace Catamailer.Domain
         /// Marque la notification comme vue pour le palier courant afin d'attendre le prochain palier (+300).
         /// </summary>
         Task AcknowledgeActivationPromptAsync();
+
+        /// <summary>
+        /// Récupère les statistiques actuelles de la télémétrie du Shadow Mode.
+        /// </summary>
+        /// <returns>Un tuple contenant le nombre de correspondances, de catégories validées et l'état de l'écriture automatique.</returns>
+        Task<(int MatchCount, int CategoryCount, bool IsAutoWriteEnabled)> GetTelemetryStatsAsync();
     }
 }

@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-09 07:59
+Généré le : 2026-09-09 19:31
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -57,6 +57,9 @@ Généré le : 2026-09-09 07:59
 - `Task AcknowledgeActivationPromptAsync()`
   - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
   - *Appelle* ➡️ `IHistoryStateRepository.SetStateAsync()`
+- `Task<(int MatchCount, int CategoryCount, bool IsAutoWriteEnabled)> GetTelemetryStatsAsync()`
+  - *Appelle* ➡️ `ShadowModeService.IsAutoWriteEnabledAsync()`
+  - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
 
 ### Class : QuickCategorizeViewModel
 **Fichier** : `src\Catamailer.Application\ViewModels\QuickCategorizeViewModel.cs`
@@ -83,6 +86,16 @@ Généré le : 2026-09-09 07:59
   - *Appelle* ➡️ `ClassificationEngine.Classify()`
 - `void SelectCategory(CategoryNode category)` : Définit la catégorie cible pour la règle en cours de création.
 - `DictionaryRule? BuildRule()` : Construit l'objet DictionaryRule final en incluant uniquement les options cochées.
+
+### Class : ShadowModeDashboardViewModel
+**Fichier** : `src\Catamailer.Application\ViewModels\ShadowModeDashboardViewModel.cs`
+**Rôle** : ViewModel responsable de l'affichage et de la gestion des statistiques du Shadow Mode.
+**Membres et Invocations :**
+- `Task InitializeAsync()` : Charge les statistiques actuelles depuis le service.
+  - *Appelle* ➡️ `IShadowModeService.GetTelemetryStatsAsync()`
+- `Task ToggleAutoWriteAsync(bool enabled)` : Active ou désactive l'écriture automatique et met à jour l'état.
+  - *Appelle* ➡️ `IShadowModeService.SetAutoWriteEnabledAsync()`
+  - *Appelle* ➡️ `ShadowModeDashboardViewModel.InitializeAsync()`
 
 ## Projet : Catamailer.Domain
 ### Class : AppSetting
@@ -459,6 +472,10 @@ Généré le : 2026-09-09 07:59
   - *Appelle* ➡️ `IAppSettingsRepository.GetSettingAsync()`
   - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
   - *Appelle* ➡️ `ShadowModeService.ShouldPromptForActivationAsync()`
+- `Task GetTelemetryStatsAsync_ShouldReturnParsedValues_FromRepositories()`
+  - *Appelle* ➡️ `IAppSettingsRepository.GetSettingAsync()`
+  - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
+  - *Appelle* ➡️ `ShadowModeService.GetTelemetryStatsAsync()`
 
 ### Class : QuickCategorizeViewModelTests
 **Fichier** : `tests\Catamailer.Application.Tests\ViewModels\QuickCategorizeViewModelTests.cs`
@@ -484,13 +501,26 @@ Généré le : 2026-09-09 07:59
   - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
   - *Appelle* ➡️ `QuickRuleBuilderViewModelTests.CreateViewModel()`
   - *Appelle* ➡️ `QuickRuleBuilderViewModel.InitializeAsync()`
-- `void BuildRule_ShouldOnlyIncludeSelectedOptions()`
+- `Task BuildRule_ShouldOnlyIncludeSelectedOptions()`
   - *Appelle* ➡️ `ISelectionProvider.GetSelectedMail()`
   - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
   - *Appelle* ➡️ `QuickRuleBuilderViewModelTests.CreateViewModel()`
   - *Appelle* ➡️ `QuickRuleBuilderViewModel.InitializeAsync()`
   - *Appelle* ➡️ `QuickRuleBuilderViewModel.SelectCategory()`
   - *Appelle* ➡️ `QuickRuleBuilderViewModel.BuildRule()`
+
+### Class : ShadowModeDashboardViewModelTests
+**Fichier** : `tests\Catamailer.Application.Tests\ViewModels\ShadowModeDashboardViewModelTests.cs`
+**Rôle** : Tests unitaires pour la classe ShadowModeDashboardViewModel.
+**Membres et Invocations :**
+- `Task InitializeAsync_ShouldLoadTelemetryStats_FromService()`
+  - *Appelle* ➡️ `IShadowModeService.GetTelemetryStatsAsync()`
+  - *Appelle* ➡️ `ShadowModeDashboardViewModel.InitializeAsync()`
+- `Task ToggleAutoWriteAsync_ShouldUpdateService_AndRefreshStats()`
+  - *Appelle* ➡️ `IShadowModeService.GetTelemetryStatsAsync()`
+  - *Appelle* ➡️ `ShadowModeDashboardViewModel.InitializeAsync()`
+  - *Appelle* ➡️ `ShadowModeDashboardViewModel.ToggleAutoWriteAsync()`
+  - *Appelle* ➡️ `IShadowModeService.SetAutoWriteEnabledAsync()`
 
 ## Projet : Catamailer.Domain.Tests
 ### Class : CategoryNodeTests

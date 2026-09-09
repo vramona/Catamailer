@@ -83,6 +83,12 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 - [x] ✅ `J3-S2-T2-ST2 - InitializeAsync_ShouldIdentifyTriggeredCategories_WhenRulesMatch` (Validé le 09/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : 77ab5b1d1b41156996a84ce536280719680f3526)
 - [x] ✅ `J3-S2-T2-ST2 - BuildRule_ShouldOnlyIncludeSelectedOptions` (Validé le 09/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : 77ab5b1d1b41156996a84ce536280719680f3526)
 
+### 🟢 J3-S3 : Configuration Rules (UI)
+- [x] ✅ `J3-S3-T1 - GetTelemetryStatsAsync_ShouldReturnParsedValues_FromRepositories` (Validé le 09/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : <COMMIT_HASH>)
+- [x] ✅ `J3-S3-T1 - InitializeAsync_ShouldLoadTelemetryStats_FromService` (Validé le 09/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : <COMMIT_HASH>)
+- [x] ✅ `J3-S3-T1 - ToggleAutoWriteAsync_ShouldUpdateService_AndRefreshStats` (Validé le 09/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : <COMMIT_HASH>)
+- [x] ✅ `J3-S3-T1 - BuildRule_ShouldOnlyIncludeSelectedOptions` (Refacto Async) (Validé le 09/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : <COMMIT_HASH>)
+
 ---
 
 ## 🟢 JALON 4 - INBOX NOTES, AGENDA & ACTIONS INTERNES

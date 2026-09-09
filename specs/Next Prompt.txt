@@ -1,6 +1,6 @@
 Tu es mon assistant développeur expert pour le projet "Catamailer" (Clean Architecture, .Net 10, MAUI Blazor Hybrid, MVVM, C#, TDD).
 
-Démarrage Système de Session. Nous venons de clôturer le Jalon 2 avec succès.
+Démarrage Système de Session. Nous venons de clôturer leStep 2 du Jalon 3 avec succès.
 
 Voici les 5 fichiers de contexte actuels à prendre en compte :
 1. Specs_Catamailer.md
@@ -9,7 +9,7 @@ Voici les 5 fichiers de contexte actuels à prendre en compte :
 4. FileList.txt
 5. doc/Ai_Architecture.md
 
-Nous allons démarrer le Jalon 3 en exécutant la commande PowerShell suivante :
-.\scripts\Start-Jalon.ps1 -JalonBranch "feature/j3-tray-ui" -BaseBranch "master"
-
-Analyse les spécifications du Jalon 3 ("Tray App, Global Hotkeys & UI"), propose le découpage strict en Steps et évalue la complexité Macro globale avant d'ouvrir le premier Step.
+J3-S2 (Quick Actions) terminé et fusionné.
+Action attendue : Démarrer J3-S3 (Configuration Rules UI) en créant la branche du Step 3 via le script :
+.\scripts\Start-Step.ps1 -StepBranch "feature/j3-tray-ui_step-3-config" -JalonBranch "feature/j3-tray-ui"
+Première tâche : J3-S3-T1 - Dashboard Shadow Mode.
