@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-09 19:31
+Généré le : 2026-09-09 19:50
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -291,27 +291,43 @@ Généré le : 2026-09-09 19:31
 **Rôle** : Représente l'application principale MAUI. Gère le cycle de vie de la fenêtre, le démarrage en mode furtif (Headless) et les actions globales (Tray Icon).
 **Membres et Invocations :**
 
+### Class : DatabaseBootstrapper
+**Fichier** : `src\Catamailer.UI\DatabaseBootstrapper.cs`
+**Rôle** : Gère l'initialisation de l'infrastructure de base de données.
+**Membres et Invocations :**
+- `void EnsureDatabaseCreated(IServiceProvider serviceProvider)` : S'assure que le schéma de la base de données est créé.
+
+### Class : DummyCategorySeeder
+**Fichier** : `src\Catamailer.UI\Dummies\DummyCategorySeeder.cs`
+**Rôle** : Injecte un jeu de catégories factices pour le développement. TODO: À supprimer une fois l'import depuis Outlook implémenté.
+**Membres et Invocations :**
+- `void SeedDummyCategories(IServiceProvider serviceProvider)` : Injecte les catégories de test si la base est vide.
+  - *Appelle* ➡️ `CategoryNode.AddChild()`
+
+### Class : DummyRuleRepository
+**Fichier** : `src\Catamailer.UI\Dummies\DummyRuleRepository.cs`
+**Rôle** : Dépôt factice pour fournir des règles en l'absence de base de données implémentée pour DictionaryRule. TODO: À supprimer une fois le vrai dépôt implémenté.
+**Membres et Invocations :**
+- `Task<IEnumerable<DictionaryRule>> GetAllDictionaryRulesAsync()`
+
+### Class : DummySelectionProvider
+**Fichier** : `src\Catamailer.UI\Dummies\DummySelectionProvider.cs`
+**Rôle** : Fournisseur factice pour valider l'IHM sans dépendre d'Outlook en phase de développement. TODO: À supprimer une fois l'intégration Outlook finalisée.
+**Membres et Invocations :**
+- `MailMetadata? GetSelectedMail()`
+
 ### Class : MainPage
 **Fichier** : `src\Catamailer.UI\MainPage.xaml.cs`
 **Rôle** : Page principale hébergeant exclusivement la vue Blazor.
 **Membres et Invocations :**
-
-### Class : DummySelectionProvider
-**Fichier** : `src\Catamailer.UI\MauiProgram.cs`
-**Membres et Invocations :**
-- `MailMetadata? GetSelectedMail()`
-
-### Class : DummyRuleRepository
-**Fichier** : `src\Catamailer.UI\MauiProgram.cs`
-**Membres et Invocations :**
-- `Task<IEnumerable<DictionaryRule>> GetAllDictionaryRulesAsync()`
 
 ### Class : MauiProgram
 **Fichier** : `src\Catamailer.UI\MauiProgram.cs`
 **Rôle** : Classe statique responsable de l'amorçage et de la configuration de l'application MAUI Blazor.
 **Membres et Invocations :**
 - `MauiApp CreateMauiApp()` : Crée et configure l'instance principale de l'application MAUI. Injecte les dépendances Blazor et initialise le composant de zone de notification (Tray Icon).
-  - *Appelle* ➡️ `CategoryNode.AddChild()`
+  - *Appelle* ➡️ `DatabaseBootstrapper.EnsureDatabaseCreated()`
+  - *Appelle* ➡️ `DummyCategorySeeder.SeedDummyCategories()`
 
 ### Class : App
 **Fichier** : `src\Catamailer.UI\Platforms\Windows\App.xaml.cs`
