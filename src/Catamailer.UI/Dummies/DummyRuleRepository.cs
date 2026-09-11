@@ -4,6 +4,7 @@
 //     Historique :
 //         - 2026-09-08 : Création initiale dans MauiProgram.
 //         - 2026-09-09 : Extraction vers un fichier dédié (J3-S3-T0 - Phase Orange).
+//         - 2026-09-11 : Implémentation des méthodes Add et Delete avec état en mémoire (J3-S3-T3-ST1).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -21,14 +22,36 @@ namespace Catamailer.UI.Dummies
     /// </summary>
     public class DummyRuleRepository : IRuleRepository
     {
+        private readonly List<DictionaryRule> _rules = new();
+
+        /// <summary>
+        /// Initialise une nouvelle instance de la classe <see cref="DummyRuleRepository"/> avec des données de test.
+        /// </summary>
+        public DummyRuleRepository()
+        {
+            _rules.Add(new DictionaryRule(
+                new CategoryNode("Urgent"), 
+                subjectKeywords: new[] { "Urgent" }));
+        }
+
         /// <inheritdoc />
         public Task<IEnumerable<DictionaryRule>> GetAllDictionaryRulesAsync()
         {
-            var dummyRule = new DictionaryRule(
-                new CategoryNode("Urgent"), 
-                subjectKeywords: new[] { "Urgent" });
-                
-            return Task.FromResult<IEnumerable<DictionaryRule>>(new List<DictionaryRule> { dummyRule });
+            return Task.FromResult<IEnumerable<DictionaryRule>>(_rules);
+        }
+
+        /// <inheritdoc />
+        public Task AddDictionaryRuleAsync(DictionaryRule rule)
+        {
+            _rules.Add(rule);
+            return Task.CompletedTask;
+        }
+
+        /// <inheritdoc />
+        public Task DeleteDictionaryRuleAsync(DictionaryRule rule)
+        {
+            _rules.Remove(rule);
+            return Task.CompletedTask;
         }
     }
 }

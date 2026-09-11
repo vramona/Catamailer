@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-11 12:13
+Généré le : 2026-09-11 14:41
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -70,6 +70,26 @@ Généré le : 2026-09-11 12:13
 - `IReadOnlyList<CategoryNode> RootCategories { get; set; }` : Obtient la liste des catégories de niveau racine (n'ayant aucun parent).
 - `Task InitializeAsync()` : Charge l'ensemble des catégories depuis le dépôt et construit la liste des nœuds racines.
   - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+
+### Class : DictionaryEditorViewModel
+**Fichier** : `src\Catamailer.Application\ViewModels\DictionaryEditorViewModel.cs`
+**Rôle** : ViewModel responsable de la gestion (CRUD) des règles de dictionnaires (Étape 1).
+**Membres et Invocations :**
+- `IEnumerable<DictionaryRule> Rules { get; }` : Obtient la liste observable des règles de dictionnaire.
+- `IEnumerable<CategoryNode> AvailableCategories { get; }` : Obtient la liste des catégories disponibles pour la création d'une règle.
+- `CategoryNode? SelectedCategory { get; set; }` : Obtient ou définit la catégorie sélectionnée dans le formulaire.
+- `string SubjectKeywordsInput { get; set; }` : Obtient ou définit les mots-clés du sujet saisis dans le formulaire (séparés par des virgules).
+- `string SenderKeywordsInput { get; set; }` : Obtient ou définit les mots-clés de l'expéditeur saisis dans le formulaire (séparés par des virgules).
+- `string RecipientKeywordsInput { get; set; }` : Obtient ou définit les mots-clés du destinataire saisis dans le formulaire (séparés par des virgules).
+- `Task InitializeAsync()` : Charge l'ensemble des règles de dictionnaire et des catégories depuis les dépôts.
+  - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+- `Task AddRuleAsync(DictionaryRule rule)` : Ajoute une nouvelle règle au dépôt et met à jour la liste en mémoire.
+  - *Appelle* ➡️ `IRuleRepository.AddDictionaryRuleAsync()`
+- `Task DeleteRuleAsync(DictionaryRule rule)` : Supprime une règle du dépôt et met à jour la liste en mémoire.
+  - *Appelle* ➡️ `IRuleRepository.DeleteDictionaryRuleAsync()`
+- `Task CreateRuleFromFormAsync()` : Crée une nouvelle règle à partir des données saisies dans le formulaire.
+  - *Appelle* ➡️ `DictionaryEditorViewModel.AddRuleAsync()`
 
 ### Class : QuickCategorizeViewModel
 **Fichier** : `src\Catamailer.Application\ViewModels\QuickCategorizeViewModel.cs`
@@ -359,6 +379,8 @@ Généré le : 2026-09-11 12:13
 **Rôle** : Dépôt factice pour fournir des règles en l'absence de base de données implémentée pour DictionaryRule. TODO: À supprimer une fois le vrai dépôt implémenté.
 **Membres et Invocations :**
 - `Task<IEnumerable<DictionaryRule>> GetAllDictionaryRulesAsync()`
+- `Task AddDictionaryRuleAsync(DictionaryRule rule)`
+- `Task DeleteDictionaryRuleAsync(DictionaryRule rule)`
 
 ### Class : DummySelectionProvider
 **Fichier** : `src\Catamailer.UI\Dummies\DummySelectionProvider.cs`
@@ -395,6 +417,7 @@ Généré le : 2026-09-11 12:13
 - **TestQuickActionsPage** (Route: `/test-quick-actions`) : `src\Catamailer.UI\Dummies\TestQuickActionsPage.razor`
 - **MainLayout** : `src\Catamailer.UI\Components\Layout\MainLayout.razor`
 - **CategoryEditor** (Route: `/category-editor`) : `src\Catamailer.UI\Components\Pages\CategoryEditor.razor`
+- **DictionaryEditor** (Route: `/dictionary-editor`) : `src\Catamailer.UI\Components\Pages\DictionaryEditor.razor`
 - **Home** (Route: `/`) : `src\Catamailer.UI\Components\Pages\Home.razor`
 - **NotFound** (Route: `/not-found`) : `src\Catamailer.UI\Components\Pages\NotFound.razor`
 
@@ -574,6 +597,22 @@ Généré le : 2026-09-11 12:13
   - *Appelle* ➡️ `CategoryNode.AddChild()`
   - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
   - *Appelle* ➡️ `CategoryTreeViewModel.InitializeAsync()`
+
+### Class : DictionaryEditorViewModelTests
+**Fichier** : `tests\Catamailer.Application.Tests\ViewModels\DictionaryEditorViewModelTests.cs`
+**Membres et Invocations :**
+- `Task InitializeAsync_ShouldLoadDictionaryRules_FromRepository()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
+- `Task AddRuleAsync_ShouldCallRepository_AndRefreshList()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.AddRuleAsync()`
+- `Task DeleteRuleAsync_ShouldCallRepository_AndRefreshList()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.DeleteRuleAsync()`
+- `Task InitializeAsync_ShouldLoadCategories_FromCategoryRepository()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
+- `Task CreateRuleFromFormAsync_ShouldAddRule_AndClearForm_WhenValid()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.CreateRuleFromFormAsync()`
 
 ### Class : QuickCategorizeViewModelTests
 **Fichier** : `tests\Catamailer.Application.Tests\ViewModels\QuickCategorizeViewModelTests.cs`
