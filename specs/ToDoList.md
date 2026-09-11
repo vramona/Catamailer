@@ -51,7 +51,7 @@
 - [ ] ⚪ **J3-S3-T3** - Éditeur Dictionnaires et Builder Visuel (Étape 2).
 - [ ] ⚪ **J3-S3-T4** - Écran de Préférences Générales (Paramétrage du délai de Debounce).
 - [ ] ⚪ **J3-S3-T5** - Popup de notification d'activation automatique suite aux paliers de télémétrie.
-- [x] ✅ **J3-S3-T6** - Amélioration AiDocGenerator (Extraction des propriétés C#). (Validé le 11/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : <COMMIT_HASH>) (Cpx: 3 / 3).
+- [x] ✅ **J3-S3-T6** - Amélioration AiDocGenerator (Extraction des propriétés C#). (Validé le 11/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : 7adbcda98463c58774e96c9283ca58177944036d) (Cpx: 3 / 3).
 
 ## Jalon 4 - Inbox Notes, Agenda & Actions Internes - feature/j4-inbox-notes
 ### Step 1 - Modélisation & Agendas - feature/j4-inbox-notes_step-1-core

@@ -89,7 +89,7 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 - [x] ✅ `J3-S3-T1 - ToggleAutoWriteAsync_ShouldUpdateService_AndRefreshStats` (Validé le 09/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : d0eead0a537423fd2b38f45da235aed9610bb599)
 - [x] ✅ `J3-S3-T1 - BuildRule_ShouldOnlyIncludeSelectedOptions` (Refacto Async) (Validé le 09/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : d0eead0a537423fd2b38f45da235aed9610bb599)
 - [x] ✅ `J3-S3-T2 - InitializeAsync_ShouldLoadOnlyRootCategories` (Validé le 09/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : b44b14a9859fda40c6380608c76881b90588fef9) (Cpx: 8 / 8)
-- [x] ✅ `J3-S3-T6 - AnalyzeProjectAsync_ShouldExtractPublicProperties` (Validé le 11/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : <COMMIT_HASH>) (Cpx: 3 / 3)
+- [x] ✅ `J3-S3-T6 - AnalyzeProjectAsync_ShouldExtractPublicProperties` (Validé le 11/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : 7adbcda98463c58774e96c9283ca58177944036d) (Cpx: 3 / 3)
 
 ---
 
