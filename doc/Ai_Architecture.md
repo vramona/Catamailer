@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-09 20:50
+Généré le : 2026-09-11 12:13
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -13,6 +13,8 @@ Généré le : 2026-09-09 20:50
 **Fichier** : `src\Catamailer.Application\ClassificationResult.cs`
 **Rôle** : Représente le résultat de l'évaluation de l'Étape 1 (Classification).
 **Membres et Invocations :**
+- `CategoryNode MatchedCategory { get; }` : Obtient la catégorie principale déduite par le moteur.
+- `IReadOnlyList<CategoryNode> AppliedCategories { get; }` : Obtient la chaîne d'ascendance complète des catégories appliquées.
 
 ### Class : DebounceService
 **Fichier** : `src\Catamailer.Application\DebounceService.cs`
@@ -65,6 +67,7 @@ Généré le : 2026-09-09 20:50
 **Fichier** : `src\Catamailer.Application\ViewModels\CategoryTreeViewModel.cs`
 **Rôle** : ViewModel responsable de la gestion et de l'affichage de l'arborescence des catégories.
 **Membres et Invocations :**
+- `IReadOnlyList<CategoryNode> RootCategories { get; set; }` : Obtient la liste des catégories de niveau racine (n'ayant aucun parent).
 - `Task InitializeAsync()` : Charge l'ensemble des catégories depuis le dépôt et construit la liste des nœuds racines.
   - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
 
@@ -72,6 +75,9 @@ Généré le : 2026-09-09 20:50
 **Fichier** : `src\Catamailer.Application\ViewModels\QuickCategorizeViewModel.cs`
 **Rôle** : ViewModel responsable de la logique de l'écran Quick Categorize (Recherche, Tris, Actions).
 **Membres et Invocations :**
+- `string SearchText { get; set; }` : Obtient ou définit le texte de recherche courant.
+- `IEnumerable<CategoryNode> FilteredCategories { get; set; }` : Obtient la liste des catégories filtrées selon la recherche.
+- `CategoryNode? SelectedCategory { get; set; }` : Obtient la catégorie actuellement sélectionnée par l'utilisateur.
 - `Task InitializeAsync()` : Initialise le ViewModel en chargeant l'intégralité des catégories existantes.
   - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
 - `Task UpdateSearchAsync(string searchText)` : Met à jour les résultats filtrés en fonction du texte de recherche fourni. La recherche ignore la casse et retourne l'intégralité des éléments si le texte est vide.
@@ -81,11 +87,19 @@ Généré le : 2026-09-09 20:50
 **Fichier** : `src\Catamailer.Application\ViewModels\QuickRuleBuilderViewModel.cs`
 **Rôle** : Représente une option sélectionnable dans l'IHM (case à cocher).
 **Membres et Invocations :**
+- `string Value { get; set; }` : La valeur textuelle de l'option.
+- `bool IsSelected { get; set; }` : Indique si l'utilisateur a coché cette option.
 
 ### Class : QuickRuleBuilderViewModel
 **Fichier** : `src\Catamailer.Application\ViewModels\QuickRuleBuilderViewModel.cs`
 **Rôle** : ViewModel responsable de la logique de l'écran Quick Rule Builder (Étape 1).
 **Membres et Invocations :**
+- `SelectableOption? SubjectOption { get; set; }` : Option de sélection pour le sujet de l'e-mail.
+- `List<SelectableOption> SenderOptions { get; set; }` : Options de sélection pour les expéditeurs (Sender et OnBehalfOf).
+- `List<SelectableOption> RecipientOptions { get; set; }` : Options de sélection pour les destinataires externes.
+- `IEnumerable<CategoryNode> Categories { get; set; }` : Obtient la liste globale des catégories disponibles.
+- `IEnumerable<CategoryNode> TriggeredCategories { get; set; }` : Obtient la liste des catégories qui sont déjà déclenchées par l'e-mail courant.
+- `CategoryNode? SelectedCategory { get; set; }` : Obtient la catégorie cible actuellement sélectionnée pour la règle.
 - `Task InitializeAsync()` : Initialise le ViewModel en récupérant les métadonnées, en construisant les options de filtrage et en identifiant les catégories déjà déclenchées.
   - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
   - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
@@ -98,6 +112,9 @@ Généré le : 2026-09-09 20:50
 **Fichier** : `src\Catamailer.Application\ViewModels\ShadowModeDashboardViewModel.cs`
 **Rôle** : ViewModel responsable de l'affichage et de la gestion des statistiques du Shadow Mode.
 **Membres et Invocations :**
+- `int MatchCount { get; set; }` : Obtient le nombre de correspondances exactes validées par la télémétrie.
+- `int CategoryCount { get; set; }` : Obtient le nombre de catégories distinctes validées par la télémétrie.
+- `bool IsAutoWriteEnabled { get; set; }` : Obtient un indicateur précisant si l'écriture automatique est activée.
 - `Task InitializeAsync()` : Charge les statistiques actuelles depuis le service.
   - *Appelle* ➡️ `IShadowModeService.GetTelemetryStatsAsync()`
 - `Task ToggleAutoWriteAsync(bool enabled)` : Active ou désactive l'écriture automatique et met à jour l'état.
@@ -109,11 +126,18 @@ Généré le : 2026-09-09 20:50
 **Fichier** : `src\Catamailer.Domain\AppSetting.cs`
 **Rôle** : Représente un paramètre de configuration globale de l'application.
 **Membres et Invocations :**
+- `string Key { get; set; }` : La clé unique du paramètre (ex: "HistoryDebounceDelayMinutes").
+- `string Value { get; set; }` : La valeur du paramètre stockée sous forme de chaîne.
 
 ### Class : CategoryNode
 **Fichier** : `src\Catamailer.Domain\CategoryNode.cs`
 **Rôle** : Représente un nœud dans l'arbre hiérarchique des catégories, agissant comme vérité absolue (Master Data Management).
 **Membres et Invocations :**
+- `string Name { get; set; }` : Obtient le nom de la catégorie.
+- `string? Color { get; set; }` : Obtient la couleur explicitement définie pour cette catégorie, ou null si elle doit hériter de son parent.
+- `CategoryNode? Parent { get; set; }` : Obtient le parent de cette catégorie dans l'arbre.
+- `IReadOnlyList<CategoryNode> Children { get; }` : Obtient la liste en lecture seule des enfants de cette catégorie.
+- `string? EffectiveColor { get; }` : Obtient la couleur effective de la catégorie, en héritant de son ascendance si aucune couleur explicite n'est définie.
 - `void AddChild(CategoryNode child)` : Ajoute un nœud enfant à cette catégorie et lie automatiquement ce nœud à ce parent.
 - `IEnumerable<CategoryNode> GetAscendanceChain()` : Récupère la chaîne d'ascendance complète depuis la racine jusqu'à ce nœud inclus.
 
@@ -121,6 +145,10 @@ Généré le : 2026-09-09 20:50
 **Fichier** : `src\Catamailer.Domain\DictionaryRule.cs`
 **Rôle** : Représente une règle de l'Étape 1 (Classification) liant des mots-clés spécifiques (Sujet, Expéditeur, Destinataire) à une catégorie déduite.
 **Membres et Invocations :**
+- `CategoryNode TargetCategory { get; }` : Obtient la catégorie cible qui sera déduite si la règle correspond.
+- `IReadOnlyList<string> SubjectKeywords { get; }` : Obtient la liste des mots-clés recherchés dans le sujet.
+- `IReadOnlyList<string> SenderKeywords { get; }` : Obtient la liste des mots-clés (adresses ou noms) recherchés parmi les expéditeurs.
+- `IReadOnlyList<string> RecipientKeywords { get; }` : Obtient la liste des mots-clés (adresses ou noms) recherchés parmi les destinataires.
 
 ### Interface : IAppSettingsRepository
 **Fichier** : `src\Catamailer.Domain\IAppSettingsRepository.cs`
@@ -191,16 +219,24 @@ Généré le : 2026-09-09 20:50
 **Fichier** : `src\Catamailer.Domain\RuleAction.cs`
 **Rôle** : Représente l'action finale à exécuter si un arbre de conditions est validé.
 **Membres et Invocations :**
+- `ActionType Type { get; }` : Obtient le type de l'action à exécuter.
+- `string Parameter { get; }` : Obtient le paramètre associé à l'action (par exemple, le nom du dossier cible).
 
 ### Class : RuleCriterion
 **Fichier** : `src\Catamailer.Domain\RuleCriterion.cs`
 **Rôle** : Représente un critère de filtrage unitaire dans l'arbre d'exécution de l'Étape 2.
 **Membres et Invocations :**
+- `MailField Field { get; }` : Obtient le champ de l'e-mail à analyser.
+- `MatchOperator Operator { get; }` : Obtient l'opérateur de comparaison.
+- `string Value { get; }` : Obtient la valeur cible de la condition.
 
 ### Class : RuleNode
 **Fichier** : `src\Catamailer.Domain\RuleNode.cs`
 **Rôle** : Représente un nœud dans l'arbre composite des conditions d'exécution de l'Étape 2.
 **Membres et Invocations :**
+- `LogicalOperator Operator { get; }` : Obtient l'opérateur logique liant les enfants de ce nœud.
+- `IReadOnlyList<RuleCriterion> Criteria { get; }` : Obtient la liste en lecture seule des critères associés à ce nœud.
+- `IReadOnlyList<RuleNode> ChildNodes { get; }` : Obtient la liste en lecture seule des nœuds enfants (sous-arbres).
 - `void AddCriterion(RuleCriterion criterion)` : Ajoute un critère de validation unitaire à ce nœud.
 - `void AddChildNode(RuleNode childNode)` : Ajoute un nœud enfant permettant d'imbriquer une nouvelle couche logique.
 
@@ -208,6 +244,8 @@ Généré le : 2026-09-09 20:50
 **Fichier** : `src\Catamailer.Domain\SystemState.cs`
 **Rôle** : Représente un état système interne (ex: curseur d'avancement).
 **Membres et Invocations :**
+- `string Key { get; set; }` : La clé unique identifiant l'état (ex: "LastEntryID").
+- `string Value { get; set; }` : La valeur associée à l'état.
 
 ## Projet : Catamailer.Infrastructure
 ### Class : AppSettingsRepository
@@ -221,6 +259,9 @@ Généré le : 2026-09-09 20:50
 **Fichier** : `src\Catamailer.Infrastructure\CatamailerDbContext.cs`
 **Rôle** : Contexte de base de données principal pour Catamailer (Entity Framework Core SQLite).
 **Membres et Invocations :**
+- `DbSet<CategoryNode> Categories { get; set; }` : Obtient ou définit la collection des nœuds de catégories.
+- `DbSet<SystemState> SystemStates { get; set; }` : Obtient ou définit la collection des états systèmes.
+- `DbSet<AppSetting> AppSettings { get; set; }` : Obtient ou définit la collection des paramètres d'application.
 
 ### Class : CategoryRepository
 **Fichier** : `src\Catamailer.Infrastructure\CategoryRepository.cs`
@@ -297,6 +338,8 @@ Généré le : 2026-09-09 20:50
 **Fichier** : `src\Catamailer.UI\App.xaml.cs`
 **Rôle** : Représente l'application principale MAUI. Gère le cycle de vie de la fenêtre, le démarrage en mode furtif (Headless) et les actions globales (Tray Icon).
 **Membres et Invocations :**
+- `ICommand OpenCommand { get; }`
+- `ICommand ExitCommand { get; }`
 
 ### Class : DatabaseBootstrapper
 **Fichier** : `src\Catamailer.UI\DatabaseBootstrapper.cs`
@@ -365,6 +408,8 @@ Généré le : 2026-09-09 20:50
 ### Class : CssComponentInfo
 **Fichier** : `src\Tools\AiDocGenerator\Analyzers\CssAnalyzer.cs`
 **Membres et Invocations :**
+- `string RelativePath { get; set; }`
+- `IEnumerable<string> Classes { get; set; }`
 
 ### Class : CssAnalyzer
 **Fichier** : `src\Tools\AiDocGenerator\Analyzers\CssAnalyzer.cs`
@@ -375,11 +420,18 @@ Généré le : 2026-09-09 20:50
 **Fichier** : `src\Tools\AiDocGenerator\Analyzers\PowerShellAnalyzer.cs`
 **Rôle** : Représente un paramètre extrait d'un script PowerShell.
 **Membres et Invocations :**
+- `string Name { get; set; }` : Obtient ou définit le nom du paramètre (sans le $).
+- `string Type { get; set; }` : Obtient ou définit le type du paramètre (ex: string, int).
+- `bool IsMandatory { get; set; }` : Indique si le paramètre est obligatoire (Mandatory=$true).
 
 ### Class : PowerShellScriptInfo
 **Fichier** : `src\Tools\AiDocGenerator\Analyzers\PowerShellAnalyzer.cs`
 **Rôle** : Contient les métadonnées et dépendances extraites d'un fichier script PowerShell (.ps1).
 **Membres et Invocations :**
+- `string ScriptName { get; set; }` : Obtient ou définit le nom du fichier script.
+- `string RelativePath { get; set; }` : Obtient ou définit le chemin relatif du script par rapport à la racine de la solution.
+- `List<ScriptParameter> Parameters { get; set; }` : Obtient la liste des paramètres déclarés dans le bloc param() du script.
+- `List<string> CalledScripts { get; set; }` : Obtient la liste des noms des autres scripts PowerShell invoqués par ce script.
 
 ### Class : PowerShellAnalyzer
 **Fichier** : `src\Tools\AiDocGenerator\Analyzers\PowerShellAnalyzer.cs`
@@ -390,6 +442,8 @@ Généré le : 2026-09-09 20:50
 ### Class : RazorComponentInfo
 **Fichier** : `src\Tools\AiDocGenerator\Analyzers\RazorAnalyzer.cs`
 **Membres et Invocations :**
+- `string? Route { get; set; }`
+- `string RelativePath { get; set; }`
 
 ### Class : RazorAnalyzer
 **Fichier** : `src\Tools\AiDocGenerator\Analyzers\RazorAnalyzer.cs`
@@ -399,10 +453,18 @@ Généré le : 2026-09-09 20:50
 ### Class : TestDetail
 **Fichier** : `src\Tools\AiDocGenerator\Analyzers\TestResultsAnalyzer.cs`
 **Membres et Invocations :**
+- `string Name { get; set; }`
+- `string Outcome { get; set; }`
+- `string Duration { get; set; }`
 
 ### Class : TestRunSummary
 **Fichier** : `src\Tools\AiDocGenerator\Analyzers\TestResultsAnalyzer.cs`
 **Membres et Invocations :**
+- `int Total { get; set; }`
+- `int Passed { get; set; }`
+- `int Failed { get; set; }`
+- `string? ErrorMessage { get; set; }`
+- `List<TestDetail> AllTests { get; set; }`
 
 ### Class : TestResultsAnalyzer
 **Fichier** : `src\Tools\AiDocGenerator\Analyzers\TestResultsAnalyzer.cs`
@@ -680,6 +742,12 @@ Généré le : 2026-09-09 20:50
 **Membres et Invocations :**
 - `void Build_ShouldReturnCatamailerSpecificToc()` : Vérifie que le TOC généré est spécifiquement adapté à l'architecture de Catamailer et ne contient plus aucune référence à l'ancien projet Sudoku.
   - *Appelle* ➡️ `CatamailerTocBuilder.Build()`
+
+### Class : CSharpAnalyzerTests
+**Fichier** : `tests\Tools.AiDocGenerator.Tests\CSharpAnalyzerTests.cs`
+**Membres et Invocations :**
+- `Task AnalyzeProjectAsync_ShouldExtractPublicProperties()`
+  - *Appelle* ➡️ `CSharpAnalyzer.AnalyzeProjectAsync()`
 
 ### Scripts PowerShell et Outils d'Automatisation
 - **Build-DocFx.ps1** : `scripts\Build-DocFx.ps1`
