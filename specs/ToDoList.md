@@ -61,8 +61,8 @@
 - [x] ✅ **J4-S1-T2** - Implémentation du service de comparaison (Outlook MCL vs SQLite) et détection des orphelins. (Validé le 15/09/2026 sur feature/j4-category-sync_step-1-core - Commit : c9ea11acbebd2e4bbcf7ddc894908c3426fb12be) (Cpx: 10 / 10)
 
 ### Step 2 - Interface de Validation au Démarrage - feature/j4-category-sync_step-2-ui
-- [ ] ⚪ **J4-S2-T1** - Composant de synchronisation (Blazor) affichant les catégories manquantes et permettant d'accepter/ignorer l'import.
-- [ ] ⚪ **J4-S2-T2** - Hook au démarrage de l'application MAUI pour déclencher l'analyse de synchronisation en tâche de fond.
+- [x] ✅ **J4-S2-T1** - Composant de synchronisation (Blazor) affichant les catégories manquantes et permettant d'accepter/ignorer l'import. (Validé le 15/09/2026 sur feature/j4-category-sync_step-2-ui - Commit : 446e031435b349db4f35f5769c47cae0bba1155f) (Cpx: 6 / 6)
+- [x] ✅ **J4-S2-T2** - Hook au démarrage de l'application MAUI pour déclencher l'analyse de synchronisation en tâche de fond. (Validé le 15/09/2026 sur feature/j4-category-sync_step-2-ui - Commit : 446e031435b349db4f35f5769c47cae0bba1155f) (Cpx: 4 / 4)
 
 ## Jalon 5 - Parité VBA et Actions d'Exécution - feature/j5-iso-vba
 ### Step 1 - Enrichissement Domain et Exécution - feature/j5-iso-vba_step-1-core

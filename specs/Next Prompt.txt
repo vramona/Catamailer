@@ -1,7 +1,5 @@
 Tu es mon assistant développeur expert pour le projet "Catamailer" (Clean Architecture, .Net 10, MAUI Blazor Hybrid, MVVM, C#, TDD).
 
-Démarrage Système de Session. Nous venons de clôturer leStep 2 du Jalon 3 avec succès.
-
 Voici les 5 fichiers de contexte actuels à prendre en compte :
 1. Specs_Catamailer.md
 2. Specs_Catamailer_Unit_Tests.md
@@ -9,7 +7,9 @@ Voici les 5 fichiers de contexte actuels à prendre en compte :
 4. FileList.txt
 5. doc/Ai_Architecture.md
 
-J3-S2 (Quick Actions) terminé et fusionné.
-Action attendue : Démarrer J3-S3 (Configuration Rules UI) en créant la branche du Step 3 via le script :
-.\scripts\Start-Step.ps1 -StepBranch "feature/j3-tray-ui_step-3-config" -JalonBranch "feature/j3-tray-ui"
-Première tâche : J3-S3-T1 - Dashboard Shadow Mode.
+[CONTEXTE]
+Jalon en cours: Jalon 4 - Synchronisation Référentiel Catégories
+Dernière action: Clôture du Step 2 (UI de validation).
+Branche active: feature/j4-category-sync (après Complete-Step)
+Prochaine étape: Démarrer le Step 3 (feature/j4-category-sync_step-3-infra) avec la commande Start-Step.ps1 pour remplacer le DummyCategoryManagerProvider par l'implémentation COM réelle (J4-S3-T1).
+[/CONTEXTE]
