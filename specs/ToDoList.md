@@ -56,15 +56,32 @@
 - [x] ✅ **J3-S3-T6** - Amélioration AiDocGenerator (Extraction des propriétés C#). (Validé le 11/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : 7adbcda98463c58774e96c9283ca58177944036d) (Cpx: 3 / 3).
 - [x] ✅ **J3-S3-T7** - Bouton Quitter Blazor et lien natif. (Validé le 15/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : 5a84daaabac29c06de35006d94d09afa29fa02dc) (Cpx: 2 / 2).
 
-## Jalon 4 - Inbox Notes, Agenda & Actions Internes - feature/j4-inbox-notes
-### Step 1 - Modélisation & Agendas - feature/j4-inbox-notes_step-1-core
-- [ ] ⚪ **J4-S1-T1** - Modélisation `NoteBlock`, `InternalTask`, `CommunicationAction`.
-- [ ] ⚪ **J4-S1-T2** - Implémentation `OutlookCalendarProvider` et `GoogleCalendarProvider` (OAuth 2.0).
-- [ ] ⚪ **J4-S1-T3** - Algorithme de matching Temporel (Note Timestamp vs Réunion).
+# ⏳ CE QUI RESTE À FAIRE
 
-### Step 2 - UI Outliner & Quick Insert - feature/j4-inbox-notes_step-2-ui
-- [ ] ⚪ **J4-S2-T1** - Composant Blazor "Outliner" polymorphe (Rendu dynamique Texte/Tâche).
-- [ ] ⚪ **J4-S2-T2** - Écran "Quick Insert Comms" : Popup sur raccourci global, copie presse-papier et simulation frappe.
+## Jalon 4 - Synchronisation Référentiel Catégories - feature/j4-category-sync
+### Step 1 - Moteur de Détection et Domain - feature/j4-category-sync_step-1-core
+- [x] ✅ **J4-S1-T1** - Modélisation des entités de comparaison (SyncResult, CategoryDelta) dans le Domain. (Validé le 15/09/2026 sur feature/j4-category-sync_step-1-core - Commit : <COMMIT_HASH>) (Cpx: 3 / 3)
+- [ ] ⚪ **J4-S1-T2** - Implémentation du service de comparaison (Outlook MCL vs SQLite) et détection des orphelins.
+### Step 2 - Interface de Validation au Démarrage - feature/j4-category-sync_step-2-ui
+- [ ] ⚪ **J4-S2-T1** - Composant de synchronisation (Blazor) affichant les catégories manquantes et permettant d'accepter/ignorer l'import.
+- [ ] ⚪ **J4-S2-T2** - Hook au démarrage de l'application MAUI pour déclencher l'analyse de synchronisation en tâche de fond.
 
-## Jalon 5 - Outil de Migration CSV (Standalone) - feature/j5-csv-migrator
+## Jalon 5 - Parité VBA et Actions d'Exécution - feature/j5-iso-vba
+### Step 1 - Enrichissement Domain et Exécution - feature/j5-iso-vba_step-1-core
+- [ ] ⚪ **J5-S1-T1** - Ajout des ActionType manquantes (Transférer, Importance, Rappel, SuiviAujourdhui) dans `Catamailer.Domain`.
+- [ ] ⚪ **J5-S1-T2** - Mise à jour de l'UI RuleBuilder pour supporter la saisie des paramètres complexes (ex: adresses e-mail pour transfert, délai en jours).
+### Step 2 - Implémentation Infrastructure COM - feature/j5-iso-vba_step-2-infra
+- [ ] ⚪ **J5-S2-T1** - Implémentation des actions physiques manquantes via `IOutlookApplicationWrapper`.
+
+## Jalon 6 - Outil de Migration CSV (Standalone) - feature/j6-csv-migrator
+- [ ] ⚪ **J6-S1-T1** - Console App isolée : Parser le CSV VBA, nettoyer, mapper les nouvelles actions, et générer le fichier `rules.db` SQLite.
+
+## Jalon 7 - Inbox Notes, Agenda & Actions Internes - feature/j7-inbox-notes
+### Step 1 - Modélisation & Agendas - feature/j7-inbox-notes_step-1-core
+- [ ] ⚪ **J7-S1-T1** - Modélisation `NoteBlock`, `InternalTask`, `CommunicationAction`.
+- [ ] ⚪ **J7-S1-T2** - Implémentation `OutlookCalendarProvider` et `GoogleCalendarProvider` (OAuth 2.0).
+- [ ] ⚪ **J7-S1-T3** - Algorithme de matching Temporel (Note Timestamp vs Réunion).
+### Step 2 - UI Outliner & Quick Insert - feature/j7-inbox-notes_step-2-ui
+- [ ] ⚪ **J7-S2-T1** - Composant Blazor "Outliner" polymorphe (Rendu dynamique Texte/Tâche).
+- [ ] ⚪ **J7-S2-T2** - Écran "Quick Insert Comms" : Popup sur raccourci global, copie presse-papier et simulation frappe.
 - [ ] ⚪ **J5-S1-T1** - Console App isolée : Parser CSV, nettoyage et génération du fichier `rules.db`.

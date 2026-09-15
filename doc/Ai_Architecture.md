@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-15 16:14
+Généré le : 2026-09-15 18:20
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -340,6 +340,29 @@ Généré le : 2026-09-15 16:14
 - `void RemoveCriterion(RuleCriterion criterion)` : Supprime un critère de validation unitaire de ce nœud.
 - `void AddChildNode(RuleNode childNode)` : Ajoute un nœud enfant permettant d'imbriquer une nouvelle couche logique.
 - `void RemoveChildNode(RuleNode childNode)` : Supprime un nœud enfant de la couche logique.
+
+### Class : CategoryDelta
+**Fichier** : `src\Catamailer.Domain\Sync\CategoryDelta.cs`
+**Rôle** : Représente un écart détecté lors de la comparaison entre la Master Category List d'Outlook et la base Catamailer.
+**Membres et Invocations :**
+- `string CategoryName { get; }` : Obtient le nom de la catégorie concernée par l'écart.
+- `string? OutlookColor { get; }` : Obtient la couleur de la catégorie telle que définie dans Outlook (le cas échéant).
+- `string? CatamailerColor { get; }` : Obtient la couleur de la catégorie telle que définie dans Catamailer (le cas échéant).
+- `DeltaStatus Status { get; }` : Obtient le type de conflit détecté.
+- `CategoryDelta CreateMissingInCatamailer(string categoryName, string? outlookColor)` : Crée un delta signalant qu'une catégorie d'Outlook n'est pas connue dans Catamailer.
+- `CategoryDelta CreateMissingInOutlook(string categoryName, string? catamailerColor)` : Crée un delta signalant qu'une catégorie de Catamailer n'existe pas dans Outlook.
+- `CategoryDelta CreateColorMismatch(string categoryName, string outlookColor, string catamailerColor)` : Crée un delta signalant une différence de couleur pour une même catégorie.
+
+### Class : SyncResult
+**Fichier** : `src\Catamailer.Domain\Sync\SyncResult.cs`
+**Rôle** : Représente le résultat global de la comparaison des référentiels de catégories.
+**Membres et Invocations :**
+- `IReadOnlyList<CategoryDelta> Deltas { get; }` : Obtient la liste en lecture seule de tous les écarts détectés.
+- `bool HasConflicts { get; }` : Indique si au moins un écart a été détecté lors de la synchronisation.
+- `void AddDelta(CategoryDelta delta)` : Ajoute un nouvel écart au résultat de la synchronisation.
+- `IEnumerable<CategoryDelta> GetMissingInCatamailer()` : Récupère la liste des catégories présentes dans Outlook mais absentes de Catamailer.
+- `IEnumerable<CategoryDelta> GetMissingInOutlook()` : Récupère la liste des catégories présentes dans Catamailer mais absentes d'Outlook.
+- `IEnumerable<CategoryDelta> GetColorConflicts()` : Récupère la liste des catégories présentant un conflit de couleur.
 
 ### Class : SystemState
 **Fichier** : `src\Catamailer.Domain\SystemState.cs`
@@ -841,6 +864,22 @@ Généré le : 2026-09-15 16:14
   - *Appelle* ➡️ `RuleNode.AddCriterion()`
   - *Appelle* ➡️ `RuleNode.UpdateCriterion()`
 - `void ExecutionRule_Creation_ShouldSetProperties()`
+
+### Class : SyncModelsTests
+**Fichier** : `tests\Catamailer.Domain.Tests\SyncModelsTests.cs`
+**Membres et Invocations :**
+- `void CategoryDelta_CreateMissingInCatamailer_ShouldSetProperties()`
+  - *Appelle* ➡️ `CategoryDelta.CreateMissingInCatamailer()`
+- `void CategoryDelta_CreateMissingInOutlook_ShouldSetProperties()`
+  - *Appelle* ➡️ `CategoryDelta.CreateMissingInOutlook()`
+- `void CategoryDelta_CreateColorMismatch_ShouldSetBothColors()`
+  - *Appelle* ➡️ `CategoryDelta.CreateColorMismatch()`
+- `void SyncResult_AddDelta_ShouldUpdateConflictsAndLists()`
+  - *Appelle* ➡️ `CategoryDelta.CreateMissingInCatamailer()`
+  - *Appelle* ➡️ `CategoryDelta.CreateColorMismatch()`
+  - *Appelle* ➡️ `SyncResult.AddDelta()`
+  - *Appelle* ➡️ `SyncResult.GetMissingInCatamailer()`
+  - *Appelle* ➡️ `SyncResult.GetColorConflicts()`
 
 ## Projet : Catamailer.Infrastructure.Tests
 ### Class : CatamailerDbContextTests

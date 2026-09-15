@@ -5,11 +5,14 @@
 ## PARTIE 1 : DÉCOUPAGE FONCTIONNEL ET RÈGLES DE GESTION
 
 ### 1. Gestion Référentielle des Catégories (Master Data Management)
-*   **Synchronisation Outlook :** Une fois les catégories importées depuis Outlook, Catamailer agit comme la source de vérité absolue. Toute modification dans Catamailer met à jour la *Master Category List* d'Outlook. Toute détection par Catamailer de catégories inconnues dans Outlook fera l'objet d'une proposition d'import filtrable dans l'application.
+*   **Synchronisation Démarrage (Outlook -> Catamailer) :** Au lancement de l'application, Catamailer scanne les catégories existantes dans la *Master Category List* d'Outlook.
+    *   **Catégories Inconnues dans Catamailer :** Toute catégorie présente dans Outlook mais absente de Catamailer fait l'objet d'une proposition d'import filtrable via une interface utilisateur dédiée. **L'import n'est jamais automatique.**
+    *   **Renommage / Détection de conflit :** En cas de détection d'un écart de nom ou de couleur, une résolution manuelle est proposée à l'utilisateur.
+    *   **Suppression Outlook :** Aucune catégorie n'est supprimée de Catamailer (ou d'Outlook) sans une validation explicite de l'utilisateur.
+*   **Synchronisation Temps Réel (Catamailer -> Outlook) :** Une fois le référentiel initialisé, Catamailer agit comme la source de vérité absolue. Toute modification dans Catamailer (Création, Changement de Couleur, Suppression validée) met à jour la *Master Category List* d'Outlook instantanément.
 *   **Arborescence :** Les catégories sont structurées hiérarchiquement (Familles > Sous-catégories).
 *   **Héritage des couleurs :** Une sous-catégorie hérite de la couleur de son parent, sauf surcharge explicite.
 *   **Tagging en chaîne (Auto-propagation) :** Appliquer une sous-catégorie (ex: `CCOEN-Voyage`) applique automatiquement toute sa chaîne de parenté (`CCOEN` + `CCOEN-Voyage`). L'affichage dans Outlook reste plat.
-*   **Synchronisation Outlook :** Toute modification dans Catamailer (Création, Couleur, Suppression) met à jour la *Master Category List* d'Outlook en temps réel.
 *   **Renommage Rétroactif (Mass Update) :** Renommer une catégorie dans l'UI déclenche un traitement de fond recherchant les e-mails historiques avec l'ancien tag pour le remplacer par le nouveau.
 
 ### 2. Le Moteur de Traitement (Logique en 2 Étapes)
@@ -19,7 +22,13 @@ L'analyse d'un e-mail suit un flux séquentiel strict.
     *   *Règle :* Dès qu'une correspondance est trouvée, le système déduit le Nœud de Catégorie principal.
 *   **Étape 2 - Exécution :**
     *   À partir de la catégorie déduite, le système évalue un arbre de conditions composite (Opérateurs ET/OU infinis, correspondances exactes, partielles ou Regex).
-    *   *Règle :* Si l'arbre est validé, le système détermine les actions physiques (Déplacer vers un dossier, Marquer comme lu, Assurer un suivi).
+    *   *Règle :* Si l'arbre est validé, le système exécute une action finale. Les actions supportées sont :
+        *   **Déplacer vers un dossier**
+        *   **Marquer comme lu**
+        *   **Transférer le message** (Nécessite la définition d'un ou plusieurs destinataires).
+        *   **Définir l'importance** (Haute, Normale, Faible).
+        *   **Ajouter un rappel** (Date/Heure spécifiques ou relance standardisée).
+        *   **Assurer un suivi (Aujourd'hui)** (Drapeau de tâche Outlook).
 
 ### 3. Prise de Notes "Inbox", Tâches et Agenda (Module PKM)
 Catamailer intègre un module de productivité croisant les notes, l'agenda et les communications.
@@ -30,6 +39,7 @@ Catamailer intègre un module de productivité croisant les notes, l'agenda et l
 
 ### 4. Interactions et Interfaces Utilisateur (UI Blazor)
 L'application est furtive : elle vit dans la zone de notification (Tray Icon) et réagit aux raccourcis globaux.
+*   **Synchronisation au Démarrage :** Modale non-bloquante de validation des deltas de catégories entre Outlook et Catamailer.
 *   **Quick Categorize (Raccourci) :** Modale superposée à Outlook. Recherche par saisie libre (Autocomplete) avec rendu en "Chips". Tris dynamiques : Alphabétique, Récents, Suggestions contextuelles. Actions : Appliquer au mail, à la conversation (Thread), à l'expéditeur.
 *   **Quick Rule Builder (Raccourci) :** Modale générant instantanément une règle d'Étape 1, pré-remplie avec le contexte de l'e-mail actuellement sélectionné dans Outlook.
 *   **Écrans de Configuration :** Éditeur d'arborescence des catégories (Drag & Drop), Grilles des dictionnaires, Builder visuel de l'arbre des actions.
@@ -48,13 +58,14 @@ L'application est furtive : elle vit dans la zone de notification (Tray Icon) et
 ### 1. Projet `Catamailer.Domain` (Cœur Métier)
 *Agnostique. Zéro dépendance. Pattern `Result<T>` absolu.*
 *   **Arbre des Catégories :** `CategoryNode`.
+*   **Synchronisation :** `CategoryDelta`, `SyncResult`.
 *   **Classification & Exécution :** `DictionaryRule`, `RuleNode` (Composite), `RuleCriterion`, `RuleAction`.
 *   **Notes & PKM :** `NoteBlock`, `InternalTask`, `CommunicationAction`.
 *   **Télémétrie :** `ShadowModeLog`, `UsageStats`.
-*   **Interfaces :** `IMailProvider`, `ICategoryProvider`, `ICalendarProvider`, `IGlobalHotkeyService`.
+*   **Interfaces :** `IMailProvider`, `ICategoryProvider`, `ICategoryManagerProvider`, `ICalendarProvider`, `IGlobalHotkeyService`.
 
 ### 2. Projet `Catamailer.Application` (Orchestration)
-*   **Engines :** `ClassificationEngine`, `ExecutionEngine`.
+*   **Engines :** `ClassificationEngine`, `ExecutionEngine`, `CategorySyncService`.
 *   **PKM Services :** `NoteContextMatcher` (Croise timestamp Note avec créneaux Agenda).
 *   **Background Services :** `DebounceService`, `HistoryRunner`, `ShadowModeValidator`.
 
@@ -67,8 +78,8 @@ L'application est furtive : elle vit dans la zone de notification (Tray Icon) et
 ### 4. Projet `Catamailer.UI` (MAUI Blazor Hybrid)
 *   **Host :** Démarrage "Headless" (Tray Icon).
 *   **Pages (Configuration) :** Dashboard (Shadow Mode logs), `CategoryTreeView.razor`, Dictionary Grids, Rule Builder.
-*   **Modales (Quick Actions) :** `QuickCategorizeModal.razor`, `QuickRuleBuilderModal.razor`, `QuickInsertModal.razor`.
+*   **Modales (Quick Actions) :** `QuickCategorizeModal.razor`, `QuickRuleBuilderModal.razor`, `QuickInsertModal.razor`, `CategorySyncModal.razor`.
 *   **PKM :** `InboxOutliner.razor` (Rendu polymorphe des NoteBlocks).
 
 ### 5. Projet `Catamailer.Migrator` (Application Console)
-*   Parser l'ancien fichier `Configuration_Regles.csv`, ignorer les entrées vides, générer `rules.db`.
+*   Parser l'ancien fichier `Configuration_Regles.csv`, ignorer les entrées vides, mapper les actions avancées, générer `rules.db`.
