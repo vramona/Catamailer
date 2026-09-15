@@ -12,7 +12,8 @@
 //         - 2026-09-09 : Injection de CategoryTreeViewModel (J3-S3-T2).
 //         - 2026-09-11 : Injection de DictionaryEditorViewModel (J3-S3-T3-ST1).
 //         - 2026-09-11 : Injection de RuleBuilderViewModel (J3-S3-T3-ST2).
-//         - 2026-09-15 : Injection de PreferencesViewModel (J3-S3-T4 - Phase Bleue).
+//         - 2026-09-15 : Injection de PreferencesViewModel (J3-S3-T4).
+//         - 2026-09-15 : Injection de IBlazorNavigationService (J3-S3-T7 - Phase Bleue).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -27,6 +28,7 @@ using Catamailer.Domain;
 using Catamailer.Infrastructure;
 using Catamailer.Application;
 using Catamailer.Application.ViewModels;
+using Catamailer.Application.Services;
 using Catamailer.UI.Dummies;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -61,6 +63,9 @@ namespace Catamailer.UI
             // Injection des services de domaine et d'application
             builder.Services.AddTransient<ClassificationEngine>();
             builder.Services.AddScoped<IShadowModeService, ShadowModeService>();
+            
+            // Le service de navigation doit être Singleton pour faire le pont entre l'hôte global et Blazor
+            builder.Services.AddSingleton<IBlazorNavigationService, BlazorNavigationService>();
 
             // Injection des services d'infrastructure
             builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();

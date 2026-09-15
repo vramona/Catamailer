@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-15 10:54
+Généré le : 2026-09-15 11:35
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -41,6 +41,13 @@ Généré le : 2026-09-15 10:54
 - `Task<int> ProcessPendingHistoryAsync(int maxItemsToProcess)`
   - *Appelle* ➡️ `IDebounceService.IsAnalysisSuspendedAsync()`
   - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
+
+### Class : BlazorNavigationService
+**Fichier** : `src\Catamailer.Application\Services\BlazorNavigationService.cs`
+**Rôle** : Implémentation du service de navigation Blazor déclenché par l'hôte natif.
+**Membres et Invocations :**
+- `void RequestNavigation(string uri)`
+- `void RequestExit()`
 
 ### Class : ShadowModeService
 **Fichier** : `src\Catamailer.Application\ShadowModeService.cs`
@@ -416,6 +423,8 @@ Généré le : 2026-09-15 10:54
 **Rôle** : Représente l'application principale MAUI. Gère le cycle de vie de la fenêtre, le démarrage en mode furtif (Headless) et les actions globales (Tray Icon).
 **Membres et Invocations :**
 - `ICommand OpenCommand { get; }`
+- `ICommand OpenRulesCommand { get; }`
+- `ICommand OpenPreferencesCommand { get; }`
 - `ICommand ExitCommand { get; }`
 
 ### Class : DatabaseBootstrapper
@@ -630,6 +639,16 @@ Généré le : 2026-09-15 10:54
   - *Appelle* ➡️ `IDebounceService.IsAnalysisSuspendedAsync()`
   - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
   - *Appelle* ➡️ `HistoryRunner.ProcessPendingHistoryAsync()`
+
+### Class : BlazorNavigationServiceTests
+**Fichier** : `tests\Catamailer.Application.Tests\Services\BlazorNavigationServiceTests.cs`
+**Membres et Invocations :**
+- `void RequestNavigation_ShouldRaiseNavigationRequestedEvent_WithCorrectUri()`
+  - *Appelle* ➡️ `BlazorNavigationService.RequestNavigation()`
+- `void RequestNavigation_WithNullUri_ShouldThrowArgumentNullException()`
+  - *Appelle* ➡️ `BlazorNavigationService.RequestNavigation()`
+- `void RequestExit_ShouldRaiseExitRequestedEvent()`
+  - *Appelle* ➡️ `BlazorNavigationService.RequestExit()`
 
 ### Class : ShadowModeServiceTests
 **Fichier** : `tests\Catamailer.Application.Tests\ShadowModeServiceTests.cs`
