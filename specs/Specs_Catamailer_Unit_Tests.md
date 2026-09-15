@@ -129,10 +129,10 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 - [x] ✅ `J4-S1-T2 - AnalyzeSyncDeltasAsync_ShouldDetectColorMismatch` (Validé le 15/09/2026 sur feature/j4-category-sync_step-1-core - Commit : c9ea11acbebd2e4bbcf7ddc894908c3426fb12be)
 
 ### 🟢 J4-S2 : Interface de Validation au Démarrage
-- [x] ✅ `J4-S2-T1 - InitializeAsync_ShouldPopulateOptions_WhenConflictsExist` (Validé le 15/09/2026 sur feature/j4-category-sync_step-2-ui - Commit : <COMMIT_HASH>)
-- [x] ✅ `J4-S2-T1 - ApplyResolutionsAsync_ShouldAddMissingInCatamailer_WhenSelected` (Validé le 15/09/2026 sur feature/j4-category-sync_step-2-ui - Commit : <COMMIT_HASH>)
-- [x] ✅ `J4-S2-T1 - ApplyResolutionsAsync_ShouldNotProcess_WhenNotSelected` (Validé le 15/09/2026 sur feature/j4-category-sync_step-2-ui - Commit : <COMMIT_HASH>)
-- [x] ✅ `J4-S2-T1 - ApplyResolutionsAsync_ShouldPushCatamailerColorToOutlook_ForMismatches` (Validé le 15/09/2026 sur feature/j4-category-sync_step-2-ui - Commit : <COMMIT_HASH>)
+- [x] ✅ `J4-S2-T1 - InitializeAsync_ShouldPopulateOptions_WhenConflictsExist` (Validé le 15/09/2026 sur feature/j4-category-sync_step-2-ui - Commit : 446e031435b349db4f35f5769c47cae0bba1155f)
+- [x] ✅ `J4-S2-T1 - ApplyResolutionsAsync_ShouldAddMissingInCatamailer_WhenSelected` (Validé le 15/09/2026 sur feature/j4-category-sync_step-2-ui - Commit : 446e031435b349db4f35f5769c47cae0bba1155f)
+- [x] ✅ `J4-S2-T1 - ApplyResolutionsAsync_ShouldNotProcess_WhenNotSelected` (Validé le 15/09/2026 sur feature/j4-category-sync_step-2-ui - Commit : 446e031435b349db4f35f5769c47cae0bba1155f)
+- [x] ✅ `J4-S2-T1 - ApplyResolutionsAsync_ShouldPushCatamailerColorToOutlook_ForMismatches` (Validé le 15/09/2026 sur feature/j4-category-sync_step-2-ui - Commit : 446e031435b349db4f35f5769c47cae0bba1155f)
 
 ---
 
