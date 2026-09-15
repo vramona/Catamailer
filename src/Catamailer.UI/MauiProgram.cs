@@ -13,7 +13,8 @@
 //         - 2026-09-11 : Injection de DictionaryEditorViewModel (J3-S3-T3-ST1).
 //         - 2026-09-11 : Injection de RuleBuilderViewModel (J3-S3-T3-ST2).
 //         - 2026-09-15 : Injection de PreferencesViewModel (J3-S3-T4).
-//         - 2026-09-15 : Injection de IBlazorNavigationService (J3-S3-T7 - Phase Bleue).
+//         - 2026-09-15 : Injection de IBlazorNavigationService (J3-S3-T7).
+//         - 2026-09-15 : Injection de ActivationPromptViewModel (J3-S3-T5 - Phase Bleue).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -85,6 +86,7 @@ namespace Catamailer.UI
             builder.Services.AddTransient<DictionaryEditorViewModel>();
             builder.Services.AddTransient<RuleBuilderViewModel>();
             builder.Services.AddTransient<PreferencesViewModel>();
+            builder.Services.AddTransient<ActivationPromptViewModel>();
 
             builder.Services.AddMauiBlazorWebView();
 

@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-15 11:35
+Généré le : 2026-09-15 16:14
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -49,6 +49,11 @@ Généré le : 2026-09-15 11:35
 - `void RequestNavigation(string uri)`
 - `void RequestExit()`
 
+### Interface : IBlazorNavigationService
+**Fichier** : `src\Catamailer.Application\Services\IBlazorNavigationService.cs`
+**Rôle** : Contrat définissant le pont de navigation depuis le code natif (MAUI) vers la vue Blazor.
+**Membres et Invocations :**
+
 ### Class : ShadowModeService
 **Fichier** : `src\Catamailer.Application\ShadowModeService.cs`
 **Rôle** : Service gérant la télémétrie Shadow Mode, le contrôle d'activation et les paliers de notification.
@@ -69,6 +74,18 @@ Généré le : 2026-09-15 11:35
 - `Task<(int MatchCount, int CategoryCount, bool IsAutoWriteEnabled)> GetTelemetryStatsAsync()`
   - *Appelle* ➡️ `ShadowModeService.IsAutoWriteEnabledAsync()`
   - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
+
+### Class : ActivationPromptViewModel
+**Fichier** : `src\Catamailer.Application\ViewModels\ActivationPromptViewModel.cs`
+**Rôle** : ViewModel gérant l'affichage et les actions de la notification d'activation du Shadow Mode.
+**Membres et Invocations :**
+- `bool ShouldShowPrompt { get; set; }` : Indique si la popup d'activation doit être affichée à l'utilisateur.
+- `Task InitializeAsync()` : Initialise le ViewModel en vérifiant si le palier de télémétrie nécessite une notification.
+  - *Appelle* ➡️ `IShadowModeService.ShouldPromptForActivationAsync()`
+- `Task ActivateAsync()` : Active l'écriture automatique et masque la notification.
+  - *Appelle* ➡️ `IShadowModeService.SetAutoWriteEnabledAsync()`
+- `Task AcknowledgeAsync()` : Acquitte la notification pour le palier courant et la masque.
+  - *Appelle* ➡️ `IShadowModeService.AcknowledgeActivationPromptAsync()`
 
 ### Class : CategoryTreeViewModel
 **Fichier** : `src\Catamailer.Application\ViewModels\CategoryTreeViewModel.cs`
@@ -477,6 +494,7 @@ Généré le : 2026-09-15 11:35
 
 
 ### Composants Razor
+- **ActivationPrompt** : `src\Catamailer.UI\Components\ActivationPrompt.razor`
 - **CategoryTreeNode** : `src\Catamailer.UI\Components\CategoryTreeNode.razor`
 - **CategoryTreeView** : `src\Catamailer.UI\Components\CategoryTreeView.razor`
 - **QuickCategorizeModal** : `src\Catamailer.UI\Components\QuickCategorizeModal.razor`
@@ -669,6 +687,20 @@ Généré le : 2026-09-15 11:35
   - *Appelle* ➡️ `IAppSettingsRepository.GetSettingAsync()`
   - *Appelle* ➡️ `IHistoryStateRepository.GetStateAsync()`
   - *Appelle* ➡️ `ShadowModeService.GetTelemetryStatsAsync()`
+
+### Class : ActivationPromptViewModelTests
+**Fichier** : `tests\Catamailer.Application.Tests\ViewModels\ActivationPromptViewModelTests.cs`
+**Membres et Invocations :**
+- `Task InitializeAsync_ShouldSetShouldShowPrompt_WhenServiceReturnsTrue()`
+  - *Appelle* ➡️ `ActivationPromptViewModel.InitializeAsync()`
+- `Task InitializeAsync_ShouldNotSetShouldShowPrompt_WhenServiceReturnsFalse()`
+  - *Appelle* ➡️ `ActivationPromptViewModel.InitializeAsync()`
+- `Task ActivateAsync_ShouldEnableAutoWrite_AndHidePrompt()`
+  - *Appelle* ➡️ `ActivationPromptViewModel.InitializeAsync()`
+  - *Appelle* ➡️ `ActivationPromptViewModel.ActivateAsync()`
+- `Task AcknowledgeAsync_ShouldAcknowledgePrompt_AndHidePrompt()`
+  - *Appelle* ➡️ `ActivationPromptViewModel.InitializeAsync()`
+  - *Appelle* ➡️ `ActivationPromptViewModel.AcknowledgeAsync()`
 
 ### Class : CategoryTreeViewModelTests
 **Fichier** : `tests\Catamailer.Application.Tests\ViewModels\CategoryTreeViewModelTests.cs`
