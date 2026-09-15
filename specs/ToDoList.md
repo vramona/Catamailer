@@ -54,7 +54,7 @@
 - [x] ✅ **J3-S3-T4** - Écran de Préférences Générales (Paramétrage du délai de Debounce). (Validé le 15/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : 0c93ff19e4e27e3d3c7febafcf76865e38cc430c) (Cpx: 3 / 3).
 - [ ] ⚪ **J3-S3-T5** - Popup de notification d'activation automatique suite aux paliers de télémétrie.
 - [x] ✅ **J3-S3-T6** - Amélioration AiDocGenerator (Extraction des propriétés C#). (Validé le 11/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : 7adbcda98463c58774e96c9283ca58177944036d) (Cpx: 3 / 3).
-- [x] ✅ **J3-S3-T7** - Bouton Quitter Blazor et lien natif. (Validé le 15/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : <COMMIT_HASH>) (Cpx: 2 / 2).
+- [x] ✅ **J3-S3-T7** - Bouton Quitter Blazor et lien natif. (Validé le 15/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : 5a84daaabac29c06de35006d94d09afa29fa02dc) (Cpx: 2 / 2).
 
 ## Jalon 4 - Inbox Notes, Agenda & Actions Internes - feature/j4-inbox-notes
 ### Step 1 - Modélisation & Agendas - feature/j4-inbox-notes_step-1-core
