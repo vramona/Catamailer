@@ -1,5 +1,89 @@
 ﻿@page "/"
+@using Catamailer.Application.ViewModels
+@using Catamailer.UI.Components
+@inject ShadowModeDashboardViewModel ViewModel
 
-<h1>Hello, world!</h1>
+<!-- Historique : -->
+<!-- 2026-09-08 : Nettoyage de l'interface par défaut (J3-S2). -->
+<!-- 2026-09-08 : Ajout temporaire du composant QuickCategorizeModal pour validation visuelle (J3-S2-T1). -->
+<!-- 2026-09-08 : Ajout du composant QuickRuleBuilderModal pour validation visuelle (J3-S2-T2). -->
+<!-- 2026-09-09 : Ajout du panneau de statistiques Shadow Mode et toggle (J3-S3-T1). -->
+<!-- 2026-09-09 : Refactoring CSS pour harmonisation des polices et correction du toggle (J3-S3-T1). -->
+<!-- 2026-09-09 : Ajout du point d'entrée vers l'éditeur de référentiel (J3-S3-T2). -->
+<!-- 2026-09-09 : Extraction des modales de test vers une page dédiée (J3-S3-T2 - Phase Orange). -->
+<!-- 2026-09-11 : Ajout du point d'entrée vers l'éditeur de dictionnaires (J3-S3-T3-ST1). -->
+<!-- 2026-09-11 : Ajout du point d'entrée vers l'éditeur de règles d'exécution (J3-S3-T3-ST2). -->
 
-Welcome to your new app.
+<h1 class="cata-page-title">Dashboard Catamailer</h1>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow-sm border-primary">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0 cata-card-header">Télémétrie - Shadow Mode</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center mb-4">
+                    <div class="col-md-6">
+                        <div class="cata-stat-value text-primary">@ViewModel.MatchCount</div>
+                        <div class="cata-stat-label text-muted">Correspondances exactes</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="cata-stat-value text-success">@ViewModel.CategoryCount</div>
+                        <div class="cata-stat-label text-muted">Catégories qualifiées</div>
+                    </div>
+                </div>
+                <hr />
+                <div class="form-check form-switch toggle-large d-flex justify-content-center mt-4">
+                    <input class="form-check-input" type="checkbox" id="autoWriteToggle"
+                           checked="@ViewModel.IsAutoWriteEnabled"
+                           @onchange="OnToggleChanged">
+                    <label class="form-check-label" for="autoWriteToggle">
+                        Activer le classement automatique dans Outlook
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr class="my-4" />
+
+<h3 class="cata-section-title">Configuration</h3>
+<div class="row mb-4">
+    <div class="col-md-3">
+        <a href="/category-editor" class="btn btn-outline-dark w-100 py-3 shadow-sm text-start fw-medium fs-5 mb-3">
+            Éditeur de Référentiel
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="/dictionary-editor" class="btn btn-outline-dark w-100 py-3 shadow-sm text-start fw-medium fs-5 mb-3">
+            Éditeur de Dictionnaires
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="/rule-builder" class="btn btn-outline-dark w-100 py-3 shadow-sm text-start fw-medium fs-5 mb-3">
+            Builder de Règles
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="/test-quick-actions" class="btn btn-outline-secondary w-100 py-3 shadow-sm text-start fw-medium fs-5 mb-3">
+            Zone de Test
+        </a>
+    </div>
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await ViewModel.InitializeAsync();
+    }
+
+    private async Task OnToggleChanged(ChangeEventArgs e)
+    {
+        if (e.Value is bool isChecked)
+        {
+            await ViewModel.ToggleAutoWriteAsync(isChecked);
+        }
+    }
+}

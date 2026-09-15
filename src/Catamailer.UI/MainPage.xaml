@@ -5,6 +5,7 @@
              xmlns:components="clr-namespace:Catamailer.UI.Components"
              x:Class="Catamailer.UI.MainPage">
 
+    <!-- La page n'est plus polluée par la logique du Tray Icon -->
     <BlazorWebView x:Name="blazorWebView" HostPage="wwwroot/index.html">
         <BlazorWebView.RootComponents>
             <RootComponent Selector="#app" ComponentType="{x:Type components:Routes}" />

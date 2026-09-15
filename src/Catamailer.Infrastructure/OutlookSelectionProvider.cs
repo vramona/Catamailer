@@ -4,6 +4,7 @@
 //     Historique :
 //         - 2026-09-07 : Création initiale (Phase Rouge).
 //         - 2026-09-07 : Implémentation (Phase Verte).
+//         - 2026-09-09 : Mise à jour de l'en-tête suite à la refonte de MailMetadata (J3-S2-T2-ST1).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -32,6 +33,7 @@ namespace Catamailer.Infrastructure
 
         /// <summary>
         /// Récupère les métadonnées de l'e-mail actuellement sélectionné.
+        /// (Le IOutlookApplicationWrapper devra être adapté pour instancier la nouvelle version de MailMetadata).
         /// </summary>
         /// <returns>Les métadonnées de l'e-mail, ou null si aucun e-mail n'est sélectionné.</returns>
         public MailMetadata? GetSelectedMail()

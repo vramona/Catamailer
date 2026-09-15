@@ -1,0 +1,161 @@
+@using Catamailer.Application.ViewModels
+@using Catamailer.Domain
+@using System.Linq
+@inject QuickRuleBuilderViewModel ViewModel
+
+<!-- Historique : -->
+<!-- 2026-09-08 : Création du composant UI Quick Rule Builder (J3-S2-T2). -->
+<!-- 2026-09-09 : Adaptation aux nouvelles listes de DictionaryRule (J3-S2-T2-ST1). -->
+<!-- 2026-09-09 : IHM 2 colonnes avec arbre, cases à cocher et indicateurs (J3-S2-T2-ST2). -->
+
+<div class="quick-rule-builder-container p-4 border rounded bg-white shadow-sm">
+    <h5 class="mb-4">Création de Règle Rapide (Étape 1)</h5>
+
+    <div class="row">
+        <!-- Colonne Gauche : Arbre des catégories -->
+        <div class="col-md-5 border-end">
+            <h6 class="text-muted mb-3">1. Choisir la catégorie cible</h6>
+            <div class="category-tree overflow-auto" style="max-height: 400px;">
+                @if (ViewModel.Categories != null && ViewModel.Categories.Any())
+                {
+                    @foreach (var rootNode in ViewModel.Categories.Where(c => c.Parent == null))
+                    {
+                        @RenderTree(rootNode)
+                    }
+                }
+                else
+                {
+                    <span class="text-muted">Aucune catégorie disponible.</span>
+                }
+            </div>
+        </div>
+
+        <!-- Colonne Droite : Configuration de la règle -->
+        <div class="col-md-7">
+            <h6 class="text-muted mb-3">2. Définir les critères de déclenchement</h6>
+            
+            @if (ViewModel.SelectedCategory == null)
+            {
+                <div class="alert alert-info">Veuillez sélectionner une catégorie à gauche.</div>
+            }
+            else
+            {
+                <div class="rule-options mb-4">
+                    <p class="fw-bold mb-2">Options extraites de l'e-mail :</p>
+                    
+                    @if (ViewModel.SubjectOption != null)
+                    {
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="chkSubject" @bind="ViewModel.SubjectOption.IsSelected" />
+                            <label class="form-check-label fw-bold" for="chkSubject">Sujet</label>
+                            <input type="text" class="form-control form-control-sm mt-1" @bind="ViewModel.SubjectOption.Value" />
+                        </div>
+                    }
+
+                    @if (ViewModel.SenderOptions.Any())
+                    {
+                        <p class="fw-bold mb-1 mt-3">Expéditeurs</p>
+                        @for (var i = 0; i < ViewModel.SenderOptions.Count; i++)
+                        {
+                            var option = ViewModel.SenderOptions[i];
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="@($"chkSender_{i}")" @bind="option.IsSelected" />
+                                <label class="form-check-label d-none" for="@($"chkSender_{i}")">Expéditeur</label>
+                                <input type="text" class="form-control form-control-sm" @bind="option.Value" />
+                            </div>
+                        }
+                    }
+
+                    @if (ViewModel.RecipientOptions.Any())
+                    {
+                        <p class="fw-bold mb-1 mt-3">Destinataires (Externes)</p>
+                        @for (var i = 0; i < ViewModel.RecipientOptions.Count; i++)
+                        {
+                            var option = ViewModel.RecipientOptions[i];
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="@($"chkRecipient_{i}")" @bind="option.IsSelected" />
+                                <label class="form-check-label d-none" for="@($"chkRecipient_{i}")">Destinataire</label>
+                                <input type="text" class="form-control form-control-sm" @bind="option.Value" />
+                            </div>
+                        }
+                    }
+                </div>
+
+                <button class="btn btn-primary w-100" @onclick="OnBuildRule">Créer la règle</button>
+            }
+
+            @if (_successMessage != null)
+            {
+                <div class="alert alert-success mt-3 mb-0">
+                    @_successMessage
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private string? _successMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ViewModel.InitializeAsync();
+    }
+
+    private void SelectCategory(CategoryNode category)
+    {
+        ViewModel.SelectCategory(category);
+        _successMessage = null; // Réinitialise le message
+    }
+
+    private void OnBuildRule()
+    {
+        var rule = ViewModel.BuildRule();
+        if (rule != null)
+        {
+            var allKws = new List<string>();
+            if (rule.SubjectKeywords != null) allKws.AddRange(rule.SubjectKeywords);
+            if (rule.SenderKeywords != null) allKws.AddRange(rule.SenderKeywords);
+            if (rule.RecipientKeywords != null) allKws.AddRange(rule.RecipientKeywords);
+
+            if (allKws.Any())
+            {
+                _successMessage = $"Règle créée : assignation de [{rule.TargetCategory.Name}] sur détection de ({string.Join(" OU ", allKws)}).";
+            }
+            else
+            {
+                _successMessage = $"Attention : Règle créée pour [{rule.TargetCategory.Name}], mais aucune case n'a été cochée.";
+            }
+        }
+    }
+
+    // Fragment récursif pour afficher l'arbre
+    private RenderFragment<CategoryNode> RenderTree => category => __builder =>
+    {
+        var isTriggered = ViewModel.TriggeredCategories.Any(c => c.Name == category.Name);
+        var isSelected = ViewModel.SelectedCategory?.Name == category.Name;
+        var bgColor = category.EffectiveColor ?? "#ccc";
+
+        <div class="category-node" style="margin-left: 15px;">
+            <div class="d-flex align-items-center mb-1 p-1 rounded @(isSelected ? "bg-light border border-primary" : "")" 
+                 style="cursor: pointer;"
+                 @onclick="() => SelectCategory(category)">
+                <span class="badge rounded-pill me-2" style="background-color: @bgColor; width: 15px; height: 15px; display: inline-block;"></span>
+                <span class="@(isSelected ? "fw-bold text-primary" : "")">@category.Name</span>
+                @if (isTriggered)
+                {
+                    <span class="badge bg-warning text-dark ms-2" title="Déjà déclenchée par cet e-mail">⚡ Actif</span>
+                }
+            </div>
+            @if (category.Children.Any())
+            {
+                <div class="children-container border-start ms-2 border-2 border-light">
+                    @foreach (var child in category.Children)
+                    {
+                        @RenderTree(child)
+                    }
+                </div>
+            }
+        </div>
+    };
+}

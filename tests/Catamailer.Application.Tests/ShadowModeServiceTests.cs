@@ -3,6 +3,7 @@
 //     Date de création : 2026-09-07
 //     Historique :
 //         - 2026-09-07 : Création initiale pour J2-S2-T4 (Phase Rouge).
+//         - 2026-09-09 : Ajout des tests pour GetTelemetryStatsAsync (J3-S3-T1 - Phase Rouge).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -84,6 +85,32 @@ namespace Catamailer.Application.Tests
 
             // Assert
             Assert.False(shouldPrompt);
+        }
+
+        [Fact]
+        public async Task GetTelemetryStatsAsync_ShouldReturnParsedValues_FromRepositories()
+        {
+            // Arrange
+            var mockSettings = new Mock<IAppSettingsRepository>();
+            var mockState = new Mock<IHistoryStateRepository>();
+
+            mockSettings.Setup(s => s.GetSettingAsync(ShadowModeService.AutoWriteSettingKey))
+                        .ReturnsAsync("true");
+
+            mockState.Setup(s => s.GetStateAsync(ShadowModeService.MatchCountStateKey))
+                     .ReturnsAsync("420");
+            mockState.Setup(s => s.GetStateAsync(ShadowModeService.CategoryCountStateKey))
+                     .ReturnsAsync("15");
+
+            var service = new ShadowModeService(mockSettings.Object, mockState.Object);
+
+            // Act
+            var stats = await service.GetTelemetryStatsAsync();
+
+            // Assert
+            Assert.Equal(420, stats.MatchCount);
+            Assert.Equal(15, stats.CategoryCount);
+            Assert.True(stats.IsAutoWriteEnabled);
         }
     }
 }

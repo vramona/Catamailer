@@ -1,6 +1,9 @@
 // Historique :
 // 2026-09-07 : Création de l'implémentation CategoryRepository (J1-S1-T3).
+// 2026-09-08 : Implémentation de GetAllAsync (J3-S2-T1).
+// 2026-09-08 : Ajout du chargement explicite (Include) du Parent dans GetAllAsync (J3-S2-T1).
 
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Catamailer.Domain;
 using Microsoft.EntityFrameworkCore;
@@ -33,6 +36,14 @@ namespace Catamailer.Infrastructure
         public async Task<CategoryNode?> GetByNameAsync(string name)
         {
             return await _context.Categories.FirstOrDefaultAsync(c => c.Name == name);
+        }
+
+        /// <inheritdoc />
+        public async Task<IEnumerable<CategoryNode>> GetAllAsync()
+        {
+            return await _context.Categories
+                .Include(c => c.Parent)
+                .ToListAsync();
         }
     }
 }

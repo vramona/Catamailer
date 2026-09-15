@@ -2,6 +2,7 @@
 // 2026-09-07 : Création des tests pour ClassificationEngine (J1-S2-T1).
 // 2026-09-07 : Ajout du test d'extraction de la chaîne d'ascendance (J1-S2-T1).
 // 2026-09-07 : Ajout du test de correspondance sur les destinataires (J1-S2-T1).
+// 2026-09-09 : Adaptation à la refonte de MailMetadata et DictionaryRule (J3-S2-T2-ST1).
 
 using System.Collections.Generic;
 using Catamailer.Domain;
@@ -14,22 +15,28 @@ namespace Catamailer.Application.Tests
     /// </summary>
     public class ClassificationEngineTests
     {
+        private MailMetadata CreateDummyMetadata(string subject = "Sujet", string sender = "test@test.com", IEnumerable<string>? recipients = null)
+        {
+            return new MailMetadata("ID", subject, sender, null, recipients ?? new List<string>(), new List<string>());
+        }
+
         [Fact]
         public void Classify_ShouldReturnNull_WhenNoRulesProvided()
         {
             // Arrange
             var engine = new ClassificationEngine();
             var rules = new List<DictionaryRule>();
+            var metadata = CreateDummyMetadata();
 
             // Act
-            ClassificationResult? result = engine.Classify("Sujet de test", "expediteur@test.com", new List<string>(), rules);
+            ClassificationResult? result = engine.Classify(metadata, rules);
 
             // Assert
             Assert.Null(result);
         }
 
         [Fact]
-        public void Classify_ShouldReturnCategoryAndAscendanceChain_WhenKeywordMatches()
+        public void Classify_ShouldReturnCategoryAndAscendanceChain_WhenSubjectKeywordMatches()
         {
             // Arrange
             var engine = new ClassificationEngine();
@@ -38,11 +45,12 @@ namespace Catamailer.Application.Tests
             var childCategory = new CategoryNode("Alpha");
             rootCategory.AddChild(childCategory);
 
-            var rule = new DictionaryRule(childCategory, new[] { "Urgent" });
+            var rule = new DictionaryRule(childCategory, subjectKeywords: new[] { "Urgent" });
             var rules = new List<DictionaryRule> { rule };
+            var metadata = CreateDummyMetadata(subject: "Message Urgent pour le projet");
 
             // Act
-            ClassificationResult? result = engine.Classify("Message Urgent pour le projet", "test@test.com", new List<string>(), rules);
+            ClassificationResult? result = engine.Classify(metadata, rules);
 
             // Assert
             Assert.NotNull(result);
@@ -59,13 +67,14 @@ namespace Catamailer.Application.Tests
             var engine = new ClassificationEngine();
 
             var category = new CategoryNode("Direction");
-            var rule = new DictionaryRule(category, new[] { "boss@company.com" });
+            var rule = new DictionaryRule(category, recipientKeywords: new[] { "boss@company.com" });
             var rules = new List<DictionaryRule> { rule };
 
             var recipients = new List<string> { "employe@company.com", "boss@company.com" };
+            var metadata = CreateDummyMetadata(recipients: recipients);
 
             // Act
-            ClassificationResult? result = engine.Classify("Sujet normal", "expediteur@test.com", recipients, rules);
+            ClassificationResult? result = engine.Classify(metadata, rules);
 
             // Assert
             Assert.NotNull(result);
