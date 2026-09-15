@@ -82,6 +82,9 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 - [x] ✅ `J3-S2-T2-ST2 - InitializeAsync_ShouldPopulateSelectableOptions_FromSelectedMail` (Validé le 09/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : 77ab5b1d1b41156996a84ce536280719680f3526)
 - [x] ✅ `J3-S2-T2-ST2 - InitializeAsync_ShouldIdentifyTriggeredCategories_WhenRulesMatch` (Validé le 09/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : 77ab5b1d1b41156996a84ce536280719680f3526)
 - [x] ✅ `J3-S2-T2-ST2 - BuildRule_ShouldOnlyIncludeSelectedOptions` (Validé le 09/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : 77ab5b1d1b41156996a84ce536280719680f3526)
+- [x] ✅ `J3-S3-T4 - InitializeAsync_ShouldLoadDebounceDelay_WhenSettingExists` (Validé le 15/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : <COMMIT_HASH>)
+- [x] ✅ `J3-S3-T4 - InitializeAsync_ShouldSetDefaultDebounceDelay_WhenSettingDoesNotExist` (Validé le 15/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : <COMMIT_HASH>)
+- [x] ✅ `J3-S3-T4 - SaveAsync_ShouldPersistDebounceDelayToRepository` (Validé le 15/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : <COMMIT_HASH>)
 
 ### 🟢 J3-S3 : Configuration Rules (UI)
 - [x] ✅ `J3-S3-T1 - GetTelemetryStatsAsync_ShouldReturnParsedValues_FromRepositories` (Validé le 09/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : d0eead0a537423fd2b38f45da235aed9610bb599)

@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-15 10:01
+Généré le : 2026-09-15 10:54
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -90,6 +90,16 @@ Généré le : 2026-09-15 10:01
   - *Appelle* ➡️ `IRuleRepository.DeleteDictionaryRuleAsync()`
 - `Task CreateRuleFromFormAsync()` : Crée une nouvelle règle à partir des données saisies dans le formulaire.
   - *Appelle* ➡️ `DictionaryEditorViewModel.AddRuleAsync()`
+
+### Class : PreferencesViewModel
+**Fichier** : `src\Catamailer.Application\ViewModels\PreferencesViewModel.cs`
+**Rôle** : ViewModel gérant l'écran des préférences globales de l'application.
+**Membres et Invocations :**
+- `int DebounceDelayMinutes { get; set; }` : Obtient ou définit le délai (en minutes) avant la reprise de l'historique suite à une modification.
+- `Task InitializeAsync()` : Charge les paramètres depuis la base de données.
+  - *Appelle* ➡️ `IAppSettingsRepository.GetSettingAsync()`
+- `Task SaveAsync()` : Sauvegarde les paramètres modifiés dans la base de données.
+  - *Appelle* ➡️ `IAppSettingsRepository.SetSettingAsync()`
 
 ### Class : QuickCategorizeViewModel
 **Fichier** : `src\Catamailer.Application\ViewModels\QuickCategorizeViewModel.cs`
@@ -470,6 +480,7 @@ Généré le : 2026-09-15 10:01
 - **DictionaryEditor** (Route: `/dictionary-editor`) : `src\Catamailer.UI\Components\Pages\DictionaryEditor.razor`
 - **Home** (Route: `/`) : `src\Catamailer.UI\Components\Pages\Home.razor`
 - **NotFound** (Route: `/not-found`) : `src\Catamailer.UI\Components\Pages\NotFound.razor`
+- **Preferences** (Route: `/preferences`) : `src\Catamailer.UI\Components\Pages\Preferences.razor`
 - **RuleBuilder** (Route: `/rule-builder`) : `src\Catamailer.UI\Components\Pages\RuleBuilder.razor`
 
 ## Projet : AiDocGenerator
@@ -664,6 +675,19 @@ Généré le : 2026-09-15 10:01
 - `Task CreateRuleFromFormAsync_ShouldAddRule_AndClearForm_WhenValid()`
   - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
   - *Appelle* ➡️ `DictionaryEditorViewModel.CreateRuleFromFormAsync()`
+
+### Class : PreferencesViewModelTests
+**Fichier** : `tests\Catamailer.Application.Tests\ViewModels\PreferencesViewModelTests.cs`
+**Membres et Invocations :**
+- `Task InitializeAsync_ShouldLoadDebounceDelay_WhenSettingExists()`
+  - *Appelle* ➡️ `FakeAppSettingsRepository.InjectSetting()`
+  - *Appelle* ➡️ `PreferencesViewModel.InitializeAsync()`
+- `Task InitializeAsync_ShouldSetDefaultDebounceDelay_WhenSettingDoesNotExist()`
+  - *Appelle* ➡️ `PreferencesViewModel.InitializeAsync()`
+- `Task SaveAsync_ShouldPersistDebounceDelayToRepository()`
+  - *Appelle* ➡️ `PreferencesViewModel.InitializeAsync()`
+  - *Appelle* ➡️ `PreferencesViewModel.SaveAsync()`
+  - *Appelle* ➡️ `FakeAppSettingsRepository.GetSettingAsync()`
 
 ### Class : QuickCategorizeViewModelTests
 **Fichier** : `tests\Catamailer.Application.Tests\ViewModels\QuickCategorizeViewModelTests.cs`

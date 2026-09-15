@@ -51,7 +51,7 @@
 - [x] ✅ **J3-S3-T3** - Éditeur Dictionnaires et Builder Visuel (Étape 2). (Validé le 15/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : 7e4dc91acb58fbe6d2a0008d32f4266bf7523281) (Cpx: 18 / 18).
 - [x] ✅ **J3-S3-T3-ST1** - Éditeur de Dictionnaires (Étape 1). (Validé le 11/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : 78f75f23e681d1fb024a6cb3f5bcf4f1330cab7b) (Cpx: 5 / 5).
 - [x] ✅ **J3-S3-T3-ST2** - Builder Visuel de Règles d'exécution (Étape 2). (Validé le 15/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : 7e4dc91acb58fbe6d2a0008d32f4266bf7523281) (Cpx: 13 / 13).
-- [ ] ⚪ **J3-S3-T4** - Écran de Préférences Générales (Paramétrage du délai de Debounce).
+- [x] ✅ **J3-S3-T4** - Écran de Préférences Générales (Paramétrage du délai de Debounce). (Validé le 15/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : <COMMIT_HASH>) (Cpx: 3 / 3).
 - [ ] ⚪ **J3-S3-T5** - Popup de notification d'activation automatique suite aux paliers de télémétrie.
 - [x] ✅ **J3-S3-T6** - Amélioration AiDocGenerator (Extraction des propriétés C#). (Validé le 11/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : 7adbcda98463c58774e96c9283ca58177944036d) (Cpx: 3 / 3).
 

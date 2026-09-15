@@ -11,7 +11,8 @@
 //         - 2026-09-09 : Refactoring de l'initialisation et extraction des Dummies (J3-S3-T0).
 //         - 2026-09-09 : Injection de CategoryTreeViewModel (J3-S3-T2).
 //         - 2026-09-11 : Injection de DictionaryEditorViewModel (J3-S3-T3-ST1).
-//         - 2026-09-11 : Injection de RuleBuilderViewModel (J3-S3-T3-ST2 - Phase Bleue).
+//         - 2026-09-11 : Injection de RuleBuilderViewModel (J3-S3-T3-ST2).
+//         - 2026-09-15 : Injection de PreferencesViewModel (J3-S3-T4 - Phase Bleue).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -78,6 +79,7 @@ namespace Catamailer.UI
             builder.Services.AddTransient<CategoryTreeViewModel>();
             builder.Services.AddTransient<DictionaryEditorViewModel>();
             builder.Services.AddTransient<RuleBuilderViewModel>();
+            builder.Services.AddTransient<PreferencesViewModel>();
 
             builder.Services.AddMauiBlazorWebView();
 
