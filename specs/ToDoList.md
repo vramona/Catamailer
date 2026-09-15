@@ -41,9 +41,6 @@
 - [x] ✅ **J3-S2-T2-ST1** - Refonte Core : Modification de `MailMetadata`, `DictionaryRule`, `ClassificationEngine`, et `OutlookSelectionProvider`. (Validé le 09/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : 73be44ce1ca1e95da0a28a6931f56ddd9cdbd57d) (Cpx: 12 / 13).
 - [x] ✅ **J3-S2-T2-ST2** - Écran "Quick Rule Builder" : IHM 2 colonnes (Arbre des catégories et cases à cocher des métadonnées). (Validé le 09/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : 77ab5b1d1b41156996a84ce536280719680f3526) (Cpx: 8 / 8).
 
-# ⏳ CE QUI RESTE À FAIRE
-
-## Jalon 3 - Intégration Système et IHM - feature/j3-tray-ui
 ### Step 3 - Configuration Rules (UI) - feature/j3-tray-ui_step-3-config
 - [x] ✅ **J3-S3-T0** - Refactoring Initialisation (Extraction DatabaseBootstrapper et DummyCategorySeeder). (Validé le 09/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : 8716510d2f4d94ed1122bb8e05ed4c7a8745ecd5) (Cpx: 2 / 2).
 - [x] ✅ **J3-S3-T1** - Dashboard Shadow Mode. (Validé le 09/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : d0eead0a537423fd2b38f45da235aed9610bb599) (Cpx: 5 / 5).
@@ -61,7 +58,8 @@
 ## Jalon 4 - Synchronisation Référentiel Catégories - feature/j4-category-sync
 ### Step 1 - Moteur de Détection et Domain - feature/j4-category-sync_step-1-core
 - [x] ✅ **J4-S1-T1** - Modélisation des entités de comparaison (SyncResult, CategoryDelta) dans le Domain. (Validé le 15/09/2026 sur feature/j4-category-sync_step-1-core - Commit : c4bb8617b86d6b3921da6408fc012ccc3afe6eef) (Cpx: 3 / 3)
-- [ ] ⚪ **J4-S1-T2** - Implémentation du service de comparaison (Outlook MCL vs SQLite) et détection des orphelins.
+- [x] ✅ **J4-S1-T2** - Implémentation du service de comparaison (Outlook MCL vs SQLite) et détection des orphelins. (Validé le 15/09/2026 sur feature/j4-category-sync_step-1-core - Commit : <COMMIT_HASH>) (Cpx: 10 / 10)
+
 ### Step 2 - Interface de Validation au Démarrage - feature/j4-category-sync_step-2-ui
 - [ ] ⚪ **J4-S2-T1** - Composant de synchronisation (Blazor) affichant les catégories manquantes et permettant d'accepter/ignorer l'import.
 - [ ] ⚪ **J4-S2-T2** - Hook au démarrage de l'application MAUI pour déclencher l'analyse de synchronisation en tâche de fond.

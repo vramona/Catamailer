@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-15 18:20
+Généré le : 2026-09-15 18:44
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -49,9 +49,26 @@ Généré le : 2026-09-15 18:20
 - `void RequestNavigation(string uri)`
 - `void RequestExit()`
 
+### Class : CategorySyncService
+**Fichier** : `src\Catamailer.Application\Services\CategorySyncService.cs`
+**Rôle** : Service responsable de l'analyse et de la synchronisation des catégories entre Outlook et la base de données.
+**Membres et Invocations :**
+- `Task<SyncResult> AnalyzeSyncDeltasAsync()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `ICategoryManagerProvider.GetAllCategories()`
+  - *Appelle* ➡️ `SyncResult.AddDelta()`
+  - *Appelle* ➡️ `CategoryDelta.CreateMissingInCatamailer()`
+  - *Appelle* ➡️ `CategoryDelta.CreateColorMismatch()`
+  - *Appelle* ➡️ `CategoryDelta.CreateMissingInOutlook()`
+
 ### Interface : IBlazorNavigationService
 **Fichier** : `src\Catamailer.Application\Services\IBlazorNavigationService.cs`
 **Rôle** : Contrat définissant le pont de navigation depuis le code natif (MAUI) vers la vue Blazor.
+**Membres et Invocations :**
+
+### Interface : ICategorySyncService
+**Fichier** : `src\Catamailer.Application\Services\ICategorySyncService.cs`
+**Rôle** : Contrat du service d'analyse et de synchronisation des catégories.
 **Membres et Invocations :**
 
 ### Class : ShadowModeService
@@ -411,6 +428,7 @@ Généré le : 2026-09-15 18:20
 **Fichier** : `src\Catamailer.Infrastructure\OutlookCategoryManagerProvider.cs`
 **Rôle** : Implémentation du fournisseur de gestion des catégories via l'Interop COM Outlook.
 **Membres et Invocations :**
+- `IEnumerable<(string Name, string? ColorCode)> GetAllCategories()`
 - `void AddCategory(string name, string colorCode)`
   - *Appelle* ➡️ `IOutlookApplicationWrapper.CategoryExists()`
   - *Appelle* ➡️ `IOutlookApplicationWrapper.AddCategory()`
@@ -690,6 +708,29 @@ Généré le : 2026-09-15 18:20
   - *Appelle* ➡️ `BlazorNavigationService.RequestNavigation()`
 - `void RequestExit_ShouldRaiseExitRequestedEvent()`
   - *Appelle* ➡️ `BlazorNavigationService.RequestExit()`
+
+### Class : CategorySyncServiceTests
+**Fichier** : `tests\Catamailer.Application.Tests\Services\CategorySyncServiceTests.cs`
+**Membres et Invocations :**
+- `Task AnalyzeSyncDeltasAsync_ShouldReturnNoConflicts_WhenRepositoriesMatchPerfectly()`
+  - *Appelle* ➡️ `ICategoryManagerProvider.GetAllCategories()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `CategorySyncService.AnalyzeSyncDeltasAsync()`
+- `Task AnalyzeSyncDeltasAsync_ShouldDetectMissingInCatamailer()`
+  - *Appelle* ➡️ `ICategoryManagerProvider.GetAllCategories()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `CategorySyncService.AnalyzeSyncDeltasAsync()`
+  - *Appelle* ➡️ `SyncResult.GetMissingInCatamailer()`
+- `Task AnalyzeSyncDeltasAsync_ShouldDetectMissingInOutlook()`
+  - *Appelle* ➡️ `ICategoryManagerProvider.GetAllCategories()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `CategorySyncService.AnalyzeSyncDeltasAsync()`
+  - *Appelle* ➡️ `SyncResult.GetMissingInOutlook()`
+- `Task AnalyzeSyncDeltasAsync_ShouldDetectColorMismatch()`
+  - *Appelle* ➡️ `ICategoryManagerProvider.GetAllCategories()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `CategorySyncService.AnalyzeSyncDeltasAsync()`
+  - *Appelle* ➡️ `SyncResult.GetColorConflicts()`
 
 ### Class : ShadowModeServiceTests
 **Fichier** : `tests\Catamailer.Application.Tests\ShadowModeServiceTests.cs`
