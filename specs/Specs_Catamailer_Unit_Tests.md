@@ -123,10 +123,10 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 - [x] ✅ `J4-S1-T1 - CategoryDelta_CreateMissingInOutlook_ShouldSetProperties` (Validé le 15/09/2026 sur feature/j4-category-sync_step-1-core - Commit : c4bb8617b86d6b3921da6408fc012ccc3afe6eef)
 - [x] ✅ `J4-S1-T1 - CategoryDelta_CreateColorMismatch_ShouldSetBothColors` (Validé le 15/09/2026 sur feature/j4-category-sync_step-1-core - Commit : c4bb8617b86d6b3921da6408fc012ccc3afe6eef)
 - [x] ✅ `J4-S1-T1 - SyncResult_AddDelta_ShouldUpdateConflictsAndLists` (Validé le 15/09/2026 sur feature/j4-category-sync_step-1-core - Commit : c4bb8617b86d6b3921da6408fc012ccc3afe6eef)
-- [x] ✅ `J4-S1-T2 - AnalyzeSyncDeltasAsync_ShouldReturnNoConflicts_WhenRepositoriesMatchPerfectly` (Validé le 15/09/2026 sur feature/j4-category-sync_step-1-core - Commit : <COMMIT_HASH>)
-- [x] ✅ `J4-S1-T2 - AnalyzeSyncDeltasAsync_ShouldDetectMissingInCatamailer` (Validé le 15/09/2026 sur feature/j4-category-sync_step-1-core - Commit : <COMMIT_HASH>)
-- [x] ✅ `J4-S1-T2 - AnalyzeSyncDeltasAsync_ShouldDetectMissingInOutlook` (Validé le 15/09/2026 sur feature/j4-category-sync_step-1-core - Commit : <COMMIT_HASH>)
-- [x] ✅ `J4-S1-T2 - AnalyzeSyncDeltasAsync_ShouldDetectColorMismatch` (Validé le 15/09/2026 sur feature/j4-category-sync_step-1-core - Commit : <COMMIT_HASH>)
+- [x] ✅ `J4-S1-T2 - AnalyzeSyncDeltasAsync_ShouldReturnNoConflicts_WhenRepositoriesMatchPerfectly` (Validé le 15/09/2026 sur feature/j4-category-sync_step-1-core - Commit : c9ea11acbebd2e4bbcf7ddc894908c3426fb12be)
+- [x] ✅ `J4-S1-T2 - AnalyzeSyncDeltasAsync_ShouldDetectMissingInCatamailer` (Validé le 15/09/2026 sur feature/j4-category-sync_step-1-core - Commit : c9ea11acbebd2e4bbcf7ddc894908c3426fb12be)
+- [x] ✅ `J4-S1-T2 - AnalyzeSyncDeltasAsync_ShouldDetectMissingInOutlook` (Validé le 15/09/2026 sur feature/j4-category-sync_step-1-core - Commit : c9ea11acbebd2e4bbcf7ddc894908c3426fb12be)
+- [x] ✅ `J4-S1-T2 - AnalyzeSyncDeltasAsync_ShouldDetectColorMismatch` (Validé le 15/09/2026 sur feature/j4-category-sync_step-1-core - Commit : c9ea11acbebd2e4bbcf7ddc894908c3426fb12be)
 
 ---
 

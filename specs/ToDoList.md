@@ -58,7 +58,7 @@
 ## Jalon 4 - Synchronisation Référentiel Catégories - feature/j4-category-sync
 ### Step 1 - Moteur de Détection et Domain - feature/j4-category-sync_step-1-core
 - [x] ✅ **J4-S1-T1** - Modélisation des entités de comparaison (SyncResult, CategoryDelta) dans le Domain. (Validé le 15/09/2026 sur feature/j4-category-sync_step-1-core - Commit : c4bb8617b86d6b3921da6408fc012ccc3afe6eef) (Cpx: 3 / 3)
-- [x] ✅ **J4-S1-T2** - Implémentation du service de comparaison (Outlook MCL vs SQLite) et détection des orphelins. (Validé le 15/09/2026 sur feature/j4-category-sync_step-1-core - Commit : <COMMIT_HASH>) (Cpx: 10 / 10)
+- [x] ✅ **J4-S1-T2** - Implémentation du service de comparaison (Outlook MCL vs SQLite) et détection des orphelins. (Validé le 15/09/2026 sur feature/j4-category-sync_step-1-core - Commit : c9ea11acbebd2e4bbcf7ddc894908c3426fb12be) (Cpx: 10 / 10)
 
 ### Step 2 - Interface de Validation au Démarrage - feature/j4-category-sync_step-2-ui
 - [ ] ⚪ **J4-S2-T1** - Composant de synchronisation (Blazor) affichant les catégories manquantes et permettant d'accepter/ignorer l'import.
