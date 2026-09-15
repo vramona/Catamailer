@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-15 18:45
+Généré le : 2026-09-15 19:19
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -103,6 +103,24 @@ Généré le : 2026-09-15 18:45
   - *Appelle* ➡️ `IShadowModeService.SetAutoWriteEnabledAsync()`
 - `Task AcknowledgeAsync()` : Acquitte la notification pour le palier courant et la masque.
   - *Appelle* ➡️ `IShadowModeService.AcknowledgeActivationPromptAsync()`
+
+### Class : CategorySyncViewModel
+**Fichier** : `src\Catamailer.Application\ViewModels\CategorySyncViewModel.cs`
+**Rôle** : ViewModel responsable de la gestion des écarts de synchronisation entre Outlook et Catamailer.
+**Membres et Invocations :**
+- `bool HasConflicts { get; set; }` : Indique si des conflits de synchronisation ont été détectés.
+- `List<SyncDeltaOption> MissingInCatamailerOptions { get; set; }` : Liste des options pour les catégories manquantes dans la base de données Catamailer.
+- `List<SyncDeltaOption> MissingInOutlookOptions { get; set; }` : Liste des options pour les catégories manquantes dans Outlook.
+- `List<SyncDeltaOption> ColorMismatchOptions { get; set; }` : Liste des options pour les catégories présentant un conflit de couleur.
+- `Task InitializeAsync()` : Charge les écarts de synchronisation depuis le service et initialise les listes d'options pour l'IHM.
+  - *Appelle* ➡️ `ICategorySyncService.AnalyzeSyncDeltasAsync()`
+  - *Appelle* ➡️ `SyncResult.GetMissingInCatamailer()`
+  - *Appelle* ➡️ `SyncResult.GetMissingInOutlook()`
+  - *Appelle* ➡️ `SyncResult.GetColorConflicts()`
+- `Task ApplyResolutionsAsync()` : Applique les résolutions sélectionnées par l'utilisateur aux référentiels respectifs.
+  - *Appelle* ➡️ `ICategoryRepository.AddAsync()`
+  - *Appelle* ➡️ `ICategoryManagerProvider.AddCategory()`
+  - *Appelle* ➡️ `ICategoryManagerProvider.UpdateCategoryColor()`
 
 ### Class : CategoryTreeViewModel
 **Fichier** : `src\Catamailer.Application\ViewModels\CategoryTreeViewModel.cs`
@@ -223,6 +241,13 @@ Généré le : 2026-09-15 18:45
 - `Task ToggleAutoWriteAsync(bool enabled)` : Active ou désactive l'écriture automatique et met à jour l'état.
   - *Appelle* ➡️ `IShadowModeService.SetAutoWriteEnabledAsync()`
   - *Appelle* ➡️ `ShadowModeDashboardViewModel.InitializeAsync()`
+
+### Class : SyncDeltaOption
+**Fichier** : `src\Catamailer.Application\ViewModels\SyncDeltaOption.cs`
+**Rôle** : Enveloppe un écart de synchronisation avec un état de sélection booléen pour le binding IHM.
+**Membres et Invocations :**
+- `CategoryDelta Delta { get; }` : Obtient l'écart de synchronisation sous-jacent.
+- `bool IsSelected { get; set; }` : Obtient ou définit une valeur indiquant si cet écart doit être résolu. Coché par défaut.
 
 ## Projet : Catamailer.Domain
 ### Class : AppSetting
@@ -491,6 +516,15 @@ Généré le : 2026-09-15 18:45
 **Membres et Invocations :**
 - `void EnsureDatabaseCreated(IServiceProvider serviceProvider)` : S'assure que le schéma de la base de données est créé.
 
+### Class : DummyCategoryManagerProvider
+**Fichier** : `src\Catamailer.UI\Dummies\DummyCategoryManagerProvider.cs`
+**Rôle** : Fournisseur factice simulant les retours d'Outlook pour tester l'IHM de synchronisation.
+**Membres et Invocations :**
+- `IEnumerable<(string Name, string? ColorCode)> GetAllCategories()`
+- `void AddCategory(string name, string colorCode)`
+- `void UpdateCategoryColor(string name, string newColorCode)`
+- `void RemoveCategory(string name)`
+
 ### Class : DummyCategorySeeder
 **Fichier** : `src\Catamailer.UI\Dummies\DummyCategorySeeder.cs`
 **Rôle** : Injecte un jeu de catégories factices pour le développement. TODO: À supprimer une fois l'import depuis Outlook implémenté.
@@ -536,6 +570,7 @@ Généré le : 2026-09-15 18:45
 
 ### Composants Razor
 - **ActivationPrompt** : `src\Catamailer.UI\Components\ActivationPrompt.razor`
+- **CategorySyncModal** : `src\Catamailer.UI\Components\CategorySyncModal.razor`
 - **CategoryTreeNode** : `src\Catamailer.UI\Components\CategoryTreeNode.razor`
 - **CategoryTreeView** : `src\Catamailer.UI\Components\CategoryTreeView.razor`
 - **QuickCategorizeModal** : `src\Catamailer.UI\Components\QuickCategorizeModal.razor`
@@ -765,6 +800,38 @@ Généré le : 2026-09-15 18:45
 - `Task AcknowledgeAsync_ShouldAcknowledgePrompt_AndHidePrompt()`
   - *Appelle* ➡️ `ActivationPromptViewModel.InitializeAsync()`
   - *Appelle* ➡️ `ActivationPromptViewModel.AcknowledgeAsync()`
+
+### Class : CategorySyncViewModelTests
+**Fichier** : `tests\Catamailer.Application.Tests\ViewModels\CategorySyncViewModelTests.cs`
+**Membres et Invocations :**
+- `Task InitializeAsync_ShouldPopulateOptions_WhenConflictsExist()`
+  - *Appelle* ➡️ `SyncResult.AddDelta()`
+  - *Appelle* ➡️ `CategoryDelta.CreateMissingInCatamailer()`
+  - *Appelle* ➡️ `CategoryDelta.CreateMissingInOutlook()`
+  - *Appelle* ➡️ `CategoryDelta.CreateColorMismatch()`
+  - *Appelle* ➡️ `ICategorySyncService.AnalyzeSyncDeltasAsync()`
+  - *Appelle* ➡️ `CategorySyncViewModel.InitializeAsync()`
+- `Task ApplyResolutionsAsync_ShouldAddMissingInCatamailer_WhenSelected()`
+  - *Appelle* ➡️ `SyncResult.AddDelta()`
+  - *Appelle* ➡️ `CategoryDelta.CreateMissingInCatamailer()`
+  - *Appelle* ➡️ `ICategorySyncService.AnalyzeSyncDeltasAsync()`
+  - *Appelle* ➡️ `CategorySyncViewModel.InitializeAsync()`
+  - *Appelle* ➡️ `CategorySyncViewModel.ApplyResolutionsAsync()`
+  - *Appelle* ➡️ `ICategoryRepository.AddAsync()`
+- `Task ApplyResolutionsAsync_ShouldNotProcess_WhenNotSelected()`
+  - *Appelle* ➡️ `SyncResult.AddDelta()`
+  - *Appelle* ➡️ `CategoryDelta.CreateMissingInOutlook()`
+  - *Appelle* ➡️ `ICategorySyncService.AnalyzeSyncDeltasAsync()`
+  - *Appelle* ➡️ `CategorySyncViewModel.InitializeAsync()`
+  - *Appelle* ➡️ `CategorySyncViewModel.ApplyResolutionsAsync()`
+  - *Appelle* ➡️ `ICategoryManagerProvider.AddCategory()`
+- `Task ApplyResolutionsAsync_ShouldPushCatamailerColorToOutlook_ForMismatches()`
+  - *Appelle* ➡️ `SyncResult.AddDelta()`
+  - *Appelle* ➡️ `CategoryDelta.CreateColorMismatch()`
+  - *Appelle* ➡️ `ICategorySyncService.AnalyzeSyncDeltasAsync()`
+  - *Appelle* ➡️ `CategorySyncViewModel.InitializeAsync()`
+  - *Appelle* ➡️ `CategorySyncViewModel.ApplyResolutionsAsync()`
+  - *Appelle* ➡️ `ICategoryManagerProvider.UpdateCategoryColor()`
 
 ### Class : CategoryTreeViewModelTests
 **Fichier** : `tests\Catamailer.Application.Tests\ViewModels\CategoryTreeViewModelTests.cs`

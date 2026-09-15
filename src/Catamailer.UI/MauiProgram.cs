@@ -14,7 +14,9 @@
 //         - 2026-09-11 : Injection de RuleBuilderViewModel (J3-S3-T3-ST2).
 //         - 2026-09-15 : Injection de PreferencesViewModel (J3-S3-T4).
 //         - 2026-09-15 : Injection de IBlazorNavigationService (J3-S3-T7).
-//         - 2026-09-15 : Injection de ActivationPromptViewModel (J3-S3-T5 - Phase Bleue).
+//         - 2026-09-15 : Injection de ActivationPromptViewModel (J3-S3-T5).
+//         - 2026-09-15 : Injection de ICategorySyncService et CategorySyncViewModel (J4-S2).
+//         - 2026-09-15 : Remplacement temporaire par DummyCategoryManagerProvider (J4-S2 - Phase Orange).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -64,6 +66,7 @@ namespace Catamailer.UI
             // Injection des services de domaine et d'application
             builder.Services.AddTransient<ClassificationEngine>();
             builder.Services.AddScoped<IShadowModeService, ShadowModeService>();
+            builder.Services.AddScoped<ICategorySyncService, CategorySyncService>();
             
             // Le service de navigation doit être Singleton pour faire le pont entre l'hôte global et Blazor
             builder.Services.AddSingleton<IBlazorNavigationService, BlazorNavigationService>();
@@ -77,6 +80,7 @@ namespace Catamailer.UI
             // Faux fournisseurs pour le test de l'IHM (TODO: À remplacer en production)
             builder.Services.AddScoped<IRuleRepository, DummyRuleRepository>();
             builder.Services.AddScoped<ISelectionProvider, DummySelectionProvider>();
+            builder.Services.AddScoped<ICategoryManagerProvider, DummyCategoryManagerProvider>(); // INJECTION DU DUMMY
             
             // Injection des ViewModels (Transient pour réinitialiser l'état à chaque appel)
             builder.Services.AddTransient<QuickCategorizeViewModel>();
@@ -87,6 +91,7 @@ namespace Catamailer.UI
             builder.Services.AddTransient<RuleBuilderViewModel>();
             builder.Services.AddTransient<PreferencesViewModel>();
             builder.Services.AddTransient<ActivationPromptViewModel>();
+            builder.Services.AddTransient<CategorySyncViewModel>();
 
             builder.Services.AddMauiBlazorWebView();
 
