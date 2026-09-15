@@ -52,7 +52,7 @@
 - [x] ✅ **J3-S3-T3-ST1** - Éditeur de Dictionnaires (Étape 1). (Validé le 11/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : 78f75f23e681d1fb024a6cb3f5bcf4f1330cab7b) (Cpx: 5 / 5).
 - [x] ✅ **J3-S3-T3-ST2** - Builder Visuel de Règles d'exécution (Étape 2). (Validé le 15/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : 7e4dc91acb58fbe6d2a0008d32f4266bf7523281) (Cpx: 13 / 13).
 - [x] ✅ **J3-S3-T4** - Écran de Préférences Générales (Paramétrage du délai de Debounce). (Validé le 15/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : 0c93ff19e4e27e3d3c7febafcf76865e38cc430c) (Cpx: 3 / 3).
-- [x] ✅ **J3-S3-T5** - Popup de notification d'activation automatique suite aux paliers de télémétrie. (Validé le 15/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : <COMMIT_HASH>) (Cpx: 5 / 6).
+- [x] ✅ **J3-S3-T5** - Popup de notification d'activation automatique suite aux paliers de télémétrie. (Validé le 15/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : 45c96b958cf6ed0db00266dccf13940c86acd88c) (Cpx: 5 / 6).
 - [x] ✅ **J3-S3-T6** - Amélioration AiDocGenerator (Extraction des propriétés C#). (Validé le 11/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : 7adbcda98463c58774e96c9283ca58177944036d) (Cpx: 3 / 3).
 - [x] ✅ **J3-S3-T7** - Bouton Quitter Blazor et lien natif. (Validé le 15/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : 5a84daaabac29c06de35006d94d09afa29fa02dc) (Cpx: 2 / 2).
 
