@@ -3,6 +3,7 @@
 // 2026-09-08 : Correction des signatures suite à la récupération des entités de domaine (J3-S2-T2).
 // 2026-09-09 : Adaptation aux refontes de MailMetadata et DictionaryRule (J3-S2-T2-ST1).
 // 2026-09-09 : Ajout des tests pour l'IHM à 2 colonnes (Options sélectionnables et catégories déclenchées) (J3-S2-T2-ST2).
+// 2026-09-09 : Refactoring xUnit1031, passage de BuildRule_ShouldOnlyIncludeSelectedOptions en async (J3-S3-T1 - Phase Orange).
 
 using System;
 using System.Collections.Generic;
@@ -99,7 +100,7 @@ public class QuickRuleBuilderViewModelTests
     }
 
     [Fact]
-    public void BuildRule_ShouldOnlyIncludeSelectedOptions()
+    public async Task BuildRule_ShouldOnlyIncludeSelectedOptions()
     {
         // Arrange
         var targetCategory = new CategoryNode("Target");
@@ -110,7 +111,7 @@ public class QuickRuleBuilderViewModelTests
         _ruleRepositoryMock.Setup(rr => rr.GetAllDictionaryRulesAsync()).ReturnsAsync(new List<DictionaryRule>());
 
         var viewModel = CreateViewModel();
-        viewModel.InitializeAsync().Wait(); // Remplissage initial
+        await viewModel.InitializeAsync(); // Remplissage initial sans appel bloquant .Wait()
 
         viewModel.SelectCategory(targetCategory);
 

@@ -1,5 +1,6 @@
 // Historique :
 // 2026-09-07 : Création de l'énumération MailField (J1-S1-T2).
+// 2026-09-11 : Ajout du champ Category (J3-S3-T3-ST2 - Phase Verte).
 
 namespace Catamailer.Domain
 {
@@ -26,6 +27,11 @@ namespace Catamailer.Domain
         /// <summary>
         /// Le corps textuel de l'e-mail.
         /// </summary>
-        Body
+        Body,
+        
+        /// <summary>
+        /// La catégorie déduite lors de l'Étape 1.
+        /// </summary>
+        Category
     }
 }

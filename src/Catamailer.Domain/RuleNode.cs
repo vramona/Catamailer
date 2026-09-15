@@ -1,5 +1,7 @@
 // Historique :
 // 2026-09-07 : Création de l'entité RuleNode (J1-S1-T2).
+// 2026-09-11 : Ajout des méthodes de suppression (J3-S3-T3-ST2 - Phase Verte).
+// 2026-09-11 : Ajout des méthodes de mutation pour l'interface (J3-S3-T3-ST2 - Phase Orange/Verte).
 
 using System.Collections.Generic;
 
@@ -16,7 +18,7 @@ namespace Catamailer.Domain
         /// <summary>
         /// Obtient l'opérateur logique liant les enfants de ce nœud.
         /// </summary>
-        public LogicalOperator Operator { get; }
+        public LogicalOperator Operator { get; private set; }
 
         /// <summary>
         /// Obtient la liste en lecture seule des critères associés à ce nœud.
@@ -38,6 +40,15 @@ namespace Catamailer.Domain
         }
 
         /// <summary>
+        /// Modifie l'opérateur logique de ce nœud.
+        /// </summary>
+        /// <param name="newOperator">Le nouvel opérateur logique.</param>
+        public void SetOperator(LogicalOperator newOperator)
+        {
+            Operator = newOperator;
+        }
+
+        /// <summary>
         /// Ajoute un critère de validation unitaire à ce nœud.
         /// </summary>
         /// <param name="criterion">Le critère à ajouter.</param>
@@ -47,12 +58,44 @@ namespace Catamailer.Domain
         }
 
         /// <summary>
+        /// Met à jour un critère existant en le remplaçant par un nouveau (Value Object).
+        /// </summary>
+        /// <param name="oldCriterion">Le critère à remplacer.</param>
+        /// <param name="newCriterion">Le nouveau critère.</param>
+        public void UpdateCriterion(RuleCriterion oldCriterion, RuleCriterion newCriterion)
+        {
+            var index = _criteria.IndexOf(oldCriterion);
+            if (index >= 0)
+            {
+                _criteria[index] = newCriterion;
+            }
+        }
+
+        /// <summary>
+        /// Supprime un critère de validation unitaire de ce nœud.
+        /// </summary>
+        /// <param name="criterion">Le critère à supprimer.</param>
+        public void RemoveCriterion(RuleCriterion criterion)
+        {
+            _criteria.Remove(criterion);
+        }
+
+        /// <summary>
         /// Ajoute un nœud enfant permettant d'imbriquer une nouvelle couche logique.
         /// </summary>
         /// <param name="childNode">Le nœud composite enfant.</param>
         public void AddChildNode(RuleNode childNode)
         {
             _childNodes.Add(childNode);
+        }
+
+        /// <summary>
+        /// Supprime un nœud enfant de la couche logique.
+        /// </summary>
+        /// <param name="childNode">Le nœud composite enfant à supprimer.</param>
+        public void RemoveChildNode(RuleNode childNode)
+        {
+            _childNodes.Remove(childNode);
         }
     }
 }

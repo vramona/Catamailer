@@ -4,6 +4,7 @@
 //     Historique :
 //         - 2026-09-07 : Création initiale pour J2-S2-T4 (Phase Rouge).
 //         - 2026-09-07 : Implémentation de la télémétrie et du contrôle des paliers (Phase Verte).
+//         - 2026-09-09 : Implémentation de GetTelemetryStatsAsync (J3-S3-T1 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -109,6 +110,20 @@ namespace Catamailer.Application
             var currentPalier = (matchCount / 300) * 300;
 
             await _historyStateRepository.SetStateAsync(LastPromptMatchCountStateKey, currentPalier.ToString(CultureInfo.InvariantCulture));
+        }
+
+        /// <inheritdoc />
+        public async Task<(int MatchCount, int CategoryCount, bool IsAutoWriteEnabled)> GetTelemetryStatsAsync()
+        {
+            var isAutoWriteEnabled = await IsAutoWriteEnabledAsync();
+
+            var matchCountStr = await _historyStateRepository.GetStateAsync(MatchCountStateKey);
+            int.TryParse(matchCountStr, NumberStyles.Integer, CultureInfo.InvariantCulture, out var matchCount);
+
+            var categoryCountStr = await _historyStateRepository.GetStateAsync(CategoryCountStateKey);
+            int.TryParse(categoryCountStr, NumberStyles.Integer, CultureInfo.InvariantCulture, out var categoryCount);
+
+            return (matchCount, categoryCount, isAutoWriteEnabled);
         }
     }
 }

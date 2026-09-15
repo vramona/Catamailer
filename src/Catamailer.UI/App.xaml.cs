@@ -4,6 +4,8 @@
 // 2026-09-08 : Interception de l'événement natif Closing pour masquer la fenêtre au lieu de tuer l'application (J3-S1-T1).
 // 2026-09-08 : Initialisation du Hook de raccourcis Win32 sur la fenêtre native (J3-S1-T2).
 // 2026-09-08 : Ajout d'un raccourci de test (Ctrl+Alt+K) pour valider l'interception fonctionnelle (J3-S1-T2).
+// 2026-09-15 : Ajout des commandes de navigation vers Blazor via IBlazorNavigationService (J3-S3-T7).
+// 2026-09-15 : Abonnement à l'événement ExitRequested du service de navigation (J3-S3-T7 - Phase Bleue).
 
 using System;
 using System.Windows.Input;
@@ -11,6 +13,8 @@ using H.NotifyIcon;
 using Microsoft.Maui.Controls;
 using Catamailer.Domain;
 using Catamailer.Infrastructure;
+using Catamailer.Application.Services;
+using Microsoft.Extensions.DependencyInjection;
 #if WINDOWS
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
@@ -29,11 +33,15 @@ public partial class App : Microsoft.Maui.Controls.Application
     private TaskbarIcon? _trayIcon;
 
     public ICommand OpenCommand { get; }
+    public ICommand OpenRulesCommand { get; }
+    public ICommand OpenPreferencesCommand { get; }
     public ICommand ExitCommand { get; }
 
     public App()
     {
-        OpenCommand = new Command(ExecuteOpen);
+        OpenCommand = new Command(() => ExecuteNavigateAndOpen("/"));
+        OpenRulesCommand = new Command(() => ExecuteNavigateAndOpen("/rule-builder"));
+        OpenPreferencesCommand = new Command(() => ExecuteNavigateAndOpen("/preferences"));
         ExitCommand = new Command(ExecuteExit);
 
         InitializeComponent();
@@ -60,6 +68,19 @@ public partial class App : Microsoft.Maui.Controls.Application
                 var windowId = Win32Interop.GetWindowIdFromWindow(windowHandle);
                 var appWindow = AppWindow.GetFromWindowId(windowId);
                 
+                // Abonnement au service de navigation pour intercepter les demandes de fermeture depuis Blazor
+                var navService = _mainWindow.Handler?.MauiContext?.Services.GetService<IBlazorNavigationService>();
+                if (navService != null)
+                {
+                    navService.ExitRequested += (sender, args) =>
+                    {
+                        Microsoft.Maui.Controls.Application.Current?.Dispatcher.Dispatch(() =>
+                        {
+                            ExecuteExit();
+                        });
+                    };
+                }
+
                 // Initialisation du Hook Win32 pour intercepter les raccourcis globaux
                 var hotkeyService = _mainWindow.Handler?.MauiContext?.Services.GetService<IGlobalHotkeyService>() as Win32GlobalHotkeyService;
                 if (hotkeyService != null)
@@ -73,7 +94,7 @@ public partial class App : Microsoft.Maui.Controls.Application
                         {
                             Microsoft.Maui.Controls.Application.Current?.Dispatcher.Dispatch(() =>
                             {
-                                ExecuteOpen(); // Ouvre la fenêtre via le raccourci
+                                ExecuteNavigateAndOpen("/"); // Ouvre la fenêtre via le raccourci sur le dashboard
                             });
                         }
                     };
@@ -99,8 +120,13 @@ public partial class App : Microsoft.Maui.Controls.Application
         return _mainWindow;
     }
 
-    private void ExecuteOpen()
+    private void ExecuteNavigateAndOpen(string uri)
     {
+        // 1. Déclencher la navigation côté Blazor
+        var navService = _mainWindow?.Handler?.MauiContext?.Services.GetService<IBlazorNavigationService>();
+        navService?.RequestNavigation(uri);
+
+        // 2. Afficher la fenêtre Native
 #if WINDOWS
         if (_mainWindow?.Handler?.PlatformView is Microsoft.UI.Xaml.Window nativeWindow)
         {

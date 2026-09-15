@@ -1,6 +1,7 @@
 // Historique :
 // 2026-09-07 : Création de l'entité CategoryNode (J1-S1-T1).
 // 2026-09-07 : Ajout du constructeur protégé pour compatibilité avec Entity Framework Core (J1-S1-T3).
+// 2026-09-11 : Ajout de Depth et GetFullName pour le rendu hiérarchique (J3-S3-T3-ST2 - Phase Verte).
 
 using System.Collections.Generic;
 using System.Linq;
@@ -38,6 +39,11 @@ namespace Catamailer.Domain
         /// Obtient la couleur effective de la catégorie, en héritant de son ascendance si aucune couleur explicite n'est définie.
         /// </summary>
         public string? EffectiveColor => Color ?? Parent?.EffectiveColor;
+
+        /// <summary>
+        /// Obtient la profondeur du nœud dans l'arborescence (0 pour un nœud racine).
+        /// </summary>
+        public int Depth => Parent == null ? 0 : Parent.Depth + 1;
 
         /// <summary>
         /// Constructeur sans paramètre requis par Entity Framework Core pour la matérialisation.
@@ -85,6 +91,16 @@ namespace Catamailer.Domain
 
             chain.Reverse();
             return chain;
+        }
+
+        /// <summary>
+        /// Génère le nom complet de la catégorie incluant toute son ascendance, séparée par le caractère spécifié.
+        /// </summary>
+        /// <param name="separator">Le séparateur (par défaut "-").</param>
+        /// <returns>Le nom complet (ex: "Projet Alpha-Design").</returns>
+        public string GetFullName(string separator = "-")
+        {
+            return string.Join(separator, GetAscendanceChain().Select(c => c.Name));
         }
     }
 }
