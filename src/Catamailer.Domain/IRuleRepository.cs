@@ -1,6 +1,7 @@
 // Historique :
 // 2026-09-09 : Création de l'interface IRuleRepository (J3-S2-T2-ST2).
 // 2026-09-11 : Ajout des méthodes AddDictionaryRuleAsync et DeleteDictionaryRuleAsync (J3-S3-T3-ST1).
+// 2026-09-11 : Ajout des méthodes pour ExecutionRule (J3-S3-T3-ST2 - Phase Verte).
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -29,5 +30,23 @@ namespace Catamailer.Domain
         /// </summary>
         /// <param name="rule">La règle à supprimer.</param>
         Task DeleteDictionaryRuleAsync(DictionaryRule rule);
+
+        /// <summary>
+        /// Récupère l'intégralité des règles d'exécution (Étape 2).
+        /// </summary>
+        /// <returns>Une collection de ExecutionRule.</returns>
+        Task<IEnumerable<ExecutionRule>> GetAllExecutionRulesAsync();
+
+        /// <summary>
+        /// Ajoute une nouvelle règle d'exécution.
+        /// </summary>
+        /// <param name="rule">La règle à ajouter.</param>
+        Task AddExecutionRuleAsync(ExecutionRule rule);
+
+        /// <summary>
+        /// Supprime une règle d'exécution existante.
+        /// </summary>
+        /// <param name="rule">La règle à supprimer.</param>
+        Task DeleteExecutionRuleAsync(ExecutionRule rule);
     }
 }

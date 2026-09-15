@@ -5,6 +5,7 @@
 //         - 2026-09-11 : Création initiale des tests pour DictionaryEditorViewModel (J3-S3-T3-ST1 - Phase Rouge).
 //         - 2026-09-11 : Ajout des tests pour le formulaire de création et l'injection de ICategoryRepository (Phase Orange/Rouge).
 //         - 2026-09-11 : Ajout des tests pour les champs Expéditeur et Destinataire (Phase Orange/Rouge).
+//         - 2026-09-11 : Mise à jour du FakeRuleRepository pour supporter ExecutionRule (J3-S3-T3-ST2 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -43,6 +44,21 @@ namespace Catamailer.Application.Tests.ViewModels
             {
                 DeleteCalled = true;
                 Rules.Remove(rule);
+                return Task.CompletedTask;
+            }
+
+            public Task<IEnumerable<ExecutionRule>> GetAllExecutionRulesAsync()
+            {
+                return Task.FromResult(Enumerable.Empty<ExecutionRule>());
+            }
+
+            public Task AddExecutionRuleAsync(ExecutionRule rule)
+            {
+                return Task.CompletedTask;
+            }
+
+            public Task DeleteExecutionRuleAsync(ExecutionRule rule)
+            {
                 return Task.CompletedTask;
             }
         }

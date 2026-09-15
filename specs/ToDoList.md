@@ -48,9 +48,9 @@
 - [x] ✅ **J3-S3-T0** - Refactoring Initialisation (Extraction DatabaseBootstrapper et DummyCategorySeeder). (Validé le 09/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : 8716510d2f4d94ed1122bb8e05ed4c7a8745ecd5) (Cpx: 2 / 2).
 - [x] ✅ **J3-S3-T1** - Dashboard Shadow Mode. (Validé le 09/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : d0eead0a537423fd2b38f45da235aed9610bb599) (Cpx: 5 / 5).
 - [x] ✅ **J3-S3-T2** - Éditeur de Référentiel (TreeView Catégories). (Validé le 09/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : b44b14a9859fda40c6380608c76881b90588fef9) (Cpx: 8 / 8).
-- [ ] ⚪ **J3-S3-T3** - Éditeur Dictionnaires et Builder Visuel (Étape 2).
+- [x] ✅ **J3-S3-T3** - Éditeur Dictionnaires et Builder Visuel (Étape 2). (Validé le 15/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : <COMMIT_HASH>) (Cpx: 18 / 18).
 - [x] ✅ **J3-S3-T3-ST1** - Éditeur de Dictionnaires (Étape 1). (Validé le 11/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : 78f75f23e681d1fb024a6cb3f5bcf4f1330cab7b) (Cpx: 5 / 5).
-- [ ] ⚪ **J3-S3-T3-ST2** - Builder Visuel de Règles d'exécution (Étape 2).
+- [x] ✅ **J3-S3-T3-ST2** - Builder Visuel de Règles d'exécution (Étape 2). (Validé le 15/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : <COMMIT_HASH>) (Cpx: 13 / 13).
 - [ ] ⚪ **J3-S3-T4** - Écran de Préférences Générales (Paramétrage du délai de Debounce).
 - [ ] ⚪ **J3-S3-T5** - Popup de notification d'activation automatique suite aux paliers de télémétrie.
 - [x] ✅ **J3-S3-T6** - Amélioration AiDocGenerator (Extraction des propriétés C#). (Validé le 11/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : 7adbcda98463c58774e96c9283ca58177944036d) (Cpx: 3 / 3).

@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-11 14:41
+Généré le : 2026-09-15 10:01
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -128,6 +128,38 @@ Généré le : 2026-09-11 14:41
 - `void SelectCategory(CategoryNode category)` : Définit la catégorie cible pour la règle en cours de création.
 - `DictionaryRule? BuildRule()` : Construit l'objet DictionaryRule final en incluant uniquement les options cochées.
 
+### Record : CategoryOption
+**Fichier** : `src\Catamailer.Application\ViewModels\RuleBuilderViewModel.cs`
+**Rôle** : Représente une option de catégorie aplatie et formatée pour l'IHM.
+**Membres et Invocations :**
+
+### Class : RuleBuilderViewModel
+**Fichier** : `src\Catamailer.Application\ViewModels\RuleBuilderViewModel.cs`
+**Rôle** : ViewModel responsable de la création visuelle des règles d'exécution (Étape 2).
+**Membres et Invocations :**
+- `string RuleName { get; set; }` : Obtient ou définit le nom descriptif de la règle à sauvegarder.
+- `RuleNode RootNode { get; }` : Obtient le nœud racine de l'arbre des conditions.
+- `RuleAction? FinalAction { get; set; }` : Obtient l'action finale à exécuter si l'arbre est validé.
+- `IEnumerable<CategoryNode> AvailableCategories { get; set; }` : Obtient la liste brute des catégories disponibles.
+- `IEnumerable<CategoryOption> FlatCategories { get; set; }` : Obtient la liste aplatie et indentée des catégories prête pour l'affichage UI.
+- `Task InitializeAsync()` : Charge les données de référence nécessaires à l'IHM (catégories) et construit l'arborescence visuelle.
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `CategoryNode.GetFullName()`
+  - *Appelle* ➡️ `RuleBuilderViewModel.Traverse()`
+- `void SetOperator(RuleNode targetNode, LogicalOperator newOperator)` : Modifie l'opérateur logique d'un nœud spécifique.
+  - *Appelle* ➡️ `RuleNode.SetOperator()`
+- `void AddCriterion(RuleNode targetNode, RuleCriterion criterion)` : Ajoute un critère à un nœud spécifique.
+  - *Appelle* ➡️ `RuleNode.AddCriterion()`
+- `void UpdateCriterion(RuleNode targetNode, RuleCriterion oldCriterion, RuleCriterion newCriterion)` : Met à jour un critère existant dans un nœud spécifique.
+  - *Appelle* ➡️ `RuleNode.UpdateCriterion()`
+- `void RemoveCriterion(RuleNode targetNode, RuleCriterion criterion)` : Supprime un critère d'un nœud spécifique.
+  - *Appelle* ➡️ `RuleNode.RemoveCriterion()`
+- `void AddChildNode(RuleNode targetNode, RuleNode childNode)` : Ajoute un sous-nœud à un nœud spécifique.
+  - *Appelle* ➡️ `RuleNode.AddChildNode()`
+- `void SetAction(RuleAction action)` : Définit l'action finale de la règle.
+- `Task SaveRuleAsync()` : Sauvegarde la règle en base de données si elle est correctement configurée.
+  - *Appelle* ➡️ `IRuleRepository.AddExecutionRuleAsync()`
+
 ### Class : ShadowModeDashboardViewModel
 **Fichier** : `src\Catamailer.Application\ViewModels\ShadowModeDashboardViewModel.cs`
 **Rôle** : ViewModel responsable de l'affichage et de la gestion des statistiques du Shadow Mode.
@@ -158,8 +190,11 @@ Généré le : 2026-09-11 14:41
 - `CategoryNode? Parent { get; set; }` : Obtient le parent de cette catégorie dans l'arbre.
 - `IReadOnlyList<CategoryNode> Children { get; }` : Obtient la liste en lecture seule des enfants de cette catégorie.
 - `string? EffectiveColor { get; }` : Obtient la couleur effective de la catégorie, en héritant de son ascendance si aucune couleur explicite n'est définie.
+- `int Depth { get; }` : Obtient la profondeur du nœud dans l'arborescence (0 pour un nœud racine).
 - `void AddChild(CategoryNode child)` : Ajoute un nœud enfant à cette catégorie et lie automatiquement ce nœud à ce parent.
 - `IEnumerable<CategoryNode> GetAscendanceChain()` : Récupère la chaîne d'ascendance complète depuis la racine jusqu'à ce nœud inclus.
+- `string GetFullName(string separator)` : Génère le nom complet de la catégorie incluant toute son ascendance, séparée par le caractère spécifié.
+  - *Appelle* ➡️ `CategoryNode.GetAscendanceChain()`
 
 ### Class : DictionaryRule
 **Fichier** : `src\Catamailer.Domain\DictionaryRule.cs`
@@ -169,6 +204,14 @@ Généré le : 2026-09-11 14:41
 - `IReadOnlyList<string> SubjectKeywords { get; }` : Obtient la liste des mots-clés recherchés dans le sujet.
 - `IReadOnlyList<string> SenderKeywords { get; }` : Obtient la liste des mots-clés (adresses ou noms) recherchés parmi les expéditeurs.
 - `IReadOnlyList<string> RecipientKeywords { get; }` : Obtient la liste des mots-clés (adresses ou noms) recherchés parmi les destinataires.
+
+### Class : ExecutionRule
+**Fichier** : `src\Catamailer.Domain\ExecutionRule.cs`
+**Rôle** : Représente l'entité racine (Aggregate Root) pour une règle de l'Étape 2.
+**Membres et Invocations :**
+- `string Name { get; }` : Obtient le nom descriptif de la règle.
+- `RuleNode RootNode { get; }` : Obtient le nœud racine de l'arbre des conditions d'exécution.
+- `RuleAction Action { get; }` : Obtient l'action finale à exécuter si l'arbre est validé.
 
 ### Interface : IAppSettingsRepository
 **Fichier** : `src\Catamailer.Domain\IAppSettingsRepository.cs`
@@ -254,11 +297,15 @@ Généré le : 2026-09-11 14:41
 **Fichier** : `src\Catamailer.Domain\RuleNode.cs`
 **Rôle** : Représente un nœud dans l'arbre composite des conditions d'exécution de l'Étape 2.
 **Membres et Invocations :**
-- `LogicalOperator Operator { get; }` : Obtient l'opérateur logique liant les enfants de ce nœud.
+- `LogicalOperator Operator { get; set; }` : Obtient l'opérateur logique liant les enfants de ce nœud.
 - `IReadOnlyList<RuleCriterion> Criteria { get; }` : Obtient la liste en lecture seule des critères associés à ce nœud.
 - `IReadOnlyList<RuleNode> ChildNodes { get; }` : Obtient la liste en lecture seule des nœuds enfants (sous-arbres).
+- `void SetOperator(LogicalOperator newOperator)` : Modifie l'opérateur logique de ce nœud.
 - `void AddCriterion(RuleCriterion criterion)` : Ajoute un critère de validation unitaire à ce nœud.
+- `void UpdateCriterion(RuleCriterion oldCriterion, RuleCriterion newCriterion)` : Met à jour un critère existant en le remplaçant par un nouveau (Value Object).
+- `void RemoveCriterion(RuleCriterion criterion)` : Supprime un critère de validation unitaire de ce nœud.
 - `void AddChildNode(RuleNode childNode)` : Ajoute un nœud enfant permettant d'imbriquer une nouvelle couche logique.
+- `void RemoveChildNode(RuleNode childNode)` : Supprime un nœud enfant de la couche logique.
 
 ### Class : SystemState
 **Fichier** : `src\Catamailer.Domain\SystemState.cs`
@@ -376,11 +423,14 @@ Généré le : 2026-09-11 14:41
 
 ### Class : DummyRuleRepository
 **Fichier** : `src\Catamailer.UI\Dummies\DummyRuleRepository.cs`
-**Rôle** : Dépôt factice pour fournir des règles en l'absence de base de données implémentée pour DictionaryRule. TODO: À supprimer une fois le vrai dépôt implémenté.
+**Rôle** : Dépôt factice pour fournir des règles en l'absence de base de données.
 **Membres et Invocations :**
 - `Task<IEnumerable<DictionaryRule>> GetAllDictionaryRulesAsync()`
 - `Task AddDictionaryRuleAsync(DictionaryRule rule)`
 - `Task DeleteDictionaryRuleAsync(DictionaryRule rule)`
+- `Task<IEnumerable<ExecutionRule>> GetAllExecutionRulesAsync()`
+- `Task AddExecutionRuleAsync(ExecutionRule rule)`
+- `Task DeleteExecutionRuleAsync(ExecutionRule rule)`
 
 ### Class : DummySelectionProvider
 **Fichier** : `src\Catamailer.UI\Dummies\DummySelectionProvider.cs`
@@ -420,6 +470,7 @@ Généré le : 2026-09-11 14:41
 - **DictionaryEditor** (Route: `/dictionary-editor`) : `src\Catamailer.UI\Components\Pages\DictionaryEditor.razor`
 - **Home** (Route: `/`) : `src\Catamailer.UI\Components\Pages\Home.razor`
 - **NotFound** (Route: `/not-found`) : `src\Catamailer.UI\Components\Pages\NotFound.razor`
+- **RuleBuilder** (Route: `/rule-builder`) : `src\Catamailer.UI\Components\Pages\RuleBuilder.razor`
 
 ## Projet : AiDocGenerator
 ### Class : CSharpAnalyzer
@@ -646,6 +697,30 @@ Généré le : 2026-09-11 14:41
   - *Appelle* ➡️ `QuickRuleBuilderViewModel.SelectCategory()`
   - *Appelle* ➡️ `QuickRuleBuilderViewModel.BuildRule()`
 
+### Class : RuleBuilderViewModelTests
+**Fichier** : `tests\Catamailer.Application.Tests\ViewModels\RuleBuilderViewModelTests.cs`
+**Membres et Invocations :**
+- `void Constructor_ShouldInitializeRootNode()`
+- `Task InitializeAsync_ShouldLoadCategories_FromCategoryRepository()`
+  - *Appelle* ➡️ `RuleBuilderViewModel.InitializeAsync()`
+- `void AddCriterion_ShouldAddCriterionToTargetNode()`
+  - *Appelle* ➡️ `RuleBuilderViewModel.AddCriterion()`
+- `void RemoveCriterion_ShouldRemoveCriterionFromTargetNode()`
+  - *Appelle* ➡️ `RuleBuilderViewModel.AddCriterion()`
+  - *Appelle* ➡️ `RuleBuilderViewModel.RemoveCriterion()`
+- `void AddChildNode_ShouldAddNodeToTargetNode()`
+  - *Appelle* ➡️ `RuleBuilderViewModel.AddChildNode()`
+- `void SetAction_ShouldUpdateFinalActionProperty()`
+  - *Appelle* ➡️ `RuleBuilderViewModel.SetAction()`
+- `void SetOperator_ShouldUpdateTargetNodeOperator()`
+  - *Appelle* ➡️ `RuleBuilderViewModel.SetOperator()`
+- `void UpdateCriterion_ShouldReplaceCriterionInTargetNode()`
+  - *Appelle* ➡️ `RuleBuilderViewModel.AddCriterion()`
+  - *Appelle* ➡️ `RuleBuilderViewModel.UpdateCriterion()`
+- `Task SaveRuleAsync_ShouldCallRepository_WhenNameAndActionAreSet()`
+  - *Appelle* ➡️ `RuleBuilderViewModel.SetAction()`
+  - *Appelle* ➡️ `RuleBuilderViewModel.SaveRuleAsync()`
+
 ### Class : ShadowModeDashboardViewModelTests
 **Fichier** : `tests\Catamailer.Application.Tests\ViewModels\ShadowModeDashboardViewModelTests.cs`
 **Rôle** : Tests unitaires pour la classe ShadowModeDashboardViewModel.
@@ -675,14 +750,22 @@ Généré le : 2026-09-11 14:41
 
 ### Class : RuleModelsTests
 **Fichier** : `tests\Catamailer.Domain.Tests\RuleModelsTests.cs`
-**Rôle** : Classe de test validant la modélisation des entités de règles (DictionaryRule, RuleNode, RuleCriterion, RuleAction).
+**Rôle** : Classe de test validant la modélisation des entités de règles (DictionaryRule, RuleNode, RuleCriterion, RuleAction, ExecutionRule).
 **Membres et Invocations :**
 - `void DictionaryRule_Creation_ShouldSetProperties()`
 - `void RuleAction_Creation_ShouldSetActionTypeAndParameter()`
 - `void RuleCriterion_Creation_ShouldSetConditionFields()`
+- `void RuleCriterion_WithCategoryField_AndValidOperator_ShouldBeValid()`
+- `void RuleCriterion_WithInvalidCombinations_ShouldThrowArgumentException()`
 - `void RuleNode_ShouldActAsComposite_HoldingCriteriaAndChildNodes()`
   - *Appelle* ➡️ `RuleNode.AddCriterion()`
   - *Appelle* ➡️ `RuleNode.AddChildNode()`
+- `void RuleNode_SetOperator_ShouldUpdateOperatorValue()`
+  - *Appelle* ➡️ `RuleNode.SetOperator()`
+- `void RuleNode_UpdateCriterion_ShouldReplaceOldCriterionWithNewOne()`
+  - *Appelle* ➡️ `RuleNode.AddCriterion()`
+  - *Appelle* ➡️ `RuleNode.UpdateCriterion()`
+- `void ExecutionRule_Creation_ShouldSetProperties()`
 
 ## Projet : Catamailer.Infrastructure.Tests
 ### Class : CatamailerDbContextTests

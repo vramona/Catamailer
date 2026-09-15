@@ -3,6 +3,7 @@
 //     Date de création : 2026-09-09
 //     Historique :
 //         - 2026-09-09 : Création pour isoler le jeu de test factice (J3-S3-T0 - Phase Orange).
+//         - 2026-09-11 : Correction du nommage de l'enfant Design pour exploiter la hiérarchie (J3-S3-T3-ST2 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -35,7 +36,9 @@ namespace Catamailer.UI.Dummies
             {
                 var urgent = new CategoryNode("Urgent", "#dc3545");
                 var alpha = new CategoryNode("Projet Alpha", "#0d6efd");
-                var alphaDesign = new CategoryNode("Projet Alpha - Design"); // Sans couleur
+                
+                // L'arborescence se chargera de reconstruire "Projet Alpha-Design" lors des exports
+                var alphaDesign = new CategoryNode("Design"); // Sans couleur
                 
                 alpha.AddChild(alphaDesign); // Héritage de la couleur de "Projet Alpha"
 

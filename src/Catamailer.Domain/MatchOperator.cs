@@ -1,5 +1,6 @@
 // Historique :
 // 2026-09-07 : Création de l'énumération MatchOperator (J1-S1-T2).
+// 2026-09-11 : Ajout des opérateurs pour l'arbre des catégories (J3-S3-T3-ST2 - Phase Verte).
 
 namespace Catamailer.Domain
 {
@@ -9,7 +10,7 @@ namespace Catamailer.Domain
     public enum MatchOperator
     {
         /// <summary>
-        /// Correspondance stricte et exacte.
+        /// Correspondance stricte et exacte (applicable aux chaînes).
         /// </summary>
         Equals,
         
@@ -21,6 +22,16 @@ namespace Catamailer.Domain
         /// <summary>
         /// Correspondance basée sur une expression régulière.
         /// </summary>
-        RegexMatch
+        RegexMatch,
+
+        /// <summary>
+        /// Correspondance stricte au nœud de catégorie ciblé (sans ses enfants).
+        /// </summary>
+        ExactNode,
+
+        /// <summary>
+        /// Correspondance au nœud de catégorie ciblé ou à n'importe lequel de ses enfants (ascendance).
+        /// </summary>
+        NodeAndChildren
     }
 }

@@ -10,7 +10,8 @@
 //         - 2026-09-09 : Injection de ShadowModeDashboardViewModel et IShadowModeService (J3-S3-T1).
 //         - 2026-09-09 : Refactoring de l'initialisation et extraction des Dummies (J3-S3-T0).
 //         - 2026-09-09 : Injection de CategoryTreeViewModel (J3-S3-T2).
-//         - 2026-09-11 : Injection de DictionaryEditorViewModel (J3-S3-T3-ST1 - Phase Bleue).
+//         - 2026-09-11 : Injection de DictionaryEditorViewModel (J3-S3-T3-ST1).
+//         - 2026-09-11 : Injection de RuleBuilderViewModel (J3-S3-T3-ST2 - Phase Bleue).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -76,6 +77,7 @@ namespace Catamailer.UI
             builder.Services.AddTransient<ShadowModeDashboardViewModel>();
             builder.Services.AddTransient<CategoryTreeViewModel>();
             builder.Services.AddTransient<DictionaryEditorViewModel>();
+            builder.Services.AddTransient<RuleBuilderViewModel>();
 
             builder.Services.AddMauiBlazorWebView();
 
