@@ -6,6 +6,7 @@
 //         - 2026-09-07 : Création initiale (Phase Rouge).
 //         - 2026-09-07 : Implémentation des opérations CRUD avec le wrapper (Phase Verte).
 //         - 2026-09-15 : Implémentation de GetAllCategories avec NotImplementedException (J4-S1-T2).
+//         - 2026-09-15 : Implémentation de GetAllCategories via GetMasterCategories (J4-S3-T1 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -34,8 +35,7 @@ namespace Catamailer.Infrastructure
         /// <inheritdoc />
         public IEnumerable<(string Name, string? ColorCode)> GetAllCategories()
         {
-            // TODO: Implémenter via IOutlookApplicationWrapper lors de la phase Infrastructure COM
-            throw new NotImplementedException("L'implémentation COM pour lire la Master Category List sera faite ultérieurement.");
+            return _outlookWrapper.GetMasterCategories();
         }
 
         /// <inheritdoc />

@@ -134,6 +134,9 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 - [x] ✅ `J4-S2-T1 - ApplyResolutionsAsync_ShouldNotProcess_WhenNotSelected` (Validé le 15/09/2026 sur feature/j4-category-sync_step-2-ui - Commit : 446e031435b349db4f35f5769c47cae0bba1155f)
 - [x] ✅ `J4-S2-T1 - ApplyResolutionsAsync_ShouldPushCatamailerColorToOutlook_ForMismatches` (Validé le 15/09/2026 sur feature/j4-category-sync_step-2-ui - Commit : 446e031435b349db4f35f5769c47cae0bba1155f)
 
+### 🟢 J4-S3 : Intégration Infrastructure COM
+- [x] ✅ `J4-S3-T1 - GetAllCategories_ShouldReturnMappedCategories_FromWrapper` (Validé le 16/09/2026 sur feature/j4-category-sync_step-3-infra - Commit : <COMMIT_HASH>)
+
 ---
 
 ## 🟢 JALON 5 - MIGRATION CSV
