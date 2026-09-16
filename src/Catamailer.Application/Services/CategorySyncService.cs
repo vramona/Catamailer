@@ -4,11 +4,12 @@
 //     Date de création : 2026-09-15
 //     Historique :
 //         - 2026-09-15 : Création initiale de CategorySyncService (J4-S1-T2 - Phase Verte).
-//         - 2026-09-15 : Ajout de l'implémentation de l'interface ICategorySyncService.
+//         - 2026-09-16 : Ajout de la reconstruction d'arbre virtuel et de l'héritage de couleurs (J4-S4-T1 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Catamailer.Domain;
@@ -36,37 +37,63 @@ namespace Catamailer.Application.Services
         }
 
         /// <inheritdoc />
-        public async Task<SyncResult> AnalyzeSyncDeltasAsync()
+        public async Task<SyncResult> AnalyzeSyncDeltasAsync(string? separator = null)
         {
             var result = new SyncResult();
-
             var dbCategories = await _categoryRepository.GetAllAsync();
-            var outlookCategories = _outlookProvider.GetAllCategories();
-
             var dbDict = dbCategories.ToDictionary(c => c.Name, c => c, StringComparer.OrdinalIgnoreCase);
-            var outlookDict = outlookCategories.ToDictionary(c => c.Name, c => c, StringComparer.OrdinalIgnoreCase);
 
-            // 1. Détection : Présent dans Outlook mais absent/différent dans Catamailer
-            foreach (var outlookCat in outlookCategories)
+            var rawOutlookCategories = _outlookProvider.GetAllCategories();
+            var outlookDict = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+
+            // 1. Initialiser le dictionnaire avec les catégories explicites lues dans Outlook
+            foreach (var (Name, ColorCode) in rawOutlookCategories)
             {
-                if (!dbDict.TryGetValue(outlookCat.Name, out var dbCat))
-                {
-                    result.AddDelta(CategoryDelta.CreateMissingInCatamailer(outlookCat.Name, outlookCat.ColorCode));
-                }
-                else
-                {
-                    // Comparaison des couleurs (en ignorant la casse pour l'hexa)
-                    string? dbColor = dbCat.EffectiveColor;
-                    string? outColor = outlookCat.ColorCode;
+                outlookDict[Name] = ColorCode;
+            }
 
-                    if (!string.Equals(dbColor, outColor, StringComparison.OrdinalIgnoreCase))
+            // 2. Reconstruire la hiérarchie implicite si un séparateur est fourni
+            if (!string.IsNullOrEmpty(separator))
+            {
+                var explicitNames = outlookDict.Keys.ToList();
+                foreach (var name in explicitNames)
+                {
+                    var parts = name.Split(new[] { separator }, StringSplitOptions.None);
+                    string current = "";
+                    for (int i = 0; i < parts.Length - 1; i++) // Remonte jusqu'au parent direct
                     {
-                        result.AddDelta(CategoryDelta.CreateColorMismatch(outlookCat.Name, outColor ?? "", dbColor ?? ""));
+                        current += (i == 0 ? "" : separator) + parts[i];
+                        if (!outlookDict.ContainsKey(current))
+                        {
+                            outlookDict[current] = null; // Création d'un parent implicite (sans couleur propre)
+                        }
                     }
                 }
             }
 
-            // 2. Détection : Présent dans Catamailer mais absent d'Outlook
+            // 3. Détection des manques dans Catamailer et conflits de couleur
+            foreach (var kvp in outlookDict)
+            {
+                string outName = kvp.Key;
+                string? outOptimizedColor = GetOptimizedOutlookColor(outName, outlookDict, separator);
+
+                if (!dbDict.TryGetValue(outName, out var dbCat))
+                {
+                    result.AddDelta(CategoryDelta.CreateMissingInCatamailer(outName, outOptimizedColor));
+                }
+                else
+                {
+                    string? dbEff = dbCat.EffectiveColor;
+                    string? outEff = GetOutlookEffectiveColor(outName, outlookDict, separator);
+
+                    if (!string.Equals(dbEff, outEff, StringComparison.OrdinalIgnoreCase))
+                    {
+                        result.AddDelta(CategoryDelta.CreateColorMismatch(outName, outEff ?? "", dbEff ?? ""));
+                    }
+                }
+            }
+
+            // 4. Détection des manques dans Outlook
             foreach (var dbCat in dbCategories)
             {
                 if (!outlookDict.ContainsKey(dbCat.Name))
@@ -76,6 +103,49 @@ namespace Catamailer.Application.Services
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Remonte l'arbre virtuel d'Outlook pour déterminer la couleur effective héritée d'un nœud.
+        /// </summary>
+        private string? GetOutlookEffectiveColor(string name, Dictionary<string, string?> outlookDict, string? separator)
+        {
+            if (string.IsNullOrEmpty(separator)) return outlookDict.TryGetValue(name, out var c) ? c : null;
+            
+            string current = name;
+            while (true)
+            {
+                if (outlookDict.TryGetValue(current, out var color) && color != null)
+                    return color;
+                
+                int lastSep = current.LastIndexOf(separator);
+                if (lastSep < 0) break;
+                current = current.Substring(0, lastSep);
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Calcule la couleur optimisée (null si elle hérite exactement de son parent) pour respecter le modèle Catamailer.
+        /// </summary>
+        private string? GetOptimizedOutlookColor(string name, Dictionary<string, string?> outlookDict, string? separator)
+        {
+            string? explicitColor = outlookDict[name];
+            if (explicitColor == null) return null; // Un parent implicite n'a déjà pas de couleur
+            
+            if (string.IsNullOrEmpty(separator)) return explicitColor;
+
+            int lastSep = name.LastIndexOf(separator);
+            if (lastSep < 0) return explicitColor; // Nœud racine, pas d'héritage possible
+            
+            string parentName = name.Substring(0, lastSep);
+            string? parentEffective = GetOutlookEffectiveColor(parentName, outlookDict, separator);
+
+            // Si la couleur explicite est identique à ce qu'il hériterait de son ascendance, on l'annule (null) pour utiliser l'héritage dans Catamailer
+            if (string.Equals(explicitColor, parentEffective, StringComparison.OrdinalIgnoreCase))
+                return null;
+
+            return explicitColor;
         }
     }
 }

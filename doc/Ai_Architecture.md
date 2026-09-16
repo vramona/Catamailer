@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-16 17:32
+Généré le : 2026-09-16 17:54
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -53,11 +53,13 @@ Généré le : 2026-09-16 17:32
 **Fichier** : `src\Catamailer.Application\Services\CategorySyncService.cs`
 **Rôle** : Service responsable de l'analyse et de la synchronisation des catégories entre Outlook et la base de données.
 **Membres et Invocations :**
-- `Task<SyncResult> AnalyzeSyncDeltasAsync()`
+- `Task<SyncResult> AnalyzeSyncDeltasAsync(string? separator)`
   - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
   - *Appelle* ➡️ `ICategoryManagerProvider.GetAllCategories()`
+  - *Appelle* ➡️ `CategorySyncService.GetOptimizedOutlookColor()`
   - *Appelle* ➡️ `SyncResult.AddDelta()`
   - *Appelle* ➡️ `CategoryDelta.CreateMissingInCatamailer()`
+  - *Appelle* ➡️ `CategorySyncService.GetOutlookEffectiveColor()`
   - *Appelle* ➡️ `CategoryDelta.CreateColorMismatch()`
   - *Appelle* ➡️ `CategoryDelta.CreateMissingInOutlook()`
 
@@ -782,6 +784,16 @@ Généré le : 2026-09-16 17:32
   - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
   - *Appelle* ➡️ `CategorySyncService.AnalyzeSyncDeltasAsync()`
   - *Appelle* ➡️ `SyncResult.GetColorConflicts()`
+- `Task AnalyzeSyncDeltasAsync_ShouldCreateImplicitParent_WhenOnlyChildExistsInOutlook()`
+  - *Appelle* ➡️ `ICategoryManagerProvider.GetAllCategories()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `CategorySyncService.AnalyzeSyncDeltasAsync()`
+  - *Appelle* ➡️ `SyncResult.GetMissingInCatamailer()`
+- `Task AnalyzeSyncDeltasAsync_ShouldApplyInheritance_WhenOutlookReturnsSameColorForHierarchy()`
+  - *Appelle* ➡️ `ICategoryManagerProvider.GetAllCategories()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `CategorySyncService.AnalyzeSyncDeltasAsync()`
+  - *Appelle* ➡️ `SyncResult.GetMissingInCatamailer()`
 
 ### Class : ShadowModeServiceTests
 **Fichier** : `tests\Catamailer.Application.Tests\ShadowModeServiceTests.cs`

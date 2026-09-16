@@ -4,6 +4,7 @@
 //     Date de création : 2026-09-15
 //     Historique :
 //         - 2026-09-15 : Création initiale des tests pour CategorySyncService (J4-S1-T2 - Phase Rouge).
+//         - 2026-09-16 : Ajout des tests de hiérarchie implicite et séparateur dynamique (J4-S4-T1 - Phase Rouge).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -110,6 +111,63 @@ namespace Catamailer.Application.Tests.Services
             Assert.Equal("SharedCat", conflict.CategoryName);
             Assert.Equal("#OUTLOOK", conflict.OutlookColor);
             Assert.Equal("#DBCOLOR", conflict.CatamailerColor);
+        }
+
+        [Fact]
+        public async Task AnalyzeSyncDeltasAsync_ShouldCreateImplicitParent_WhenOnlyChildExistsInOutlook()
+        {
+            // Arrange
+            // Outlook retourne uniquement l'enfant "CCOEN-Voyage", le parent "CCOEN" n'existe pas physiquement dans Outlook
+            _outlookProviderMock.Setup(p => p.GetAllCategories())
+                .Returns(new List<(string, string?)> { ("CCOEN-Voyage", "#1ABC9C") });
+
+            _categoryRepositoryMock.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<CategoryNode>());
+
+            // Act
+            // On passe le séparateur "-" pour déclencher la détection d'arborescence
+            var result = await _sut.AnalyzeSyncDeltasAsync("-");
+
+            // Assert
+            Assert.True(result.HasConflicts);
+            var missing = result.GetMissingInCatamailer().ToList();
+            
+            // Il doit proposer d'importer le parent IMPLICITE ET l'enfant EXPLICITE
+            Assert.Equal(2, missing.Count);
+            
+            var parentDelta = missing.FirstOrDefault(m => m.CategoryName == "CCOEN");
+            Assert.NotNull(parentDelta);
+            Assert.Null(parentDelta.OutlookColor); // Le parent implicite n'a pas de couleur propre lue dans Outlook
+
+            var childDelta = missing.FirstOrDefault(m => m.CategoryName == "CCOEN-Voyage");
+            Assert.NotNull(childDelta);
+            Assert.Equal("#1ABC9C", childDelta.OutlookColor);
+        }
+
+        [Fact]
+        public async Task AnalyzeSyncDeltasAsync_ShouldApplyInheritance_WhenOutlookReturnsSameColorForHierarchy()
+        {
+            // Arrange
+            // Outlook retourne le parent et l'enfant avec la même couleur
+            _outlookProviderMock.Setup(p => p.GetAllCategories())
+                .Returns(new List<(string, string?)> 
+                { 
+                    ("CCOEN", "#1ABC9C"),
+                    ("CCOEN-Voyage", "#1ABC9C") 
+                });
+
+            _categoryRepositoryMock.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<CategoryNode>());
+
+            // Act
+            var result = await _sut.AnalyzeSyncDeltasAsync("-");
+
+            // Assert
+            var missing = result.GetMissingInCatamailer().ToList();
+            Assert.Equal(2, missing.Count);
+
+            var childDelta = missing.First(m => m.CategoryName == "CCOEN-Voyage");
+            // S'il a la même couleur que son parent dans l'arborescence reconstruite,
+            // Catamailer devrait optimiser en utilisant l'héritage (donc null explicitement)
+            Assert.Null(childDelta.OutlookColor); 
         }
     }
 }
