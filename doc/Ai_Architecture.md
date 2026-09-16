@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-15 19:20
+Généré le : 2026-09-16 17:32
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -449,11 +449,27 @@ Généré le : 2026-09-15 19:20
 **Rôle** : Interface d'abstraction pour l'application COM Outlook, facilitant les tests unitaires.
 **Membres et Invocations :**
 
+### Class : OutlookApplicationWrapper
+**Fichier** : `src\Catamailer.Infrastructure\OutlookApplicationWrapper.cs`
+**Rôle** : Implémentation concrète de l'abstraction COM Outlook via Late Binding (dynamic).
+**Membres et Invocations :**
+- `IEnumerable<(string Name, string? ColorCode)> GetMasterCategories()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.MapOlCategoryColorToHex()`
+- `MailMetadata GetMailMetadata(string entryId)`
+- `string? GetSelectedEntryId()`
+- `bool CategoryExists(string name)`
+- `void AddCategory(string name, string colorCode)`
+- `void UpdateCategory(string name, string newColorCode)`
+- `void RemoveCategory(string name)`
+- `void ReplaceCategoryOnAllItems(string oldCategoryName, string newCategoryName)`
+- `IEnumerable<string> GetNextUnprocessedMailEntryIds(string? lastEntryId, int maxItems)`
+
 ### Class : OutlookCategoryManagerProvider
 **Fichier** : `src\Catamailer.Infrastructure\OutlookCategoryManagerProvider.cs`
 **Rôle** : Implémentation du fournisseur de gestion des catégories via l'Interop COM Outlook.
 **Membres et Invocations :**
 - `IEnumerable<(string Name, string? ColorCode)> GetAllCategories()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.GetMasterCategories()`
 - `void AddCategory(string name, string colorCode)`
   - *Appelle* ➡️ `IOutlookApplicationWrapper.CategoryExists()`
   - *Appelle* ➡️ `IOutlookApplicationWrapper.AddCategory()`
@@ -1012,6 +1028,9 @@ Généré le : 2026-09-15 19:20
 **Fichier** : `tests\Catamailer.Infrastructure.Tests\OutlookCategoryManagerProviderTests.cs`
 **Rôle** : Classe de tests validant le comportement du gestionnaire de catégories Outlook.
 **Membres et Invocations :**
+- `void GetAllCategories_ShouldReturnMappedCategories_FromWrapper()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.GetMasterCategories()`
+  - *Appelle* ➡️ `OutlookCategoryManagerProvider.GetAllCategories()`
 - `void AddCategory_ShouldCallWrapperAdd_WhenCategoryDoesNotExist()`
   - *Appelle* ➡️ `IOutlookApplicationWrapper.CategoryExists()`
   - *Appelle* ➡️ `OutlookCategoryManagerProvider.AddCategory()`

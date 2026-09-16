@@ -32,11 +32,11 @@
 
 ## Jalon 3 - Intégration Système et IHM - feature/j3-tray-ui
 ### Step 1 : Application Hôte et Zone de Notification - feature/j3-tray-ui_step-1-host
-- ✅ **J3-S1-T1 - Démarrage Headless et Tray Icon de base** : Configurer le projet MAUI pour démarrer de façon invisible (Headless) et afficher une icône native avec `H.NotifyIcon` dans la zone de notification Windows. Ajout d'un menu contextuel basique (Ouvrir / Quitter) via des Commandes MVVM (App.xaml). Configuration du profil de lancement (launch.json/tasks.json). (Validé le 08/09/2026 sur feature/j3-tray-ui_step-1-host - Commit : c7161baebfa314a65a8d7fef263e91a6583e8804) (Cpx: 5 / 5).
-- ✅ **J3-S1-T2 - GlobalHotkeyService (Hook Win32)** : Création de `IGlobalHotkeyService` et implémentation `Win32GlobalHotkeyService` avec P/Invoke (`RegisterHotKey`, `UnregisterHotKey`) et Subclassing (`SetWindowSubclass`) pour intercepter `WM_HOTKEY` (0x0312). Injection, initialisation sur le handle natif, et validation fonctionnelle. (Validé le 08/09/2026 sur feature/j3-tray-ui_step-1-host - Commit : 4a5b88b8e70c9201a863d0e9ac33c541ea287541) (Cpx: 5 / 5).
+- [x] ✅ **J3-S1-T1** - Démarrage Headless et Tray Icon de base. (Validé le 08/09/2026 sur feature/j3-tray-ui_step-1-host - Commit : c7161baebfa314a65a8d7fef263e91a6583e8804) (Cpx: 5 / 5).
+- [x] ✅ **J3-S1-T2** - GlobalHotkeyService (Hook Win32). (Validé le 08/09/2026 sur feature/j3-tray-ui_step-1-host - Commit : 4a5b88b8e70c9201a863d0e9ac33c541ea287541) (Cpx: 5 / 5).
 
 ### Step 2 - Quick Actions (Modales) - feature/j3-tray-ui_step-2-quickactions
-- ✅ **J3-S2-T1 - Écran Quick Categorize** : Création du `QuickCategorizeViewModel` (moteur de recherche, filtrage, sélection), intégration dans l'IHM via `QuickCategorizeModal.razor`, initialisation de la base SQLite et ajout de `GetAllAsync` dans le dépôt métier avec Include. (Validé le 08/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : 740d643e59e21240fd8065f2a27d0ab624cced68) (Cpx: 8 / 10).
+- [x] ✅ **J3-S2-T1** - Écran Quick Categorize. (Validé le 08/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : 740d643e59e21240fd8065f2a27d0ab624cced68) (Cpx: 8 / 10).
 - [x] ✅ **J3-S2-T2** - Écran "Quick Rule Builder" : Création pré-remplie d'une règle (Étape 1).
 - [x] ✅ **J3-S2-T2-ST1** - Refonte Core : Modification de `MailMetadata`, `DictionaryRule`, `ClassificationEngine`, et `OutlookSelectionProvider`. (Validé le 09/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : 73be44ce1ca1e95da0a28a6931f56ddd9cdbd57d) (Cpx: 12 / 13).
 - [x] ✅ **J3-S2-T2-ST2** - Écran "Quick Rule Builder" : IHM 2 colonnes (Arbre des catégories et cases à cocher des métadonnées). (Validé le 09/09/2026 sur feature/j3-tray-ui_step-2-quickactions - Commit : 77ab5b1d1b41156996a84ce536280719680f3526) (Cpx: 8 / 8).
@@ -64,12 +64,17 @@
 - [x] ✅ **J4-S2-T1** - Composant de synchronisation (Blazor) affichant les catégories manquantes et permettant d'accepter/ignorer l'import. (Validé le 15/09/2026 sur feature/j4-category-sync_step-2-ui - Commit : 446e031435b349db4f35f5769c47cae0bba1155f) (Cpx: 6 / 6)
 - [x] ✅ **J4-S2-T2** - Hook au démarrage de l'application MAUI pour déclencher l'analyse de synchronisation en tâche de fond. (Validé le 15/09/2026 sur feature/j4-category-sync_step-2-ui - Commit : 446e031435b349db4f35f5769c47cae0bba1155f) (Cpx: 4 / 4)
 
+### Step 3 - Intégration Infrastructure COM - feature/j4-category-sync_step-3-infra
+- [x] ✅ **J4-S3-T1** - Implémentation de la lecture de la Master Category List via COM et suppression des Dummies. (Validé le 16/09/2026 sur feature/j4-category-sync_step-3-infra - Commit : 65fdf358aa1004d3c444ec976e7a4fbf1a771835) (Cpx: 7 / 7)
+
 ## Jalon 5 - Parité VBA et Actions d'Exécution - feature/j5-iso-vba
 ### Step 1 - Enrichissement Domain et Exécution - feature/j5-iso-vba_step-1-core
-- [ ] ⚪ **J5-S1-T1** - Ajout des ActionType manquantes (Transférer, Importance, Rappel, SuiviAujourdhui) dans `Catamailer.Domain`.
-- [ ] ⚪ **J5-S1-T2** - Mise à jour de l'UI RuleBuilder pour supporter la saisie des paramètres complexes (ex: adresses e-mail pour transfert, délai en jours).
+- [ ] ⚪ **J5-S1-T1** - Ajout des ActionType manquantes (Transférer, Importance, Rappel, SuiviAujourdhui, DeplacerDossier, SignatureHTML) dans `Catamailer.Domain`.
+- [ ] ⚪ **J5-S1-T2** - Mise à jour de l'UI RuleBuilder pour supporter la saisie des paramètres complexes (ex: adresses e-mail pour transfert, délai en jours, dossier de destination).
 ### Step 2 - Implémentation Infrastructure COM - feature/j5-iso-vba_step-2-infra
 - [ ] ⚪ **J5-S2-T1** - Implémentation des actions physiques manquantes via `IOutlookApplicationWrapper`.
+- [ ] ⚪ **J5-S2-T2** - Lecture de l'arborescence des dossiers Outlook via COM (`IOutlookApplicationWrapper`).
+- [ ] ⚪ **J5-S2-T3** - Lecture des fichiers physiques de signature HTML (%APPDATA%\Microsoft\Signatures).
 
 ## Jalon 6 - Outil de Migration CSV (Standalone) - feature/j6-csv-migrator
 - [ ] ⚪ **J6-S1-T1** - Console App isolée : Parser le CSV VBA, nettoyer, mapper les nouvelles actions, et générer le fichier `rules.db` SQLite.
@@ -82,4 +87,3 @@
 ### Step 2 - UI Outliner & Quick Insert - feature/j7-inbox-notes_step-2-ui
 - [ ] ⚪ **J7-S2-T1** - Composant Blazor "Outliner" polymorphe (Rendu dynamique Texte/Tâche).
 - [ ] ⚪ **J7-S2-T2** - Écran "Quick Insert Comms" : Popup sur raccourci global, copie presse-papier et simulation frappe.
-- [ ] ⚪ **J5-S1-T1** - Console App isolée : Parser CSV, nettoyage et génération du fichier `rules.db`.

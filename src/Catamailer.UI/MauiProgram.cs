@@ -16,7 +16,7 @@
 //         - 2026-09-15 : Injection de IBlazorNavigationService (J3-S3-T7).
 //         - 2026-09-15 : Injection de ActivationPromptViewModel (J3-S3-T5).
 //         - 2026-09-15 : Injection de ICategorySyncService et CategorySyncViewModel (J4-S2).
-//         - 2026-09-15 : Remplacement temporaire par DummyCategoryManagerProvider (J4-S2 - Phase Orange).
+//         - 2026-09-16 : Remplacement du Dummy par l'intégration COM réelle via OutlookApplicationWrapper (J4-S3-T1).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -80,7 +80,10 @@ namespace Catamailer.UI
             // Faux fournisseurs pour le test de l'IHM (TODO: À remplacer en production)
             builder.Services.AddScoped<IRuleRepository, DummyRuleRepository>();
             builder.Services.AddScoped<ISelectionProvider, DummySelectionProvider>();
-            builder.Services.AddScoped<ICategoryManagerProvider, DummyCategoryManagerProvider>(); // INJECTION DU DUMMY
+
+            // Injection COM Réelle
+            builder.Services.AddSingleton<IOutlookApplicationWrapper, OutlookApplicationWrapper>();
+            builder.Services.AddScoped<ICategoryManagerProvider, OutlookCategoryManagerProvider>();
             
             // Injection des ViewModels (Transient pour réinitialiser l'état à chaque appel)
             builder.Services.AddTransient<QuickCategorizeViewModel>();
