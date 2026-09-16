@@ -68,7 +68,7 @@
 - [x] ✅ **J4-S3-T1** - Implémentation de la lecture de la Master Category List via COM et suppression des Dummies. (Validé le 16/09/2026 sur feature/j4-category-sync_step-3-infra - Commit : 65fdf358aa1004d3c444ec976e7a4fbf1a771835) (Cpx: 7 / 7)
 
 ### Step 4 - Synchronisation Avancée, UI et Tests d'Intégration COM - feature/j4-category-sync_step-4-advanced-sync
-- [x] ✅ **J4-S4-T1** - Modification de `CategorySyncService` et du Domain pour structurer les deltas en arbre avec gestion du séparateur dynamique. (Validé le 16/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : <COMMIT_HASH>) (Cpx: 10 / 10)
+- [x] ✅ **J4-S4-T1** - Modification de `CategorySyncService` et du Domain pour structurer les deltas en arbre avec gestion du séparateur dynamique. (Validé le 16/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : faae02e697a31159296aab3d678f38ee1d9fbaf7) (Cpx: 10 / 10)
 - [ ] ⚪ **J4-S4-T2** - UI : Remplacement de la modale par un écran complet (Gauche: Outlook / Droite: Catamailer), tri alphabétique, indicateurs visuels (Noir/Gris, couleurs).
 - [ ] ⚪ **J4-S4-T3** - Infrastructure & Tests : Ajout de `RenameCategory` au Wrapper, création du projet `Catamailer.Infrastructure.IntegrationTests` sur profil PST dédié.
 

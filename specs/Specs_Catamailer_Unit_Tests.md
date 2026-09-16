@@ -138,8 +138,8 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 - [x] ✅ `J4-S3-T1 - GetAllCategories_ShouldReturnMappedCategories_FromWrapper` (Validé le 16/09/2026 sur feature/j4-category-sync_step-3-infra - Commit : 65fdf358aa1004d3c444ec976e7a4fbf1a771835)
 
 ### 🟢 J4-S4 : Synchronisation Avancée, UI et Tests d'Intégration COM
-- [x] ✅ `J4-S4-T1 - AnalyzeSyncDeltasAsync_ShouldCreateImplicitParent_WhenOnlyChildExistsInOutlook` (Validé le 16/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : <COMMIT_HASH>)
-- [x] ✅ `J4-S4-T1 - AnalyzeSyncDeltasAsync_ShouldApplyInheritance_WhenOutlookReturnsSameColorForHierarchy` (Validé le 16/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : <COMMIT_HASH>)
+- [x] ✅ `J4-S4-T1 - AnalyzeSyncDeltasAsync_ShouldCreateImplicitParent_WhenOnlyChildExistsInOutlook` (Validé le 16/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : faae02e697a31159296aab3d678f38ee1d9fbaf7)
+- [x] ✅ `J4-S4-T1 - AnalyzeSyncDeltasAsync_ShouldApplyInheritance_WhenOutlookReturnsSameColorForHierarchy` (Validé le 16/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : faae02e697a31159296aab3d678f38ee1d9fbaf7)
 
 ---
 
