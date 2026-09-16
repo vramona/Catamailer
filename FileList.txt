@@ -35,8 +35,8 @@ Arborescence / Fichier                                Taille      Date de MAJ
 ├── specs                                                         2026-09-15 19:20
 │   ├── Next Prompt.txt                               742 octets  2026-09-15 19:20
 │   ├── Specs_Catamailer.md                           8,39 Ko     2026-09-15 18:47
-│   ├── Specs_Catamailer_Unit_Tests.md                20,20 Ko    2026-09-16 17:32
-│   └── ToDoList.md                                   11,56 Ko    2026-09-16 17:31
+│   ├── Specs_Catamailer_Unit_Tests.md                20,23 Ko    2026-09-16 17:32
+│   └── ToDoList.md                                   11,59 Ko    2026-09-16 17:32
 ├── src                                                           2026-09-07 10:58
 │   ├── Catamailer.Application                                    2026-09-15 18:45
 │   │   ├── Services                                              2026-09-15 18:47
