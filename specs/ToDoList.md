@@ -65,7 +65,7 @@
 - [x] ✅ **J4-S2-T2** - Hook au démarrage de l'application MAUI pour déclencher l'analyse de synchronisation en tâche de fond. (Validé le 15/09/2026 sur feature/j4-category-sync_step-2-ui - Commit : 446e031435b349db4f35f5769c47cae0bba1155f) (Cpx: 4 / 4)
 
 ### Step 3 - Intégration Infrastructure COM - feature/j4-category-sync_step-3-infra
-- [x] ✅ **J4-S3-T1** - Implémentation de la lecture de la Master Category List via COM et suppression des Dummies. (Validé le 16/09/2026 sur feature/j4-category-sync_step-3-infra - Commit : <COMMIT_HASH>) (Cpx: 7 / 7)
+- [x] ✅ **J4-S3-T1** - Implémentation de la lecture de la Master Category List via COM et suppression des Dummies. (Validé le 16/09/2026 sur feature/j4-category-sync_step-3-infra - Commit : 65fdf358aa1004d3c444ec976e7a4fbf1a771835) (Cpx: 7 / 7)
 
 ## Jalon 5 - Parité VBA et Actions d'Exécution - feature/j5-iso-vba
 ### Step 1 - Enrichissement Domain et Exécution - feature/j5-iso-vba_step-1-core
