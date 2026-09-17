@@ -71,7 +71,7 @@
 - [x] ✅ **J4-S4-T1** - Modification de `CategorySyncService` et du Domain pour structurer les deltas en arbre avec gestion du séparateur dynamique. (Validé le 16/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : faae02e697a31159296aab3d678f38ee1d9fbaf7) (Cpx: 10 / 10)
 - [x] ✅ **J4-S4-T2** - UI : Remplacement de la modale par un écran complet, vue comparée arborescente/dense, fix FullName/Trim et Bubbling IsImplicit. (Validé le 17/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : 9b2c1b18e71a851c4520652969405adfe598c0df) (Cpx: 18 / 29)
 - [ ] ⚪ **J4-S4-T3** - Infrastructure & Tests : Ajout de `RenameCategory` au Wrapper, création du projet `Catamailer.Infrastructure.IntegrationTests` sur profil PST dédié.
-- [x] ✅ **J4-S4-T4** - Bugfix : Reconstruction d'arbre à l'import, Direction des couleurs, Maintien du contexte visuel et auto-guérison SQLite. (Validé le 17/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : <COMMIT_HASH>) (Cpx: 11 / 11)
+- [x] ✅ **J4-S4-T4** - Bugfix : Reconstruction d'arbre à l'import, Direction des couleurs, Maintien du contexte visuel et auto-guérison SQLite. (Validé le 17/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : 7855c889fbec1297be4902c5d21b535bf453cfff) (Cpx: 11 / 11)
 
 ## Jalon 5 - Parité VBA et Actions d'Exécution - feature/j5-iso-vba
 ### Step 1 - Enrichissement Domain et Exécution - feature/j5-iso-vba_step-1-core

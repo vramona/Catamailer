@@ -144,9 +144,9 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 - [x] ✅ `J4-S4-T2 - AnalyzeSyncDeltasAsync_ShouldTrimSpacesAroundSeparator_ToGroupCorrectly` (Validé le 17/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : 9b2c1b18e71a851c4520652969405adfe598c0df)
 - [x] ✅ `J4-S4-T2 - AnalyzeSyncDeltasAsync_ShouldUseFullName_WhenPushingToOutlook` (Validé le 17/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : 9b2c1b18e71a851c4520652969405adfe598c0df)
 
-- [x] ✅ `J4-S4-T4 - AnalyzeSyncDeltasAsync_ShouldDetectSynchronizedCategories_ToMaintainTreeContext` (Validé le 17/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : <COMMIT_HASH>)
-- [x] ✅ `J4-S4-T4 - ApplyResolutionsAsync_ShouldReconstructTree_ForMissingInCatamailer` (Validé le 17/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : <COMMIT_HASH>)
-- [x] ✅ `J4-S4-T4 - ApplyResolutionsAsync_ShouldRespectDirection_ForColorMismatches` (Validé le 17/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : <COMMIT_HASH>)
+- [x] ✅ `J4-S4-T4 - AnalyzeSyncDeltasAsync_ShouldDetectSynchronizedCategories_ToMaintainTreeContext` (Validé le 17/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : 7855c889fbec1297be4902c5d21b535bf453cfff)
+- [x] ✅ `J4-S4-T4 - ApplyResolutionsAsync_ShouldReconstructTree_ForMissingInCatamailer` (Validé le 17/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : 7855c889fbec1297be4902c5d21b535bf453cfff)
+- [x] ✅ `J4-S4-T4 - ApplyResolutionsAsync_ShouldRespectDirection_ForColorMismatches` (Validé le 17/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : 7855c889fbec1297be4902c5d21b535bf453cfff)
 
 ---
 
