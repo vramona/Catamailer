@@ -5,15 +5,15 @@
 //     Date de création : 2026-09-16
 //     Historique :
 //         - 2026-09-16 : Création de la page de synchronisation avancée avec vue comparée (J4-S4-T2).
-//         - 2026-09-16 : Ajustement UI : Masquage des parents implicites à gauche, inversion des checkboxes.
 //         - 2026-09-17 : Restructuration Flexbox pour figer l'en-tête/boutons et permettre le scroll du corps.
-//         - 2026-09-17 : Correction du calc(100vh) pour éviter la troncature des boutons en bas d'écran (J4-S4-T2 - Phase Bleue).
 //         - 2026-09-17 : Refonte UI : Grille ligne par ligne pour alignement strict, densité accrue, et export avec CategoryName (J4-S4-T2 - Phase Bleue).
+//         - 2026-09-17 : Ajout du grisage des nœuds synchronisés et sélecteur de direction pour les conflits (J4-S4-T4 - Phase Bleue).
 // </auto-generated>
 // ------------------------------------------------------------------------------ 
 *@
 
 @using Catamailer.Application.ViewModels
+@using Catamailer.Domain.Sync
 @inject CategorySyncViewModel ViewModel
 @inject NavigationManager Navigation
 
@@ -79,13 +79,16 @@
                     <!-- Lignes de données -->
                     @foreach (var option in ViewModel.MissingInCatamailerOptions)
                     {
-                        <div class="row g-0 border-bottom align-items-center hover-bg-light" style="font-size: 0.9rem;">
+                        bool isSync = option.Delta.Status == DeltaStatus.Synchronized;
+                        string rowClass = isSync ? "row g-0 border-bottom align-items-center bg-light text-muted" : "row g-0 border-bottom align-items-center hover-bg-light";
+
+                        <div class="@rowClass" style="font-size: 0.9rem; opacity: @(isSync ? "0.6" : "1");">
                             
                             <!-- Gauche (Outlook) -->
                             <div class="col-6 border-end p-1 d-flex justify-content-between align-items-center" style="min-height: 32px;">
                                 @if (!option.IsImplicitParent)
                                 {
-                                    <span class="text-dark text-truncate px-2">@option.Delta.CategoryName</span>
+                                    <span class="text-truncate px-2 @(isSync ? "" : "text-dark")">@option.Delta.CategoryName</span>
                                     @if (!string.IsNullOrEmpty(option.Delta.OutlookColor))
                                     {
                                         <span class="badge border ms-2 me-1" style="background-color: @option.Delta.OutlookColor; color: transparent; width: 16px; height: 16px; flex-shrink: 0;">_</span>
@@ -100,11 +103,18 @@
                             <!-- Droite (Catamailer) -->
                             <div class="col-6 p-1 d-flex justify-content-between align-items-center" style="min-height: 32px;">
                                 <div style="padding-left: @(8 + option.Depth * 20)px;" class="d-flex align-items-center text-truncate">
-                                    <input type="checkbox" class="form-check-input me-2 mt-0 flex-shrink-0" @bind="option.IsSelected" />
+                                    @if (isSync)
+                                    {
+                                        <span class="ms-1 me-3" style="width: 16px; display: inline-block;"></span>
+                                    }
+                                    else
+                                    {
+                                        <input type="checkbox" class="form-check-input me-2 mt-0 flex-shrink-0" @bind="option.IsSelected" />
+                                    }
                                     <span class="me-2 flex-shrink-0">@(option.IsFolder ? "📁" : "🏷️")</span>
-                                    <span class="text-secondary text-truncate">@option.ShortName @(option.IsImplicitParent ? "(Création parent)" : "")</span>
+                                    <span class="text-truncate @(isSync ? "" : "text-secondary")">@option.ShortName @(option.IsImplicitParent ? "(Création parent)" : "")</span>
                                 </div>
-                                @if (!string.IsNullOrEmpty(option.Delta.OptimizedColor))
+                                @if (!string.IsNullOrEmpty(option.Delta.OptimizedColor) && !isSync)
                                 {
                                     <span class="badge border ms-2 me-1" style="background-color: @option.Delta.OptimizedColor; color: transparent; width: 16px; height: 16px; flex-shrink: 0;" title="Couleur explicite rompant l'héritage">_</span>
                                 }
@@ -119,20 +129,31 @@
             {
                 <div class="d-flex align-items-center mt-3 mb-2">
                     <input type="checkbox" class="form-check-input me-2 mt-0" @bind="ViewModel.SelectAllColorMismatch" id="selectAllMismatch" />
-                    <h5 class="text-warning mb-0">Changements de Couleurs (Catamailer → Outlook)</h5>
+                    <h5 class="text-warning mb-0">Changements de Couleurs</h5>
                 </div>
                 <div class="border rounded mb-4">
                     @foreach (var option in ViewModel.ColorMismatchOptions)
                     {
                         <div class="d-flex justify-content-between align-items-center border-bottom p-2 hover-bg-light" style="font-size: 0.9rem;">
-                            <div>
-                                <input type="checkbox" class="form-check-input me-2 mt-0" @bind="option.IsSelected" />
+                            <div class="d-flex align-items-center">
+                                <input type="checkbox" class="form-check-input me-3 mt-0" @bind="option.IsSelected" />
                                 <strong>@option.ShortName</strong>
                             </div>
-                            <div class="d-flex align-items-center">
-                                <span class="badge border text-dark me-2" style="background-color: @option.Delta.OutlookColor;">Ancien</span>
-                                <span class="me-2">➔</span>
-                                <span class="badge border text-dark" style="background-color: @option.Delta.CatamailerColor;">Nouveau</span>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="d-flex align-items-center border rounded px-2 py-1 bg-white">
+                                    <span class="text-muted small me-2">Outlook:</span>
+                                    <span class="badge border" style="background-color: @option.Delta.OutlookColor; color: transparent; width: 16px; height: 16px;">_</span>
+                                </div>
+                                
+                                <select class="form-select form-select-sm w-auto" @bind="option.Direction" disabled="@(!option.IsSelected)">
+                                    <option value="@SyncResolutionDirection.OutlookToCatamailer">Écraser Catamailer</option>
+                                    <option value="@SyncResolutionDirection.CatamailerToOutlook">Écraser Outlook</option>
+                                </select>
+
+                                <div class="d-flex align-items-center border rounded px-2 py-1 bg-white">
+                                    <span class="text-muted small me-2">Catamailer:</span>
+                                    <span class="badge border" style="background-color: @option.Delta.CatamailerColor; color: transparent; width: 16px; height: 16px;">_</span>
+                                </div>
                             </div>
                         </div>
                     }

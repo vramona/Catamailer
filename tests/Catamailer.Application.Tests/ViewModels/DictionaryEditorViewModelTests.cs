@@ -6,6 +6,7 @@
 //         - 2026-09-11 : Ajout des tests pour le formulaire de création et l'injection de ICategoryRepository (Phase Orange/Rouge).
 //         - 2026-09-11 : Ajout des tests pour les champs Expéditeur et Destinataire (Phase Orange/Rouge).
 //         - 2026-09-11 : Mise à jour du FakeRuleRepository pour supporter ExecutionRule (J3-S3-T3-ST2 - Phase Verte).
+//         - 2026-09-17 : Implémentation de UpdateAsync dans FakeCategoryRepository (J4-S4-T4 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -66,6 +67,7 @@ namespace Catamailer.Application.Tests.ViewModels
         private class FakeCategoryRepository : ICategoryRepository
         {
             public Task AddAsync(CategoryNode category) => Task.CompletedTask;
+            public Task UpdateAsync(CategoryNode category) => Task.CompletedTask;
             public Task<CategoryNode?> GetByNameAsync(string name) => Task.FromResult<CategoryNode?>(null);
             
             public Task<IEnumerable<CategoryNode>> GetAllAsync()

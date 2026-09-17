@@ -9,7 +9,8 @@
 //         - 2026-09-17 : Ajout de la remontée de couleur (Bubbling) sur les parents implicites (J4-S4-T2).
 //         - 2026-09-17 : Ajout des tests pour le Trim du séparateur et le FullName vers Outlook (J4-S4-T2).
 //         - 2026-09-17 : Ajout d'assertions sur la propriété IsImplicit même après bubbling de couleur (J4-S4-T2).
-//         - 2026-09-17 : Renforcement du test Trim pour valider la bonne application de l'héritage (J4-S4-T2 - Phase Rouge).
+//         - 2026-09-17 : Renforcement du test Trim pour valider la bonne application de l'héritage (J4-S4-T2).
+//         - 2026-09-17 : Ajout du test de détection des catégories synchronisées (J4-S4-T4 - Phase Rouge).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -53,7 +54,25 @@ namespace Catamailer.Application.Tests.Services
             var result = await _sut.AnalyzeSyncDeltasAsync();
 
             Assert.False(result.HasConflicts);
-            Assert.Empty(result.Deltas);
+        }
+
+        [Fact]
+        public async Task AnalyzeSyncDeltasAsync_ShouldDetectSynchronizedCategories_ToMaintainTreeContext()
+        {
+            // Arrange
+            _outlookProviderMock.Setup(p => p.GetAllCategories())
+                .Returns(new List<(string, string?)> { ("Cat1", "#000000") });
+
+            var dbCategories = new List<CategoryNode> { new CategoryNode("Cat1", "#000000") };
+            _categoryRepositoryMock.Setup(r => r.GetAllAsync()).ReturnsAsync(dbCategories);
+
+            // Act
+            var result = await _sut.AnalyzeSyncDeltasAsync();
+
+            // Assert : Le moteur doit inclure les catégories synchronisées pour que l'IHM puisse dessiner l'arbre complet
+            var synchronized = result.GetSynchronized().ToList();
+            Assert.Single(synchronized);
+            Assert.Equal("Cat1", synchronized[0].CategoryName);
         }
 
         [Fact]
@@ -205,7 +224,6 @@ namespace Catamailer.Application.Tests.Services
             
             var child = missing.FirstOrDefault(m => m.CategoryName == "Cercle A - PAG");
             Assert.NotNull(child);
-            // Ce test va échouer car la couleur ne sera pas héritée (null) à cause de l'espace non trimmé
             Assert.Null(child.OptimizedColor); 
         }
 

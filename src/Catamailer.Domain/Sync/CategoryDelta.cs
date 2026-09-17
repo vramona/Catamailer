@@ -5,7 +5,8 @@
 //     Historique :
 //         - 2026-09-15 : Création initiale des modèles de synchronisation (J4-S1-T1).
 //         - 2026-09-16 : Ajout de OptimizedColor (J4-S4-T2).
-//         - 2026-09-17 : Ajout de IsImplicit pour un tracking formel des parents virtuels (J4-S4-T2 - Phase Verte).
+//         - 2026-09-17 : Ajout de IsImplicit pour un tracking formel des parents virtuels (J4-S4-T2).
+//         - 2026-09-17 : Ajout de la méthode CreateSynchronized (J4-S4-T4 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -46,6 +47,11 @@ namespace Catamailer.Domain.Sync
         public static CategoryDelta CreateColorMismatch(string categoryName, string outlookColor, string catamailerColor)
         {
             return new CategoryDelta(categoryName, outlookColor, catamailerColor, null, false, DeltaStatus.ColorMismatch);
+        }
+
+        public static CategoryDelta CreateSynchronized(string categoryName, string color)
+        {
+            return new CategoryDelta(categoryName, color, color, null, false, DeltaStatus.Synchronized);
         }
     }
 }

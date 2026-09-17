@@ -6,7 +6,8 @@
 //     Description : Tests unitaires validant la modélisation des entités de synchronisation
 //     Historique :
 //         - 2026-09-16 : Mise à jour de la signature CreateMissingInCatamailer avec optimizedColor (J4-S4-T2).
-//         - 2026-09-17 : Ajout de la propriété IsImplicit pour tracker formellement les parents virtuels (J4-S4-T2 - Phase Rouge).
+//         - 2026-09-17 : Ajout de la propriété IsImplicit pour tracker formellement les parents virtuels (J4-S4-T2).
+//         - 2026-09-17 : Ajout des tests pour le statut Synchronized (J4-S4-T4 - Phase Rouge).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -74,6 +75,40 @@ namespace Catamailer.Domain.Tests
             Assert.Equal(catamailerColor, delta.CatamailerColor);
             Assert.False(delta.IsImplicit);
             Assert.Equal(DeltaStatus.ColorMismatch, delta.Status);
+        }
+
+        [Fact]
+        public void CategoryDelta_CreateSynchronized_ShouldSetProperties()
+        {
+            // Arrange
+            string categoryName = "InSyncCat";
+            string color = "#123456";
+
+            // Act
+            var delta = CategoryDelta.CreateSynchronized(categoryName, color);
+
+            // Assert
+            Assert.Equal(categoryName, delta.CategoryName);
+            Assert.Equal(color, delta.OutlookColor);
+            Assert.Equal(color, delta.CatamailerColor);
+            Assert.False(delta.IsImplicit);
+            Assert.Equal(DeltaStatus.Synchronized, delta.Status);
+        }
+
+        [Fact]
+        public void SyncResult_GetSynchronized_ShouldReturnOnlySynchronizedDeltas()
+        {
+            // Arrange
+            var syncResult = new SyncResult();
+            syncResult.AddDelta(CategoryDelta.CreateMissingInCatamailer("Cat1", null, null, false));
+            syncResult.AddDelta(CategoryDelta.CreateSynchronized("Cat2", "#000000"));
+
+            // Act
+            var synchronized = syncResult.GetSynchronized().ToList();
+
+            // Assert
+            Assert.Single(synchronized);
+            Assert.Equal("Cat2", synchronized[0].CategoryName);
         }
 
         [Fact]

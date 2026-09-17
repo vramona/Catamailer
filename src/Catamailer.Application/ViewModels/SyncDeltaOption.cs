@@ -6,7 +6,8 @@
 //         - 2026-09-15 : Création initiale (J4-S2-T1).
 //         - 2026-09-16 : Ajout de la profondeur (Depth), du nom court (ShortName) et du flag IsFolder pour l'IHM (J4-S4-T2).
 //         - 2026-09-16 : Ajout du Trim sur le nom court pour gérer les séparateurs avec espaces (J4-S4-T2).
-//         - 2026-09-17 : Délégation de l'indicateur IsImplicit à l'entité Domain (J4-S4-T2 - Phase Bleue).
+//         - 2026-09-17 : Délégation de l'indicateur IsImplicit à l'entité Domain (J4-S4-T2).
+//         - 2026-09-17 : Ajout de la propriété Direction pour la résolution bidirectionnelle (J4-S4-T4 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -22,6 +23,9 @@ namespace Catamailer.Application.ViewModels
         public string ShortName { get; }
         public bool IsImplicitParent => Delta.IsImplicit;
         public bool IsFolder { get; set; }
+        
+        // Direction par défaut (Outlook écrase Catamailer)
+        public SyncResolutionDirection Direction { get; set; } = SyncResolutionDirection.OutlookToCatamailer;
 
         public SyncDeltaOption(CategoryDelta delta, string separator)
         {

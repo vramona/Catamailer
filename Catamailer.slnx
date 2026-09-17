@@ -12,6 +12,7 @@
   <Folder Name="/tests/">
     <Project Path="tests/Catamailer.Application.Tests/Catamailer.Application.Tests.csproj" />
     <Project Path="tests/Catamailer.Domain.Tests/Catamailer.Domain.Tests.csproj" />
+    <Project Path="tests/Catamailer.Infrastructure.IntegrationTests/Catamailer.Infrastructure.IntegrationTests.csproj" />
     <Project Path="tests/Catamailer.Infrastructure.Tests/Catamailer.Infrastructure.Tests.csproj" />
     <Project Path="tests/Tools.AiDocGenerator.Tests/Tools.AiDocGenerator.Tests.csproj" />
   </Folder>

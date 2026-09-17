@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-17 11:01
+Généré le : 2026-09-17 14:14
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -61,6 +61,7 @@ Généré le : 2026-09-17 11:01
   - *Appelle* ➡️ `CategoryDelta.CreateMissingInCatamailer()`
   - *Appelle* ➡️ `CategorySyncService.GetOutlookEffectiveColor()`
   - *Appelle* ➡️ `CategoryDelta.CreateColorMismatch()`
+  - *Appelle* ➡️ `CategoryDelta.CreateSynchronized()`
   - *Appelle* ➡️ `CategoryDelta.CreateMissingInOutlook()`
 
 ### Interface : IBlazorNavigationService
@@ -120,12 +121,19 @@ Généré le : 2026-09-17 11:01
 - `Task InitializeAsync()`
   - *Appelle* ➡️ `ICategorySyncService.AnalyzeSyncDeltasAsync()`
   - *Appelle* ➡️ `SyncResult.GetMissingInCatamailer()`
+  - *Appelle* ➡️ `SyncResult.GetSynchronized()`
   - *Appelle* ➡️ `SyncResult.GetMissingInOutlook()`
   - *Appelle* ➡️ `SyncResult.GetColorConflicts()`
 - `Task ApplyResolutionsAsync()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `CategoryNode.GetFullName()`
+  - *Appelle* ➡️ `CategoryNode.UpdateColor()`
+  - *Appelle* ➡️ `CategoryNode.AddChild()`
+  - *Appelle* ➡️ `ICategoryRepository.UpdateAsync()`
   - *Appelle* ➡️ `ICategoryRepository.AddAsync()`
   - *Appelle* ➡️ `ICategoryManagerProvider.AddCategory()`
   - *Appelle* ➡️ `ICategoryManagerProvider.UpdateCategoryColor()`
+  - *Appelle* ➡️ `ICategoryRepository.GetByNameAsync()`
 - `Task RefreshAsync()`
   - *Appelle* ➡️ `CategorySyncViewModel.InitializeAsync()`
 
@@ -258,6 +266,7 @@ Généré le : 2026-09-17 11:01
 - `string ShortName { get; }`
 - `bool IsImplicitParent { get; }`
 - `bool IsFolder { get; set; }`
+- `SyncResolutionDirection Direction { get; set; }`
 
 ## Projet : Catamailer.Domain
 ### Class : AppSetting
@@ -278,6 +287,7 @@ Généré le : 2026-09-17 11:01
 - `string? EffectiveColor { get; }` : Obtient la couleur effective de la catégorie, en héritant de son ascendance si aucune couleur explicite n'est définie.
 - `int Depth { get; }` : Obtient la profondeur du nœud dans l'arborescence (0 pour un nœud racine).
 - `void AddChild(CategoryNode child)` : Ajoute un nœud enfant à cette catégorie et lie automatiquement ce nœud à ce parent.
+- `void UpdateColor(string? newColor)` : Met à jour la couleur explicite de la catégorie.
 - `IEnumerable<CategoryNode> GetAscendanceChain()` : Récupère la chaîne d'ascendance complète depuis la racine jusqu'à ce nœud inclus.
 - `string GetFullName(string separator)` : Génère le nom complet de la catégorie incluant toute son ascendance, séparée par le caractère spécifié.
   - *Appelle* ➡️ `CategoryNode.GetAscendanceChain()`
@@ -406,6 +416,7 @@ Généré le : 2026-09-17 11:01
 - `CategoryDelta CreateMissingInCatamailer(string categoryName, string? outlookColor, string? optimizedColor, bool isImplicit)`
 - `CategoryDelta CreateMissingInOutlook(string categoryName, string? catamailerColor)`
 - `CategoryDelta CreateColorMismatch(string categoryName, string outlookColor, string catamailerColor)`
+- `CategoryDelta CreateSynchronized(string categoryName, string color)`
 
 ### Class : SyncResult
 **Fichier** : `src\Catamailer.Domain\Sync\SyncResult.cs`
@@ -417,6 +428,7 @@ Généré le : 2026-09-17 11:01
 - `IEnumerable<CategoryDelta> GetMissingInCatamailer()` : Récupère la liste des catégories présentes dans Outlook mais absentes de Catamailer.
 - `IEnumerable<CategoryDelta> GetMissingInOutlook()` : Récupère la liste des catégories présentes dans Catamailer mais absentes d'Outlook.
 - `IEnumerable<CategoryDelta> GetColorConflicts()` : Récupère la liste des catégories présentant un conflit de couleur.
+- `IEnumerable<CategoryDelta> GetSynchronized()` : Récupère la liste des catégories parfaitement synchronisées pour le tracé de l'arborescence.
 
 ### Class : SystemState
 **Fichier** : `src\Catamailer.Domain\SystemState.cs`
@@ -446,6 +458,7 @@ Généré le : 2026-09-17 11:01
 **Rôle** : Implémentation SQLite du dépôt pour les catégories utilisant Entity Framework Core.
 **Membres et Invocations :**
 - `Task AddAsync(CategoryNode category)`
+- `Task UpdateAsync(CategoryNode category)`
 - `Task<CategoryNode?> GetByNameAsync(string name)`
 - `Task<IEnumerable<CategoryNode>> GetAllAsync()`
 
@@ -779,6 +792,11 @@ Généré le : 2026-09-17 11:01
   - *Appelle* ➡️ `ICategoryManagerProvider.GetAllCategories()`
   - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
   - *Appelle* ➡️ `CategorySyncService.AnalyzeSyncDeltasAsync()`
+- `Task AnalyzeSyncDeltasAsync_ShouldDetectSynchronizedCategories_ToMaintainTreeContext()`
+  - *Appelle* ➡️ `ICategoryManagerProvider.GetAllCategories()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `CategorySyncService.AnalyzeSyncDeltasAsync()`
+  - *Appelle* ➡️ `SyncResult.GetSynchronized()`
 - `Task AnalyzeSyncDeltasAsync_ShouldDetectMissingInCatamailer()`
   - *Appelle* ➡️ `ICategoryManagerProvider.GetAllCategories()`
   - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
@@ -865,7 +883,7 @@ Généré le : 2026-09-17 11:01
   - *Appelle* ➡️ `CategoryDelta.CreateColorMismatch()`
   - *Appelle* ➡️ `ICategorySyncService.AnalyzeSyncDeltasAsync()`
   - *Appelle* ➡️ `CategorySyncViewModel.InitializeAsync()`
-- `Task ApplyResolutionsAsync_ShouldAddMissingInCatamailer_WhenSelected()`
+- `Task ApplyResolutionsAsync_ShouldReconstructTree_ForMissingInCatamailer()`
   - *Appelle* ➡️ `SyncResult.AddDelta()`
   - *Appelle* ➡️ `CategoryDelta.CreateMissingInCatamailer()`
   - *Appelle* ➡️ `ICategorySyncService.AnalyzeSyncDeltasAsync()`
@@ -879,13 +897,14 @@ Généré le : 2026-09-17 11:01
   - *Appelle* ➡️ `CategorySyncViewModel.InitializeAsync()`
   - *Appelle* ➡️ `CategorySyncViewModel.ApplyResolutionsAsync()`
   - *Appelle* ➡️ `ICategoryManagerProvider.AddCategory()`
-- `Task ApplyResolutionsAsync_ShouldPushCatamailerColorToOutlook_ForMismatches()`
+- `Task ApplyResolutionsAsync_ShouldRespectDirection_ForColorMismatches()`
   - *Appelle* ➡️ `SyncResult.AddDelta()`
   - *Appelle* ➡️ `CategoryDelta.CreateColorMismatch()`
   - *Appelle* ➡️ `ICategorySyncService.AnalyzeSyncDeltasAsync()`
   - *Appelle* ➡️ `CategorySyncViewModel.InitializeAsync()`
   - *Appelle* ➡️ `CategorySyncViewModel.ApplyResolutionsAsync()`
   - *Appelle* ➡️ `ICategoryManagerProvider.UpdateCategoryColor()`
+  - *Appelle* ➡️ `ICategoryRepository.UpdateAsync()`
 
 ### Class : CategoryTreeViewModelTests
 **Fichier** : `tests\Catamailer.Application.Tests\ViewModels\CategoryTreeViewModelTests.cs`
@@ -1036,12 +1055,25 @@ Généré le : 2026-09-17 11:01
   - *Appelle* ➡️ `CategoryDelta.CreateMissingInOutlook()`
 - `void CategoryDelta_CreateColorMismatch_ShouldSetBothColors()`
   - *Appelle* ➡️ `CategoryDelta.CreateColorMismatch()`
+- `void CategoryDelta_CreateSynchronized_ShouldSetProperties()`
+  - *Appelle* ➡️ `CategoryDelta.CreateSynchronized()`
+- `void SyncResult_GetSynchronized_ShouldReturnOnlySynchronizedDeltas()`
+  - *Appelle* ➡️ `SyncResult.AddDelta()`
+  - *Appelle* ➡️ `CategoryDelta.CreateMissingInCatamailer()`
+  - *Appelle* ➡️ `CategoryDelta.CreateSynchronized()`
+  - *Appelle* ➡️ `SyncResult.GetSynchronized()`
 - `void SyncResult_AddDelta_ShouldUpdateConflictsAndLists()`
   - *Appelle* ➡️ `CategoryDelta.CreateMissingInCatamailer()`
   - *Appelle* ➡️ `CategoryDelta.CreateColorMismatch()`
   - *Appelle* ➡️ `SyncResult.AddDelta()`
   - *Appelle* ➡️ `SyncResult.GetMissingInCatamailer()`
   - *Appelle* ➡️ `SyncResult.GetColorConflicts()`
+
+## Projet : Catamailer.Infrastructure.IntegrationTests
+### Class : UnitTest1
+**Fichier** : `tests\Catamailer.Infrastructure.IntegrationTests\UnitTest1.cs`
+**Membres et Invocations :**
+- `void Test1()`
 
 ## Projet : Catamailer.Infrastructure.Tests
 ### Class : CatamailerDbContextTests

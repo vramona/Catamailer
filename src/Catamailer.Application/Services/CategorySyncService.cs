@@ -11,6 +11,7 @@
 //         - 2026-09-17 : Utilisation du FullName pour la résolution croisée et la poussée vers Outlook (J4-S4-T2 - Phase Verte).
 //         - 2026-09-17 : Transmission de isImplicit lors de la création du Delta (J4-S4-T2 - Phase Verte).
 //         - 2026-09-17 : Ajout de Trim() lors de la remontée hiérarchique pour corriger l'héritage avec espaces (J4-S4-T2 - Phase Verte).
+//         - 2026-09-17 : Ajout de la création de CategoryDelta.CreateSynchronized pour maintenir le contexte de l'arbre (J4-S4-T4 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -49,7 +50,7 @@ namespace Catamailer.Application.Services
 
             var rawOutlookCategories = _outlookProvider.GetAllCategories().ToList();
             var outlookDict = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
-            var implicitTracking = new HashSet<string>(StringComparer.OrdinalIgnoreCase); // Track formellement les parents implicites
+            var implicitTracking = new HashSet<string>(StringComparer.OrdinalIgnoreCase); 
 
             foreach (var (Name, ColorCode) in rawOutlookCategories)
             {
@@ -117,6 +118,10 @@ namespace Catamailer.Application.Services
                     {
                         result.AddDelta(CategoryDelta.CreateColorMismatch(outName, outEff ?? "", dbEff ?? ""));
                     }
+                    else
+                    {
+                        result.AddDelta(CategoryDelta.CreateSynchronized(outName, outEff ?? ""));
+                    }
                 }
             }
 
@@ -145,7 +150,7 @@ namespace Catamailer.Application.Services
                 
                 int lastSep = current.LastIndexOf(cleanSeparator);
                 if (lastSep < 0) break;
-                current = current.Substring(0, lastSep).Trim(); // Trim ajouté pour s'aligner sur la création des parents virtuels
+                current = current.Substring(0, lastSep).Trim(); 
             }
             return null;
         }
@@ -160,7 +165,7 @@ namespace Catamailer.Application.Services
             int lastSep = name.LastIndexOf(cleanSeparator);
             if (lastSep < 0) return explicitColor;
             
-            string parentName = name.Substring(0, lastSep).Trim(); // Trim ajouté pour la recherche du parent
+            string parentName = name.Substring(0, lastSep).Trim(); 
             string? parentEffective = GetOutlookEffectiveColor(parentName, outlookDict, cleanSeparator);
 
             if (string.Equals(explicitColor, parentEffective, StringComparison.OrdinalIgnoreCase))

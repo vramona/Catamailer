@@ -2,6 +2,8 @@
 // 2026-09-07 : Création de l'implémentation CategoryRepository (J1-S1-T3).
 // 2026-09-08 : Implémentation de GetAllAsync (J3-S2-T1).
 // 2026-09-08 : Ajout du chargement explicite (Include) du Parent dans GetAllAsync (J3-S2-T1).
+// 2026-09-17 : Implémentation de UpdateAsync (J4-S4-T4).
+// 2026-09-17 : Ajout de SaveChangesAsync dans AddAsync et UpdateAsync pour garantir la persistance (J4-S4-T4 - Bugfix).
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -30,6 +32,14 @@ namespace Catamailer.Infrastructure
         public async Task AddAsync(CategoryNode category)
         {
             await _context.Categories.AddAsync(category);
+            await _context.SaveChangesAsync();
+        }
+
+        /// <inheritdoc />
+        public async Task UpdateAsync(CategoryNode category)
+        {
+            _context.Categories.Update(category);
+            await _context.SaveChangesAsync();
         }
 
         /// <inheritdoc />

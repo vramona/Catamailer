@@ -5,6 +5,9 @@
 //     Historique :
 //         - 2026-09-15 : Création initiale du CategorySyncViewModel (J4-S2-T1).
 //         - 2026-09-16 : Refonte pour gérer l'affichage hiérarchique, le séparateur dynamique et les tris/sélections (J4-S4-T2).
+//         - 2026-09-17 : Refonte ApplyResolutionsAsync pour reconstruire l'arbre avant l'import SQLite (J4-S4-T4).
+//         - 2026-09-17 : Gestion de la direction de résolution des conflits de couleur (J4-S4-T4).
+//         - 2026-09-17 : Ajout de la mécanique de Healing pour récupérer et ré-attacher les nœuds orphelins existants (J4-S4-T4 - Phase Bleue).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -14,6 +17,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Catamailer.Application.Services;
 using Catamailer.Domain;
+using Catamailer.Domain.Sync;
 
 namespace Catamailer.Application.ViewModels
 {
@@ -30,7 +34,6 @@ namespace Catamailer.Application.ViewModels
         public List<SyncDeltaOption> MissingInOutlookOptions { get; private set; } = new();
         public List<SyncDeltaOption> ColorMismatchOptions { get; private set; } = new();
 
-        // Propriétés bidirectionnelles pour les cases "Tout cocher"
         public bool SelectAllMissingInCatamailer
         {
             get => MissingInCatamailerOptions.Any() && MissingInCatamailerOptions.All(o => o.IsSelected);
@@ -64,12 +67,19 @@ namespace Catamailer.Application.ViewModels
             var syncResult = await _syncService.AnalyzeSyncDeltasAsync(Separator);
             HasConflicts = syncResult.HasConflicts;
 
-            MissingInCatamailerOptions = syncResult.GetMissingInCatamailer()
+            // Intégrer les éléments synchronisés pour maintenir le contexte de l'arbre
+            var combinedCatamailerList = syncResult.GetMissingInCatamailer()
+                .Concat(syncResult.GetSynchronized())
                 .OrderBy(d => d.CategoryName, StringComparer.OrdinalIgnoreCase)
-                .Select(d => new SyncDeltaOption(d, Separator))
+                .Select(d => new SyncDeltaOption(d, Separator)
+                {
+                    // Forcer la non-sélection si l'élément est déjà synchronisé
+                    IsSelected = d.Status != DeltaStatus.Synchronized
+                })
                 .ToList();
 
-            // Calcul de la nature du nœud (Dossier ou Feuille) pour l'icône UI
+            MissingInCatamailerOptions = combinedCatamailerList;
+
             foreach (var opt in MissingInCatamailerOptions)
             {
                 string prefix = opt.Delta.CategoryName + Separator;
@@ -89,23 +99,86 @@ namespace Catamailer.Application.ViewModels
 
         public async Task ApplyResolutionsAsync()
         {
-            // 1. Ajouter à Catamailer avec la couleur OPTIMISÉE (pour respecter l'héritage)
-            foreach (var option in MissingInCatamailerOptions.Where(o => o.IsSelected))
+            // Chargement de l'existant pour auto-guérison (Healing) de la base de données
+            var existingNodes = (await _categoryRepository.GetAllAsync() ?? Enumerable.Empty<CategoryNode>()).ToList();
+            var existingMapByFullName = existingNodes.ToDictionary(
+                n => n.GetFullName(Separator), 
+                n => n, 
+                StringComparer.OrdinalIgnoreCase);
+
+            var selectedToCatamailer = MissingInCatamailerOptions
+                .Where(o => o.IsSelected && o.Delta.Status == DeltaStatus.MissingInCatamailer)
+                .OrderBy(o => o.Depth)
+                .ToList();
+
+            foreach (var option in selectedToCatamailer)
             {
-                var newNode = new CategoryNode(option.Delta.CategoryName, option.Delta.OptimizedColor);
-                await _categoryRepository.AddAsync(newNode);
+                // Si le nœud existe déjà en base (suite à un précédent import défectueux), on le réutilise au lieu d'en créer un nouveau
+                var targetNode = existingNodes.FirstOrDefault(n => string.Equals(n.Name, option.ShortName, StringComparison.OrdinalIgnoreCase));
+                bool isNew = false;
+
+                if (targetNode == null)
+                {
+                    targetNode = new CategoryNode(option.ShortName, option.Delta.OptimizedColor);
+                    isNew = true;
+                    existingNodes.Add(targetNode);
+                }
+                else
+                {
+                    targetNode.UpdateColor(option.Delta.OptimizedColor);
+                }
+
+                existingMapByFullName[option.Delta.CategoryName] = targetNode;
+
+                if (option.Depth > 0)
+                {
+                    int lastSep = option.Delta.CategoryName.LastIndexOf(Separator);
+                    if (lastSep >= 0)
+                    {
+                        string parentFullName = option.Delta.CategoryName.Substring(0, lastSep).Trim();
+                        
+                        if (existingMapByFullName.TryGetValue(parentFullName, out var parentNode))
+                        {
+                            // On attache au parent uniquement si ce n'est pas déjà fait
+                            if (targetNode.Parent != parentNode)
+                            {
+                                parentNode.AddChild(targetNode);
+                                await _categoryRepository.UpdateAsync(parentNode);
+                            }
+                        }
+                    }
+                }
+
+                // Sauvegarde EF Core
+                if (isNew && targetNode.Parent == null)
+                {
+                    await _categoryRepository.AddAsync(targetNode);
+                }
+                else if (!isNew)
+                {
+                    await _categoryRepository.UpdateAsync(targetNode);
+                }
             }
 
-            // 2. Ajouter à Outlook les catégories manquantes
             foreach (var option in MissingInOutlookOptions.Where(o => o.IsSelected))
             {
                 _outlookProvider.AddCategory(option.Delta.CategoryName, option.Delta.CatamailerColor ?? "");
             }
 
-            // 3. Pousser la couleur Catamailer vers Outlook
             foreach (var option in ColorMismatchOptions.Where(o => o.IsSelected))
             {
-                _outlookProvider.UpdateCategoryColor(option.Delta.CategoryName, option.Delta.CatamailerColor ?? "");
+                if (option.Direction == SyncResolutionDirection.CatamailerToOutlook)
+                {
+                    _outlookProvider.UpdateCategoryColor(option.Delta.CategoryName, option.Delta.CatamailerColor ?? "");
+                }
+                else
+                {
+                    var dbNode = await _categoryRepository.GetByNameAsync(option.ShortName) 
+                                 ?? new CategoryNode(option.ShortName, option.Delta.OutlookColor);
+                    
+                    dbNode.UpdateColor(option.Delta.OutlookColor);
+                    await _categoryRepository.UpdateAsync(dbNode);
+                }
             }
         }
         

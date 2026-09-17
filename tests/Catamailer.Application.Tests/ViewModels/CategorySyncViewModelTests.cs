@@ -5,7 +5,8 @@
 //     Historique :
 //         - 2026-09-15 : Création initiale des tests pour CategorySyncViewModel (J4-S2-T1).
 //         - 2026-09-16 : Mise à jour suite au changement de signature du Domain et séparateur dynamique (J4-S4-T2).
-//         - 2026-09-17 : Ajustement signature isImplicit (J4-S4-T2 - Phase Rouge).
+//         - 2026-09-17 : Ajustement signature isImplicit (J4-S4-T2).
+//         - 2026-09-17 : Ajout des tests de reconstruction d'arbre et de résolution bidirectionnelle des couleurs (J4-S4-T4 - Phase Rouge).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -63,20 +64,32 @@ namespace Catamailer.Application.Tests.ViewModels
         }
 
         [Fact]
-        public async Task ApplyResolutionsAsync_ShouldAddMissingInCatamailer_WhenSelected()
+        public async Task ApplyResolutionsAsync_ShouldReconstructTree_ForMissingInCatamailer()
         {
             // Arrange
             var syncResult = new SyncResult();
-            syncResult.AddDelta(CategoryDelta.CreateMissingInCatamailer("Cat1", "#000000", "#000000", false));
+            syncResult.AddDelta(CategoryDelta.CreateMissingInCatamailer("Parent", null, null, false));
+            syncResult.AddDelta(CategoryDelta.CreateMissingInCatamailer("Parent-Child", "#000000", "#000000", false));
             _syncServiceMock.Setup(s => s.AnalyzeSyncDeltasAsync(It.IsAny<string?>())).ReturnsAsync(syncResult);
             
+            _sut.Separator = "-";
             await _sut.InitializeAsync();
 
             // Act
             await _sut.ApplyResolutionsAsync();
 
             // Assert
-            _categoryRepositoryMock.Verify(r => r.AddAsync(It.Is<CategoryNode>(c => c.Name == "Cat1" && c.EffectiveColor == "#000000")), Times.Once);
+            // Le ViewModel doit avoir reconstruit la hiérarchie avant de sauvegarder.
+            // On s'attend à ce que le nœud "Parent" soit sauvegardé avec un enfant "Child".
+            _categoryRepositoryMock.Verify(r => r.AddAsync(It.Is<CategoryNode>(c => 
+                c.Name == "Parent" && 
+                c.Children.Count == 1 && 
+                c.Children[0].Name == "Child" && 
+                c.Children[0].EffectiveColor == "#000000"
+            )), Times.Once);
+            
+            // On ne doit PAS avoir d'insertion d'un nœud plat nommé "Parent-Child"
+            _categoryRepositoryMock.Verify(r => r.AddAsync(It.Is<CategoryNode>(c => c.Name == "Parent-Child")), Times.Never);
         }
 
         [Fact]
@@ -98,20 +111,30 @@ namespace Catamailer.Application.Tests.ViewModels
         }
 
         [Fact]
-        public async Task ApplyResolutionsAsync_ShouldPushCatamailerColorToOutlook_ForMismatches()
+        public async Task ApplyResolutionsAsync_ShouldRespectDirection_ForColorMismatches()
         {
             // Arrange
             var syncResult = new SyncResult();
-            syncResult.AddDelta(CategoryDelta.CreateColorMismatch("Cat3", "#OUTLOOK", "#CATAMAILER"));
+            syncResult.AddDelta(CategoryDelta.CreateColorMismatch("ToOutlook", "#000", "#111"));
+            syncResult.AddDelta(CategoryDelta.CreateColorMismatch("ToCatamailer", "#222", "#333"));
             _syncServiceMock.Setup(s => s.AnalyzeSyncDeltasAsync(It.IsAny<string?>())).ReturnsAsync(syncResult);
             
             await _sut.InitializeAsync();
 
-            // Act
+            // Act : On modifie les directions
+            var opt1 = _sut.ColorMismatchOptions.First(o => o.Delta.CategoryName == "ToOutlook");
+            opt1.IsSelected = true;
+            opt1.Direction = SyncResolutionDirection.CatamailerToOutlook; // Ecrase Outlook avec #111
+
+            var opt2 = _sut.ColorMismatchOptions.First(o => o.Delta.CategoryName == "ToCatamailer");
+            opt2.IsSelected = true;
+            opt2.Direction = SyncResolutionDirection.OutlookToCatamailer; // Ecrase Catamailer avec #222
+
             await _sut.ApplyResolutionsAsync();
 
             // Assert
-            _outlookProviderMock.Verify(p => p.UpdateCategoryColor("Cat3", "#CATAMAILER"), Times.Once);
+            _outlookProviderMock.Verify(p => p.UpdateCategoryColor("ToOutlook", "#111"), Times.Once);
+            _categoryRepositoryMock.Verify(r => r.UpdateAsync(It.Is<CategoryNode>(c => c.Name == "ToCatamailer" && c.Color == "#222")), Times.Once);
         }
     }
 }
