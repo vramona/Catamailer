@@ -140,9 +140,9 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 ### 🟢 J4-S4 : Synchronisation Avancée, UI et Tests d'Intégration COM
 - [x] ✅ `J4-S4-T1 - AnalyzeSyncDeltasAsync_ShouldCreateImplicitParent_WhenOnlyChildExistsInOutlook` (Validé le 16/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : faae02e697a31159296aab3d678f38ee1d9fbaf7)
 - [x] ✅ `J4-S4-T1 - AnalyzeSyncDeltasAsync_ShouldApplyInheritance_WhenOutlookReturnsSameColorForHierarchy` (Validé le 16/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : faae02e697a31159296aab3d678f38ee1d9fbaf7)
-- [x] ✅ `J4-S4-T2 - AnalyzeSyncDeltasAsync_ShouldBubbleUpColorToImplicitParents_WhenAllChildrenShareSameColor` (Validé le 17/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : <COMMIT_HASH>)
-- [x] ✅ `J4-S4-T2 - AnalyzeSyncDeltasAsync_ShouldTrimSpacesAroundSeparator_ToGroupCorrectly` (Validé le 17/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : <COMMIT_HASH>)
-- [x] ✅ `J4-S4-T2 - AnalyzeSyncDeltasAsync_ShouldUseFullName_WhenPushingToOutlook` (Validé le 17/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : <COMMIT_HASH>)
+- [x] ✅ `J4-S4-T2 - AnalyzeSyncDeltasAsync_ShouldBubbleUpColorToImplicitParents_WhenAllChildrenShareSameColor` (Validé le 17/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : 9b2c1b18e71a851c4520652969405adfe598c0df)
+- [x] ✅ `J4-S4-T2 - AnalyzeSyncDeltasAsync_ShouldTrimSpacesAroundSeparator_ToGroupCorrectly` (Validé le 17/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : 9b2c1b18e71a851c4520652969405adfe598c0df)
+- [x] ✅ `J4-S4-T2 - AnalyzeSyncDeltasAsync_ShouldUseFullName_WhenPushingToOutlook` (Validé le 17/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : 9b2c1b18e71a851c4520652969405adfe598c0df)
 
 ---
 
