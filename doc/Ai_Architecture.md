@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-16 17:54
+Généré le : 2026-09-17 11:01
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -51,10 +51,10 @@ Généré le : 2026-09-16 17:54
 
 ### Class : CategorySyncService
 **Fichier** : `src\Catamailer.Application\Services\CategorySyncService.cs`
-**Rôle** : Service responsable de l'analyse et de la synchronisation des catégories entre Outlook et la base de données.
 **Membres et Invocations :**
 - `Task<SyncResult> AnalyzeSyncDeltasAsync(string? separator)`
   - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `CategoryNode.GetFullName()`
   - *Appelle* ➡️ `ICategoryManagerProvider.GetAllCategories()`
   - *Appelle* ➡️ `CategorySyncService.GetOptimizedOutlookColor()`
   - *Appelle* ➡️ `SyncResult.AddDelta()`
@@ -108,21 +108,26 @@ Généré le : 2026-09-16 17:54
 
 ### Class : CategorySyncViewModel
 **Fichier** : `src\Catamailer.Application\ViewModels\CategorySyncViewModel.cs`
-**Rôle** : ViewModel responsable de la gestion des écarts de synchronisation entre Outlook et Catamailer.
 **Membres et Invocations :**
-- `bool HasConflicts { get; set; }` : Indique si des conflits de synchronisation ont été détectés.
-- `List<SyncDeltaOption> MissingInCatamailerOptions { get; set; }` : Liste des options pour les catégories manquantes dans la base de données Catamailer.
-- `List<SyncDeltaOption> MissingInOutlookOptions { get; set; }` : Liste des options pour les catégories manquantes dans Outlook.
-- `List<SyncDeltaOption> ColorMismatchOptions { get; set; }` : Liste des options pour les catégories présentant un conflit de couleur.
-- `Task InitializeAsync()` : Charge les écarts de synchronisation depuis le service et initialise les listes d'options pour l'IHM.
+- `string Separator { get; set; }`
+- `bool HasConflicts { get; set; }`
+- `List<SyncDeltaOption> MissingInCatamailerOptions { get; set; }`
+- `List<SyncDeltaOption> MissingInOutlookOptions { get; set; }`
+- `List<SyncDeltaOption> ColorMismatchOptions { get; set; }`
+- `bool SelectAllMissingInCatamailer { get; set; }`
+- `bool SelectAllMissingInOutlook { get; set; }`
+- `bool SelectAllColorMismatch { get; set; }`
+- `Task InitializeAsync()`
   - *Appelle* ➡️ `ICategorySyncService.AnalyzeSyncDeltasAsync()`
   - *Appelle* ➡️ `SyncResult.GetMissingInCatamailer()`
   - *Appelle* ➡️ `SyncResult.GetMissingInOutlook()`
   - *Appelle* ➡️ `SyncResult.GetColorConflicts()`
-- `Task ApplyResolutionsAsync()` : Applique les résolutions sélectionnées par l'utilisateur aux référentiels respectifs.
+- `Task ApplyResolutionsAsync()`
   - *Appelle* ➡️ `ICategoryRepository.AddAsync()`
   - *Appelle* ➡️ `ICategoryManagerProvider.AddCategory()`
   - *Appelle* ➡️ `ICategoryManagerProvider.UpdateCategoryColor()`
+- `Task RefreshAsync()`
+  - *Appelle* ➡️ `CategorySyncViewModel.InitializeAsync()`
 
 ### Class : CategoryTreeViewModel
 **Fichier** : `src\Catamailer.Application\ViewModels\CategoryTreeViewModel.cs`
@@ -246,10 +251,13 @@ Généré le : 2026-09-16 17:54
 
 ### Class : SyncDeltaOption
 **Fichier** : `src\Catamailer.Application\ViewModels\SyncDeltaOption.cs`
-**Rôle** : Enveloppe un écart de synchronisation avec un état de sélection booléen pour le binding IHM.
 **Membres et Invocations :**
-- `CategoryDelta Delta { get; }` : Obtient l'écart de synchronisation sous-jacent.
-- `bool IsSelected { get; set; }` : Obtient ou définit une valeur indiquant si cet écart doit être résolu. Coché par défaut.
+- `CategoryDelta Delta { get; }`
+- `bool IsSelected { get; set; }`
+- `int Depth { get; }`
+- `string ShortName { get; }`
+- `bool IsImplicitParent { get; }`
+- `bool IsFolder { get; set; }`
 
 ## Projet : Catamailer.Domain
 ### Class : AppSetting
@@ -389,13 +397,15 @@ Généré le : 2026-09-16 17:54
 **Fichier** : `src\Catamailer.Domain\Sync\CategoryDelta.cs`
 **Rôle** : Représente un écart détecté lors de la comparaison entre la Master Category List d'Outlook et la base Catamailer.
 **Membres et Invocations :**
-- `string CategoryName { get; }` : Obtient le nom de la catégorie concernée par l'écart.
-- `string? OutlookColor { get; }` : Obtient la couleur de la catégorie telle que définie dans Outlook (le cas échéant).
-- `string? CatamailerColor { get; }` : Obtient la couleur de la catégorie telle que définie dans Catamailer (le cas échéant).
-- `DeltaStatus Status { get; }` : Obtient le type de conflit détecté.
-- `CategoryDelta CreateMissingInCatamailer(string categoryName, string? outlookColor)` : Crée un delta signalant qu'une catégorie d'Outlook n'est pas connue dans Catamailer.
-- `CategoryDelta CreateMissingInOutlook(string categoryName, string? catamailerColor)` : Crée un delta signalant qu'une catégorie de Catamailer n'existe pas dans Outlook.
-- `CategoryDelta CreateColorMismatch(string categoryName, string outlookColor, string catamailerColor)` : Crée un delta signalant une différence de couleur pour une même catégorie.
+- `string CategoryName { get; }`
+- `string? OutlookColor { get; }`
+- `string? OptimizedColor { get; }`
+- `string? CatamailerColor { get; }`
+- `bool IsImplicit { get; }`
+- `DeltaStatus Status { get; }`
+- `CategoryDelta CreateMissingInCatamailer(string categoryName, string? outlookColor, string? optimizedColor, bool isImplicit)`
+- `CategoryDelta CreateMissingInOutlook(string categoryName, string? catamailerColor)`
+- `CategoryDelta CreateColorMismatch(string categoryName, string outlookColor, string catamailerColor)`
 
 ### Class : SyncResult
 **Fichier** : `src\Catamailer.Domain\Sync\SyncResult.cs`
@@ -588,7 +598,6 @@ Généré le : 2026-09-16 17:54
 
 ### Composants Razor
 - **ActivationPrompt** : `src\Catamailer.UI\Components\ActivationPrompt.razor`
-- **CategorySyncModal** : `src\Catamailer.UI\Components\CategorySyncModal.razor`
 - **CategoryTreeNode** : `src\Catamailer.UI\Components\CategoryTreeNode.razor`
 - **CategoryTreeView** : `src\Catamailer.UI\Components\CategoryTreeView.razor`
 - **QuickCategorizeModal** : `src\Catamailer.UI\Components\QuickCategorizeModal.razor`
@@ -598,6 +607,7 @@ Généré le : 2026-09-16 17:54
 - **TestQuickActionsPage** (Route: `/test-quick-actions`) : `src\Catamailer.UI\Dummies\TestQuickActionsPage.razor`
 - **MainLayout** : `src\Catamailer.UI\Components\Layout\MainLayout.razor`
 - **CategoryEditor** (Route: `/category-editor`) : `src\Catamailer.UI\Components\Pages\CategoryEditor.razor`
+- **CategorySync** (Route: `/category-sync`) : `src\Catamailer.UI\Components\Pages\CategorySync.razor`
 - **DictionaryEditor** (Route: `/dictionary-editor`) : `src\Catamailer.UI\Components\Pages\DictionaryEditor.razor`
 - **Home** (Route: `/`) : `src\Catamailer.UI\Components\Pages\Home.razor`
 - **NotFound** (Route: `/not-found`) : `src\Catamailer.UI\Components\Pages\NotFound.razor`
@@ -794,6 +804,22 @@ Généré le : 2026-09-16 17:54
   - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
   - *Appelle* ➡️ `CategorySyncService.AnalyzeSyncDeltasAsync()`
   - *Appelle* ➡️ `SyncResult.GetMissingInCatamailer()`
+- `Task AnalyzeSyncDeltasAsync_ShouldBubbleUpColorToImplicitParents_WhenAllChildrenShareSameColor()`
+  - *Appelle* ➡️ `ICategoryManagerProvider.GetAllCategories()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `CategorySyncService.AnalyzeSyncDeltasAsync()`
+  - *Appelle* ➡️ `SyncResult.GetMissingInCatamailer()`
+- `Task AnalyzeSyncDeltasAsync_ShouldTrimSpacesAroundSeparator_ToGroupCorrectly()`
+  - *Appelle* ➡️ `ICategoryManagerProvider.GetAllCategories()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `CategorySyncService.AnalyzeSyncDeltasAsync()`
+  - *Appelle* ➡️ `SyncResult.GetMissingInCatamailer()`
+- `Task AnalyzeSyncDeltasAsync_ShouldUseFullName_WhenPushingToOutlook()`
+  - *Appelle* ➡️ `ICategoryManagerProvider.GetAllCategories()`
+  - *Appelle* ➡️ `CategoryNode.AddChild()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `CategorySyncService.AnalyzeSyncDeltasAsync()`
+  - *Appelle* ➡️ `SyncResult.GetMissingInOutlook()`
 
 ### Class : ShadowModeServiceTests
 **Fichier** : `tests\Catamailer.Application.Tests\ShadowModeServiceTests.cs`

@@ -9,6 +9,7 @@
     *   **Catégories Inconnues dans Catamailer :** Toute catégorie présente dans Outlook mais absente de Catamailer fait l'objet d'une proposition d'import filtrable via une interface utilisateur dédiée. **L'import n'est jamais automatique.**
     *   **Renommage / Détection de conflit :** En cas de détection d'un écart de nom ou de couleur, une résolution manuelle est proposée à l'utilisateur.
     *   **Suppression Outlook :** Aucune catégorie n'est supprimée de Catamailer (ou d'Outlook) sans une validation explicite de l'utilisateur.
+*   **Parents Implicites et Remontée de Couleur :** Les nœuds intermédiaires déduits du séparateur mais n'existant pas physiquement dans Outlook sont créés virtuellement. Si tous les enfants physiques d'un parent virtuel partagent la même couleur, ce parent hérite (bubble-up) de cette couleur pour optimiser l'arborescence.
 *   **Synchronisation Temps Réel (Catamailer -> Outlook) :** Une fois le référentiel initialisé, Catamailer agit comme la source de vérité absolue. Toute modification dans Catamailer (Création, Changement de Couleur, Suppression validée) met à jour la *Master Category List* d'Outlook instantanément.
 *   **Arborescence :** Les catégories sont structurées hiérarchiquement (Familles > Sous-catégories).
 *   **Héritage des couleurs :** Une sous-catégorie hérite de la couleur de son parent, sauf surcharge explicite.
