@@ -8,6 +8,7 @@
 //         - 2026-09-07 : Ajout de ReplaceCategoryOnAllItems pour J2-S1-T4 (Phase Rouge).
 //         - 2026-09-07 : Ajout de GetNextUnprocessedMailEntryIds pour J2-S2-T3 (Phase Rouge).
 //         - 2026-09-15 : Ajout de GetMasterCategories pour J4-S3-T1 (Phase Rouge).
+//         - 2026-09-17 : Ajout de RenameCategory pour J4-S4-T3 (Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -68,6 +69,13 @@ namespace Catamailer.Infrastructure
         /// <param name="name">Le nom de la catégorie.</param>
         /// <param name="newColorCode">Le nouveau code couleur.</param>
         void UpdateCategory(string name, string newColorCode);
+        
+        /// <summary>
+        /// Renomme une catégorie existante dans la Master Category List.
+        /// </summary>
+        /// <param name="oldName">Le nom actuel de la catégorie.</param>
+        /// <param name="newName">Le nouveau nom de la catégorie.</param>
+        void RenameCategory(string oldName, string newName);
 
         /// <summary>
         /// Supprime une catégorie de la Master Category List.

@@ -12,11 +12,14 @@
 //         - 2026-09-17 : Transmission de isImplicit lors de la création du Delta (J4-S4-T2 - Phase Verte).
 //         - 2026-09-17 : Ajout de Trim() lors de la remontée hiérarchique pour corriger l'héritage avec espaces (J4-S4-T2 - Phase Verte).
 //         - 2026-09-17 : Ajout de la création de CategoryDelta.CreateSynchronized pour maintenir le contexte de l'arbre (J4-S4-T4 - Phase Verte).
+//         - 2026-09-17 : Suppression de l'héritage simulé pour Outlook afin de révéler les vrais conflits (J4-S4-T5 - Phase Verte).
+//         - 2026-09-17 : Ajout de traces Stopwatch pour l'analyse de performance (Diag/Refacto).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Catamailer.Domain;
@@ -38,6 +41,9 @@ namespace Catamailer.Application.Services
         /// <inheritdoc />
         public async Task<SyncResult> AnalyzeSyncDeltasAsync(string? separator = null)
         {
+            var sw = Stopwatch.StartNew();
+            Debug.WriteLine("[CategorySyncService] Début AnalyzeSyncDeltasAsync...");
+
             var result = new SyncResult();
             var dbCategories = await _categoryRepository.GetAllAsync();
             
@@ -48,6 +54,9 @@ namespace Catamailer.Application.Services
                 c => c, 
                 StringComparer.OrdinalIgnoreCase);
 
+            Debug.WriteLine($"[CategorySyncService] Récupération DB terminée. {dbCategories.Count()} éléments. ({sw.ElapsedMilliseconds}ms)");
+            var stepSw = Stopwatch.StartNew();
+
             var rawOutlookCategories = _outlookProvider.GetAllCategories().ToList();
             var outlookDict = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
             var implicitTracking = new HashSet<string>(StringComparer.OrdinalIgnoreCase); 
@@ -56,6 +65,9 @@ namespace Catamailer.Application.Services
             {
                 outlookDict[Name] = ColorCode;
             }
+
+            Debug.WriteLine($"[CategorySyncService] Récupération Outlook terminée. {rawOutlookCategories.Count} éléments. ({stepSw.ElapsedMilliseconds}ms)");
+            stepSw.Restart();
 
             if (!string.IsNullOrEmpty(cleanSeparator))
             {
@@ -97,6 +109,9 @@ namespace Catamailer.Application.Services
                 }
             }
 
+            Debug.WriteLine($"[CategorySyncService] Calcul des parents virtuels (Bubbling) terminé. ({stepSw.ElapsedMilliseconds}ms)");
+            stepSw.Restart();
+
             foreach (var kvp in outlookDict)
             {
                 string outName = kvp.Key;
@@ -112,7 +127,7 @@ namespace Catamailer.Application.Services
                 else
                 {
                     string? dbEff = dbCat.EffectiveColor;
-                    string? outEff = GetOutlookEffectiveColor(outName, outlookDict, cleanSeparator);
+                    string? outEff = rawColor; // Outlook ne gérant pas l'héritage, on compare avec sa couleur brute explicite
 
                     if (!string.Equals(dbEff, outEff, StringComparison.OrdinalIgnoreCase))
                     {
@@ -135,24 +150,11 @@ namespace Catamailer.Application.Services
                 }
             }
 
-            return result;
-        }
+            Debug.WriteLine($"[CategorySyncService] Comparaison croisée terminée. {result.Deltas.Count} deltas générés. ({stepSw.ElapsedMilliseconds}ms)");
+            sw.Stop();
+            Debug.WriteLine($"[CategorySyncService] AnalyzeSyncDeltasAsync Global : {sw.ElapsedMilliseconds}ms");
 
-        private string? GetOutlookEffectiveColor(string name, Dictionary<string, string?> outlookDict, string cleanSeparator)
-        {
-            if (string.IsNullOrEmpty(cleanSeparator)) return outlookDict.TryGetValue(name, out var c) ? c : null;
-            
-            string current = name;
-            while (true)
-            {
-                if (outlookDict.TryGetValue(current, out var color) && color != null)
-                    return color;
-                
-                int lastSep = current.LastIndexOf(cleanSeparator);
-                if (lastSep < 0) break;
-                current = current.Substring(0, lastSep).Trim(); 
-            }
-            return null;
+            return result;
         }
 
         private string? GetOptimizedOutlookColor(string name, Dictionary<string, string?> outlookDict, string cleanSeparator)
@@ -166,7 +168,20 @@ namespace Catamailer.Application.Services
             if (lastSep < 0) return explicitColor;
             
             string parentName = name.Substring(0, lastSep).Trim(); 
-            string? parentEffective = GetOutlookEffectiveColor(parentName, outlookDict, cleanSeparator);
+            
+            string? parentEffective = null;
+            string current = parentName;
+            while(true)
+            {
+                if (outlookDict.TryGetValue(current, out var color) && color != null)
+                {
+                    parentEffective = color;
+                    break;
+                }
+                int sep = current.LastIndexOf(cleanSeparator);
+                if (sep < 0) break;
+                current = current.Substring(0, sep).Trim();
+            }
 
             if (string.Equals(explicitColor, parentEffective, StringComparison.OrdinalIgnoreCase))
                 return null;

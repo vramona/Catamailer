@@ -6,6 +6,7 @@
 //         - 2026-09-07 : Ajout du constructeur protégé pour compatibilité avec Entity Framework Core (J1-S1-T3).
 //         - 2026-09-11 : Ajout de Depth et GetFullName pour le rendu hiérarchique (J3-S3-T3-ST2).
 //         - 2026-09-17 : Ajout de la méthode UpdateColor pour résolution de conflit (J4-S4-T4 - Phase Verte).
+//         - 2026-09-22 : Implémentation de la suppression logique IsDeleted (J4-S4-T6 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -52,6 +53,11 @@ namespace Catamailer.Domain
         public int Depth => Parent == null ? 0 : Parent.Depth + 1;
 
         /// <summary>
+        /// Indique si la catégorie a été supprimée logiquement.
+        /// </summary>
+        public bool IsDeleted { get; private set; }
+
+        /// <summary>
         /// Constructeur sans paramètre requis par Entity Framework Core pour la matérialisation.
         /// </summary>
         protected CategoryNode()
@@ -68,6 +74,7 @@ namespace Catamailer.Domain
         {
             Name = name;
             Color = color;
+            IsDeleted = false;
         }
 
         /// <summary>
@@ -87,6 +94,22 @@ namespace Catamailer.Domain
         public void UpdateColor(string? newColor)
         {
             Color = newColor;
+        }
+
+        /// <summary>
+        /// Marque la catégorie comme supprimée logiquement.
+        /// </summary>
+        public void MarkAsDeleted()
+        {
+            IsDeleted = true;
+        }
+
+        /// <summary>
+        /// Restaure une catégorie préalablement supprimée.
+        /// </summary>
+        public void Restore()
+        {
+            IsDeleted = false;
         }
 
         /// <summary>

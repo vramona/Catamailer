@@ -8,11 +8,15 @@
 //         - 2026-09-17 : Refonte ApplyResolutionsAsync pour reconstruire l'arbre avant l'import SQLite (J4-S4-T4).
 //         - 2026-09-17 : Gestion de la direction de résolution des conflits de couleur (J4-S4-T4).
 //         - 2026-09-17 : Ajout de la mécanique de Healing pour récupérer et ré-attacher les nœuds orphelins existants (J4-S4-T4 - Phase Bleue).
+//         - 2026-09-17 : Inclusion des ColorMismatch pour maintenir la continuité visuelle de l'arbre (J4-S4-T5 - Phase Bleue).
+//         - 2026-09-17 : Direction par défaut "Écraser Outlook" si Outlook n'a pas de couleur et Catamailer en a une (J4-S4-T5 - Phase Bleue).
+//         - 2026-09-17 : Ajout de traces Stopwatch et optimisation O(1) de la boucle IsFolder (Refacto Perf).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Catamailer.Application.Services;
@@ -37,7 +41,7 @@ namespace Catamailer.Application.ViewModels
         public bool SelectAllMissingInCatamailer
         {
             get => MissingInCatamailerOptions.Any() && MissingInCatamailerOptions.All(o => o.IsSelected);
-            set { foreach (var o in MissingInCatamailerOptions) o.IsSelected = value; }
+            set { foreach (var o in MissingInCatamailerOptions) { if (o.Delta.Status == DeltaStatus.MissingInCatamailer) o.IsSelected = value; } }
         }
 
         public bool SelectAllMissingInOutlook
@@ -64,27 +68,46 @@ namespace Catamailer.Application.ViewModels
 
         public async Task InitializeAsync()
         {
+            var sw = Stopwatch.StartNew();
+            Debug.WriteLine("[CategorySyncViewModel] Début InitializeAsync...");
+
             var syncResult = await _syncService.AnalyzeSyncDeltasAsync(Separator);
             HasConflicts = syncResult.HasConflicts;
 
-            // Intégrer les éléments synchronisés pour maintenir le contexte de l'arbre
-            var combinedCatamailerList = syncResult.GetMissingInCatamailer()
-                .Concat(syncResult.GetSynchronized())
+            Debug.WriteLine($"[CategorySyncViewModel] Analyse terminée. Confits: {HasConflicts}. Temps d'attente du service: {sw.ElapsedMilliseconds}ms");
+            sw.Restart();
+
+            var combinedCatamailerList = syncResult.Deltas
+                .Where(d => d.Status == DeltaStatus.MissingInCatamailer || 
+                            d.Status == DeltaStatus.Synchronized || 
+                            d.Status == DeltaStatus.ColorMismatch)
                 .OrderBy(d => d.CategoryName, StringComparer.OrdinalIgnoreCase)
                 .Select(d => new SyncDeltaOption(d, Separator)
                 {
-                    // Forcer la non-sélection si l'élément est déjà synchronisé
-                    IsSelected = d.Status != DeltaStatus.Synchronized
+                    IsSelected = d.Status == DeltaStatus.MissingInCatamailer
                 })
                 .ToList();
 
             MissingInCatamailerOptions = combinedCatamailerList;
 
+            // Optimisation O(N) au lieu de O(N²) : On extrait tous les chemins "parents" existants
+            var parentPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (var opt in MissingInCatamailerOptions)
             {
-                string prefix = opt.Delta.CategoryName + Separator;
-                opt.IsFolder = MissingInCatamailerOptions.Any(o => o.Delta.CategoryName.StartsWith(prefix));
+                int lastSep = opt.Delta.CategoryName.LastIndexOf(Separator);
+                if (lastSep >= 0)
+                {
+                    parentPaths.Add(opt.Delta.CategoryName.Substring(0, lastSep).Trim());
+                }
             }
+
+            foreach (var opt in MissingInCatamailerOptions)
+            {
+                opt.IsFolder = parentPaths.Contains(opt.Delta.CategoryName);
+            }
+
+            Debug.WriteLine($"[CategorySyncViewModel] Résolution de l'arbre Catamailer et IsFolder terminée. {MissingInCatamailerOptions.Count} éléments. ({sw.ElapsedMilliseconds}ms)");
+            sw.Restart();
 
             MissingInOutlookOptions = syncResult.GetMissingInOutlook()
                 .OrderBy(d => d.CategoryName, StringComparer.OrdinalIgnoreCase)
@@ -93,13 +116,23 @@ namespace Catamailer.Application.ViewModels
 
             ColorMismatchOptions = syncResult.GetColorConflicts()
                 .OrderBy(d => d.CategoryName, StringComparer.OrdinalIgnoreCase)
-                .Select(d => new SyncDeltaOption(d, Separator))
+                .Select(d => new SyncDeltaOption(d, Separator)
+                {
+                    Direction = (string.IsNullOrEmpty(d.OutlookColor) && !string.IsNullOrEmpty(d.CatamailerColor)) 
+                        ? SyncResolutionDirection.CatamailerToOutlook 
+                        : SyncResolutionDirection.OutlookToCatamailer
+                })
                 .ToList();
+
+            sw.Stop();
+            Debug.WriteLine($"[CategorySyncViewModel] Initialisation complète terminée. ({sw.ElapsedMilliseconds}ms supplémentaires)");
         }
 
         public async Task ApplyResolutionsAsync()
         {
-            // Chargement de l'existant pour auto-guérison (Healing) de la base de données
+            var sw = Stopwatch.StartNew();
+            Debug.WriteLine("[CategorySyncViewModel] Début ApplyResolutionsAsync...");
+
             var existingNodes = (await _categoryRepository.GetAllAsync() ?? Enumerable.Empty<CategoryNode>()).ToList();
             var existingMapByFullName = existingNodes.ToDictionary(
                 n => n.GetFullName(Separator), 
@@ -113,7 +146,6 @@ namespace Catamailer.Application.ViewModels
 
             foreach (var option in selectedToCatamailer)
             {
-                // Si le nœud existe déjà en base (suite à un précédent import défectueux), on le réutilise au lieu d'en créer un nouveau
                 var targetNode = existingNodes.FirstOrDefault(n => string.Equals(n.Name, option.ShortName, StringComparison.OrdinalIgnoreCase));
                 bool isNew = false;
 
@@ -139,7 +171,6 @@ namespace Catamailer.Application.ViewModels
                         
                         if (existingMapByFullName.TryGetValue(parentFullName, out var parentNode))
                         {
-                            // On attache au parent uniquement si ce n'est pas déjà fait
                             if (targetNode.Parent != parentNode)
                             {
                                 parentNode.AddChild(targetNode);
@@ -149,7 +180,6 @@ namespace Catamailer.Application.ViewModels
                     }
                 }
 
-                // Sauvegarde EF Core
                 if (isNew && targetNode.Parent == null)
                 {
                     await _categoryRepository.AddAsync(targetNode);
@@ -180,6 +210,9 @@ namespace Catamailer.Application.ViewModels
                     await _categoryRepository.UpdateAsync(dbNode);
                 }
             }
+
+            sw.Stop();
+            Debug.WriteLine($"[CategorySyncViewModel] Résolutions appliquées avec succès. ({sw.ElapsedMilliseconds}ms)");
         }
         
         public async Task RefreshAsync()

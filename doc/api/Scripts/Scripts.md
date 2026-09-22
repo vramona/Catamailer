@@ -57,6 +57,23 @@
 - `[string] $Prefixe`
 
 ---
+## Script : Invoke-TestEnvSetup.ps1
+**Chemin relatif** : `scripts\Invoke-TestEnvSetup.ps1`
+
+### Paramètres
+- `[string] $TestProfile`
+- `[string] $BasePstPath`
+- `[string] $PSScriptRoot`
+
+---
+## Script : Invoke-TestEnvTeardown.ps1
+**Chemin relatif** : `scripts\Invoke-TestEnvTeardown.ps1`
+
+### Paramètres
+- `[string] $TestProfile`
+- `[string] $DefaultProfile`
+
+---
 ## Script : Merge-Branch.ps1
 **Chemin relatif** : `scripts\Merge-Branch.ps1`
 
@@ -64,6 +81,22 @@
 - `[string] $SourceBranch` *(Obligatoire)*
 - `[string] $TargetBranch` *(Obligatoire)*
 - `[string] $Message` *(Obligatoire)*
+
+---
+## Script : Run-CatamailerTestEnv.ps1
+**Chemin relatif** : `scripts\Run-CatamailerTestEnv.ps1`
+
+### Dépendances (Invocations)
+- *Appelle* ➡️ `Invoke-TestEnvSetup.ps1`
+- *Appelle* ➡️ `Invoke-TestEnvTeardown.ps1`
+
+---
+## Script : Run-IntegrationTests.ps1
+**Chemin relatif** : `scripts\Run-IntegrationTests.ps1`
+
+### Dépendances (Invocations)
+- *Appelle* ➡️ `Invoke-TestEnvSetup.ps1`
+- *Appelle* ➡️ `Invoke-TestEnvTeardown.ps1`
 
 ---
 ## Script : Serve-Site.ps1

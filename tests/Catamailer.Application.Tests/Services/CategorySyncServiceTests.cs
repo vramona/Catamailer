@@ -11,6 +11,7 @@
 //         - 2026-09-17 : Ajout d'assertions sur la propriété IsImplicit même après bubbling de couleur (J4-S4-T2).
 //         - 2026-09-17 : Renforcement du test Trim pour valider la bonne application de l'héritage (J4-S4-T2).
 //         - 2026-09-17 : Ajout du test de détection des catégories synchronisées (J4-S4-T4 - Phase Rouge).
+//         - 2026-09-17 : Ajout du test de détection de conflit d'héritage avec Outlook (J4-S4-T5 - Phase Rouge).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -124,6 +125,37 @@ namespace Catamailer.Application.Tests.Services
             Assert.Equal("SharedCat", conflict.CategoryName);
             Assert.Equal("#OUTLOOK", conflict.OutlookColor);
             Assert.Equal("#DBCOLOR", conflict.CatamailerColor);
+        }
+
+        [Fact]
+        public async Task AnalyzeSyncDeltasAsync_ShouldDetectColorMismatch_WhenOutlookLacksInheritedColor()
+        {
+            // Arrange
+            _outlookProviderMock.Setup(p => p.GetAllCategories())
+                .Returns(new List<(string, string?)> 
+                { 
+                    ("Parent", "#FF0000"),
+                    ("Parent-Child", null) // Outlook n'a pas la couleur explicitement
+                });
+
+            var parent = new CategoryNode("Parent", "#FF0000");
+            var child = new CategoryNode("Child", null);
+            parent.AddChild(child); // EffectiveColor de l'enfant devient #FF0000
+            
+            _categoryRepositoryMock.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<CategoryNode> { parent, child });
+
+            // Act
+            var result = await _sut.AnalyzeSyncDeltasAsync("-");
+
+            // Assert
+            Assert.True(result.HasConflicts);
+            var mismatches = result.GetColorConflicts().ToList();
+            
+            // Actuellement le test va échouer car Catamailer simule l'héritage pour Outlook (faux-positif de Synchronized)
+            Assert.Single(mismatches);
+            Assert.Equal("Parent-Child", mismatches[0].CategoryName);
+            Assert.Equal("", mismatches[0].OutlookColor);
+            Assert.Equal("#FF0000", mismatches[0].CatamailerColor);
         }
 
         [Fact]

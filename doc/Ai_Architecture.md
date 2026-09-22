@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-17 14:14
+Généré le : 2026-09-22 16:21
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -59,7 +59,6 @@ Généré le : 2026-09-17 14:14
   - *Appelle* ➡️ `CategorySyncService.GetOptimizedOutlookColor()`
   - *Appelle* ➡️ `SyncResult.AddDelta()`
   - *Appelle* ➡️ `CategoryDelta.CreateMissingInCatamailer()`
-  - *Appelle* ➡️ `CategorySyncService.GetOutlookEffectiveColor()`
   - *Appelle* ➡️ `CategoryDelta.CreateColorMismatch()`
   - *Appelle* ➡️ `CategoryDelta.CreateSynchronized()`
   - *Appelle* ➡️ `CategoryDelta.CreateMissingInOutlook()`
@@ -120,8 +119,6 @@ Généré le : 2026-09-17 14:14
 - `bool SelectAllColorMismatch { get; set; }`
 - `Task InitializeAsync()`
   - *Appelle* ➡️ `ICategorySyncService.AnalyzeSyncDeltasAsync()`
-  - *Appelle* ➡️ `SyncResult.GetMissingInCatamailer()`
-  - *Appelle* ➡️ `SyncResult.GetSynchronized()`
   - *Appelle* ➡️ `SyncResult.GetMissingInOutlook()`
   - *Appelle* ➡️ `SyncResult.GetColorConflicts()`
 - `Task ApplyResolutionsAsync()`
@@ -286,8 +283,11 @@ Généré le : 2026-09-17 14:14
 - `IReadOnlyList<CategoryNode> Children { get; }` : Obtient la liste en lecture seule des enfants de cette catégorie.
 - `string? EffectiveColor { get; }` : Obtient la couleur effective de la catégorie, en héritant de son ascendance si aucune couleur explicite n'est définie.
 - `int Depth { get; }` : Obtient la profondeur du nœud dans l'arborescence (0 pour un nœud racine).
+- `bool IsDeleted { get; set; }` : Indique si la catégorie a été supprimée logiquement.
 - `void AddChild(CategoryNode child)` : Ajoute un nœud enfant à cette catégorie et lie automatiquement ce nœud à ce parent.
 - `void UpdateColor(string? newColor)` : Met à jour la couleur explicite de la catégorie.
+- `void MarkAsDeleted()` : Marque la catégorie comme supprimée logiquement.
+- `void Restore()` : Restaure une catégorie préalablement supprimée.
 - `IEnumerable<CategoryNode> GetAscendanceChain()` : Récupère la chaîne d'ascendance complète depuis la racine jusqu'à ce nœud inclus.
 - `string GetFullName(string separator)` : Génère le nom complet de la catégorie incluant toute son ascendance, séparée par le caractère spécifié.
   - *Appelle* ➡️ `CategoryNode.GetAscendanceChain()`
@@ -480,12 +480,17 @@ Généré le : 2026-09-17 14:14
 **Membres et Invocations :**
 - `IEnumerable<(string Name, string? ColorCode)> GetMasterCategories()`
   - *Appelle* ➡️ `OutlookApplicationWrapper.MapOlCategoryColorToHex()`
-- `MailMetadata GetMailMetadata(string entryId)`
-- `string? GetSelectedEntryId()`
 - `bool CategoryExists(string name)`
 - `void AddCategory(string name, string colorCode)`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.CategoryExists()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.MapHexToOlCategoryColor()`
 - `void UpdateCategory(string name, string newColorCode)`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.MapHexToOlCategoryColor()`
+- `void RenameCategory(string oldName, string newName)`
 - `void RemoveCategory(string name)`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.CategoryExists()`
+- `MailMetadata GetMailMetadata(string entryId)`
+- `string? GetSelectedEntryId()`
 - `void ReplaceCategoryOnAllItems(string oldCategoryName, string newCategoryName)`
 - `IEnumerable<string> GetNextUnprocessedMailEntryIds(string? lastEntryId, int maxItems)`
 
@@ -812,6 +817,12 @@ Généré le : 2026-09-17 14:14
   - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
   - *Appelle* ➡️ `CategorySyncService.AnalyzeSyncDeltasAsync()`
   - *Appelle* ➡️ `SyncResult.GetColorConflicts()`
+- `Task AnalyzeSyncDeltasAsync_ShouldDetectColorMismatch_WhenOutlookLacksInheritedColor()`
+  - *Appelle* ➡️ `ICategoryManagerProvider.GetAllCategories()`
+  - *Appelle* ➡️ `CategoryNode.AddChild()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `CategorySyncService.AnalyzeSyncDeltasAsync()`
+  - *Appelle* ➡️ `SyncResult.GetColorConflicts()`
 - `Task AnalyzeSyncDeltasAsync_ShouldCreateImplicitParent_WhenOnlyChildExistsInOutlook()`
   - *Appelle* ➡️ `ICategoryManagerProvider.GetAllCategories()`
   - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
@@ -880,6 +891,11 @@ Généré le : 2026-09-17 14:14
   - *Appelle* ➡️ `SyncResult.AddDelta()`
   - *Appelle* ➡️ `CategoryDelta.CreateMissingInCatamailer()`
   - *Appelle* ➡️ `CategoryDelta.CreateMissingInOutlook()`
+  - *Appelle* ➡️ `CategoryDelta.CreateColorMismatch()`
+  - *Appelle* ➡️ `ICategorySyncService.AnalyzeSyncDeltasAsync()`
+  - *Appelle* ➡️ `CategorySyncViewModel.InitializeAsync()`
+- `Task InitializeAsync_ShouldSetDefaultDirectionToOverwriteOutlook_WhenOutlookLacksInheritedColor()`
+  - *Appelle* ➡️ `SyncResult.AddDelta()`
   - *Appelle* ➡️ `CategoryDelta.CreateColorMismatch()`
   - *Appelle* ➡️ `ICategorySyncService.AnalyzeSyncDeltasAsync()`
   - *Appelle* ➡️ `CategorySyncViewModel.InitializeAsync()`
@@ -1026,6 +1042,12 @@ Généré le : 2026-09-17 14:14
 - `void GetAscendanceChain_ShouldReturnFullHierarchy_FromRootToNode()`
   - *Appelle* ➡️ `CategoryNode.AddChild()`
   - *Appelle* ➡️ `CategoryNode.GetAscendanceChain()`
+- `void CategoryNode_Creation_ShouldSetIsDeletedToFalse()`
+- `void MarkAsDeleted_ShouldSetIsDeletedToTrue()`
+  - *Appelle* ➡️ `CategoryNode.MarkAsDeleted()`
+- `void Restore_ShouldSetIsDeletedToFalse()`
+  - *Appelle* ➡️ `CategoryNode.MarkAsDeleted()`
+  - *Appelle* ➡️ `CategoryNode.Restore()`
 
 ### Class : RuleModelsTests
 **Fichier** : `tests\Catamailer.Domain.Tests\RuleModelsTests.cs`
@@ -1205,10 +1227,23 @@ Généré le : 2026-09-17 14:14
 - **Generate-FileList.ps1** : `scripts\Generate-FileList.ps1`
   - Paramètre : `[string] $Chemin`
   - Paramètre : `[string] $Prefixe`
+- **Invoke-TestEnvSetup.ps1** : `scripts\Invoke-TestEnvSetup.ps1`
+  - Paramètre : `[string] $TestProfile`
+  - Paramètre : `[string] $BasePstPath`
+  - Paramètre : `[string] $PSScriptRoot`
+- **Invoke-TestEnvTeardown.ps1** : `scripts\Invoke-TestEnvTeardown.ps1`
+  - Paramètre : `[string] $TestProfile`
+  - Paramètre : `[string] $DefaultProfile`
 - **Merge-Branch.ps1** : `scripts\Merge-Branch.ps1`
   - Paramètre : `[string] $SourceBranch` *(Obligatoire)*
   - Paramètre : `[string] $TargetBranch` *(Obligatoire)*
   - Paramètre : `[string] $Message` *(Obligatoire)*
+- **Run-CatamailerTestEnv.ps1** : `scripts\Run-CatamailerTestEnv.ps1`
+  - *Appelle* ➡️ `Invoke-TestEnvSetup.ps1`
+  - *Appelle* ➡️ `Invoke-TestEnvTeardown.ps1`
+- **Run-IntegrationTests.ps1** : `scripts\Run-IntegrationTests.ps1`
+  - *Appelle* ➡️ `Invoke-TestEnvSetup.ps1`
+  - *Appelle* ➡️ `Invoke-TestEnvTeardown.ps1`
 - **Serve-Site.ps1** : `scripts\Serve-Site.ps1`
 - **setup-workspace.ps1** : `scripts\setup-workspace.ps1`
 - **Start-Jalon.ps1** : `scripts\Start-Jalon.ps1`

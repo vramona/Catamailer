@@ -7,6 +7,8 @@
 //         - 2026-09-16 : Mise à jour suite au changement de signature du Domain et séparateur dynamique (J4-S4-T2).
 //         - 2026-09-17 : Ajustement signature isImplicit (J4-S4-T2).
 //         - 2026-09-17 : Ajout des tests de reconstruction d'arbre et de résolution bidirectionnelle des couleurs (J4-S4-T4 - Phase Rouge).
+//         - 2026-09-17 : Ajustement de l'assertion InitializeAsync pour intégrer les ColorMismatch dans l'arbre (J4-S4-T5 - Phase Bleue).
+//         - 2026-09-17 : Ajout du test vérifiant la direction par défaut sur écraser Outlook lors d'une perte d'héritage (J4-S4-T5 - Phase Bleue).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -56,11 +58,31 @@ namespace Catamailer.Application.Tests.ViewModels
 
             // Assert
             Assert.True(_sut.HasConflicts);
-            Assert.Single(_sut.MissingInCatamailerOptions);
+            
+            // Cat1 (Missing) et Cat3 (Mismatch) doivent être dans la liste de gauche pour construire l'arbre
+            Assert.Equal(2, _sut.MissingInCatamailerOptions.Count);
+            Assert.Contains(_sut.MissingInCatamailerOptions, o => o.Delta.CategoryName == "Cat1" && o.IsSelected);
+            Assert.Contains(_sut.MissingInCatamailerOptions, o => o.Delta.CategoryName == "Cat3" && !o.IsSelected); // Non-sélectionné par défaut car Mismatch
+            
             Assert.Single(_sut.MissingInOutlookOptions);
             Assert.Single(_sut.ColorMismatchOptions);
-            
-            Assert.True(_sut.MissingInCatamailerOptions.First().IsSelected);
+        }
+        
+        [Fact]
+        public async Task InitializeAsync_ShouldSetDefaultDirectionToOverwriteOutlook_WhenOutlookLacksInheritedColor()
+        {
+            // Arrange
+            var syncResult = new SyncResult();
+            // Outlook n'a pas de couleur (vide), Catamailer a une couleur effective (#FF0000)
+            syncResult.AddDelta(CategoryDelta.CreateColorMismatch("Parent-Child", "", "#FF0000"));
+            _syncServiceMock.Setup(s => s.AnalyzeSyncDeltasAsync(It.IsAny<string?>())).ReturnsAsync(syncResult);
+
+            // Act
+            await _sut.InitializeAsync();
+
+            // Assert
+            var option = Assert.Single(_sut.ColorMismatchOptions);
+            Assert.Equal(SyncResolutionDirection.CatamailerToOutlook, option.Direction);
         }
 
         [Fact]
