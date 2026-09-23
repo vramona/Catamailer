@@ -160,3 +160,13 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 - [x] ✅ `J5-S1-T2 - SelectedActionType_WhenChangedToSetImportance_ShouldDefaultParameterToNormal` (Validé le 23/09/2026 sur feature/j5-iso-vba_step-1-core - Commit : 23edee26cedadd7cc9c087868675d8cd58a1fbb9) (Cpx: 3 / 3)
 - [x] ✅ `J5-S1-T2 - SelectedActionType_WhenChangedToFlagToday_ShouldClearParameter` (Validé le 23/09/2026 sur feature/j5-iso-vba_step-1-core - Commit : 23edee26cedadd7cc9c087868675d8cd58a1fbb9)
 - [x] ✅ `J5-S1-T2 - SaveRuleAsync_ShouldConstructFinalAction_WhenPropertiesAreSet` (Validé le 23/09/2026 sur feature/j5-iso-vba_step-1-core - Commit : 23edee26cedadd7cc9c087868675d8cd58a1fbb9)
+
+### 🟢 J5-S2 : Implémentation Infrastructure COM
+- [x] ✅ `J5-S2-T1 - MoveToFolder_ShouldNotThrowNotImplementedException` (Validé le 23/09/2026 sur feature/j5-iso-vba_step-2-infra - Commit : <COMMIT_HASH>) (Cpx: 3 / 3)
+- [x] ✅ `J5-S2-T1 - MarkAsRead_ShouldNotThrowNotImplementedException` (Validé le 23/09/2026 sur feature/j5-iso-vba_step-2-infra - Commit : <COMMIT_HASH>)
+- [x] ✅ `J5-S2-T1 - FlagForFollowUp_ShouldNotThrowNotImplementedException` (Validé le 23/09/2026 sur feature/j5-iso-vba_step-2-infra - Commit : <COMMIT_HASH>)
+- [x] ✅ `J5-S2-T1 - Forward_ShouldNotThrowNotImplementedException` (Validé le 23/09/2026 sur feature/j5-iso-vba_step-2-infra - Commit : <COMMIT_HASH>)
+- [x] ✅ `J5-S2-T1 - SetImportance_ShouldNotThrowNotImplementedException` (Validé le 23/09/2026 sur feature/j5-iso-vba_step-2-infra - Commit : <COMMIT_HASH>)
+- [x] ✅ `J5-S2-T1 - AddReminder_ShouldNotThrowNotImplementedException` (Validé le 23/09/2026 sur feature/j5-iso-vba_step-2-infra - Commit : <COMMIT_HASH>)
+- [x] ✅ `J5-S2-T1 - FlagToday_ShouldNotThrowNotImplementedException` (Validé le 23/09/2026 sur feature/j5-iso-vba_step-2-infra - Commit : <COMMIT_HASH>)
+- [x] ✅ `J5-S2-T1 - InsertHtmlSignature_ShouldNotThrowNotImplementedException` (Validé le 23/09/2026 sur feature/j5-iso-vba_step-2-infra - Commit : <COMMIT_HASH>)

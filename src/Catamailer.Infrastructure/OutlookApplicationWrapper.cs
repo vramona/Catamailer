@@ -10,6 +10,8 @@
 //         - 2026-09-17 : Ajustement de la palette hexadécimale pour correspondre aux couleurs natives d'Outlook (J4-S4-T3 - Phase Orange).
 //         - 2026-09-23 : Implémentation de IDisposable pour libération COM (J4-S4-T7 - Phase Orange).
 //         - 2026-09-23 : Remplacement des boucles en O(N) par l'indexeur string en O(1) pour éradiquer la saturation RPC (J4-S4-T7 - Phase Orange).
+//         - 2026-09-23 : Ajout des bouchons pour les actions physiques (J5-S2-T1 - Phase Rouge).
+//         - 2026-09-23 : Implémentation des actions physiques via Late Binding COM (J5-S2-T1 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -52,6 +54,14 @@ namespace Catamailer.Infrastructure
             _application = instance;
             
             // TODO: L'abonnement natif à l'événement NewMailEx devra être implémenté ici
+        }
+
+        /// <summary>
+        /// Récupère un élément Outlook depuis son EntryID via la session courante.
+        /// </summary>
+        private dynamic GetItemFromId(string entryId)
+        {
+            return _application.Session.GetItemFromID(entryId);
         }
 
         /// <inheritdoc />
@@ -216,6 +226,87 @@ namespace Catamailer.Infrastructure
                  "#C34E98" => 25,
                  _ => 0
              };
+        }
+
+        // ====================================================================================
+        // ACTIONS PHYSIQUES D'EXÉCUTION (J5-S2-T1)
+        // ====================================================================================
+
+        /// <inheritdoc />
+        public void MoveToFolder(string entryId, string folderPath)
+        {
+            var item = GetItemFromId(entryId);
+            
+            // TODO J5-S2-T2 : Remplacer ce bloc temporaire par le resolveur complet de chemin
+            // En attendant le Step 2 (Lecture de l'arborescence), on fallback sur la Boîte de réception
+            dynamic destinationFolder = _application.Session.GetDefaultFolder(6); // olFolderInbox
+            
+            item.Move(destinationFolder);
+        }
+
+        /// <inheritdoc />
+        public void MarkAsRead(string entryId)
+        {
+            var item = GetItemFromId(entryId);
+            item.UnRead = false;
+            item.Save();
+        }
+
+        /// <inheritdoc />
+        public void FlagForFollowUp(string entryId)
+        {
+            var item = GetItemFromId(entryId);
+            item.MarkAsTask(1); // olMarkNoDate
+            item.Save();
+        }
+
+        /// <inheritdoc />
+        public void Forward(string entryId, string recipients)
+        {
+            var item = GetItemFromId(entryId);
+            var forwardItem = item.Forward();
+            forwardItem.Recipients.Add(recipients);
+            forwardItem.Send();
+        }
+
+        /// <inheritdoc />
+        public void SetImportance(string entryId, string importanceLevel)
+        {
+            var item = GetItemFromId(entryId);
+            item.Importance = importanceLevel.ToLowerInvariant() switch
+            {
+                "haute" => 2,   // olImportanceHigh
+                "faible" => 0,  // olImportanceLow
+                _ => 1          // olImportanceNormal
+            };
+            item.Save();
+        }
+
+        /// <inheritdoc />
+        public void AddReminder(string entryId, DateTime reminderTime)
+        {
+            var item = GetItemFromId(entryId);
+            item.ReminderSet = true;
+            item.ReminderTime = reminderTime;
+            item.Save();
+        }
+
+        /// <inheritdoc />
+        public void FlagToday(string entryId)
+        {
+            var item = GetItemFromId(entryId);
+            item.MarkAsTask(2); // olMarkToday
+            item.Save();
+        }
+
+        /// <inheritdoc />
+        public void InsertHtmlSignature(string entryId, string signatureName)
+        {
+            var item = GetItemFromId(entryId);
+            // TODO J5-S2-T3 : Implémenter la lecture du fichier physique de signature depuis %APPDATA%
+            // Injection basique en attendant l'implémentation de la lecture de fichier
+            item.HTMLBody = item.HTMLBody + $"<br/><br/>[Signature: {signatureName}]";
+            item.Save();
         }
 
         // ====================================================================================

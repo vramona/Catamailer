@@ -10,6 +10,7 @@
 //         - 2026-09-15 : Ajout de GetMasterCategories pour J4-S3-T1 (Phase Rouge).
 //         - 2026-09-17 : Ajout de RenameCategory pour J4-S4-T3 (Phase Verte).
 //         - 2026-09-23 : Ajout de IDisposable pour libération explicite COM (J4-S4-T7 - Phase Orange).
+//         - 2026-09-23 : Ajout des signatures pour les actions physiques (J5-S2-T1 - Phase Rouge).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -98,5 +99,49 @@ namespace Catamailer.Infrastructure
         /// <param name="maxItems">Nombre maximal d'éléments à retourner.</param>
         /// <returns>Une liste d'EntryIDs d'e-mails.</returns>
         IEnumerable<string> GetNextUnprocessedMailEntryIds(string? lastEntryId, int maxItems);
+
+        // ====================================================================================
+        // ACTIONS PHYSIQUES D'EXÉCUTION (J5-S2-T1)
+        // ====================================================================================
+
+        /// <summary>
+        /// Déplace l'e-mail vers le dossier spécifié.
+        /// </summary>
+        void MoveToFolder(string entryId, string folderPath);
+
+        /// <summary>
+        /// Marque l'e-mail comme lu.
+        /// </summary>
+        void MarkAsRead(string entryId);
+
+        /// <summary>
+        /// Assure le suivi de l'e-mail (Drapeau classique).
+        /// </summary>
+        void FlagForFollowUp(string entryId);
+
+        /// <summary>
+        /// Transfère l'e-mail aux destinataires spécifiés.
+        /// </summary>
+        void Forward(string entryId, string recipients);
+
+        /// <summary>
+        /// Définit le niveau d'importance de l'e-mail.
+        /// </summary>
+        void SetImportance(string entryId, string importanceLevel);
+
+        /// <summary>
+        /// Ajoute un rappel à l'e-mail pour une date et heure spécifiques.
+        /// </summary>
+        void AddReminder(string entryId, DateTime reminderTime);
+
+        /// <summary>
+        /// Assure un suivi pour aujourd'hui (Drapeau de tâche Outlook).
+        /// </summary>
+        void FlagToday(string entryId);
+
+        /// <summary>
+        /// Insère une signature HTML spécifique.
+        /// </summary>
+        void InsertHtmlSignature(string entryId, string signatureName);
     }
 }
