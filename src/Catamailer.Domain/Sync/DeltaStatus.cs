@@ -5,6 +5,7 @@
 //     Historique :
 //         - 2026-09-15 : Création de l'énumération DeltaStatus (J4-S1-T1).
 //         - 2026-09-17 : Ajout du statut Synchronized (J4-S4-T4 - Phase Verte).
+//         - 2026-09-23 : Ajout du statut DeletedInCatamailer pour la suppression logique (J4-S4-T6 - Phase Rouge).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -18,6 +19,7 @@ namespace Catamailer.Domain.Sync
         MissingInCatamailer,
         MissingInOutlook,
         ColorMismatch,
-        Synchronized
+        Synchronized,
+        DeletedInCatamailer
     }
 }

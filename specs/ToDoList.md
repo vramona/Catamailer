@@ -71,7 +71,7 @@
 - [x] ✅ **J4-S4-T2** - UI : Remplacement de la modale par un écran complet, vue comparée arborescente/dense, fix FullName/Trim et Bubbling IsImplicit. (Validé le 17/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : 9b2c1b18e71a851c4520652969405adfe598c0df) (Cpx: 18 / 29)
 - [x] ✅ **J4-S4-T3** - Infrastructure & Tests : Ajout de `RenameCategory` au Wrapper, création du projet `Catamailer.Infrastructure.IntegrationTests` sur profil PST dédié. (Validé le 22/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : 30526a52a8e2b7d67f38968ddf46d833a0dc1ff1)
 - [x] ✅ **J4-S4-T4** - Bugfix : Reconstruction d'arbre à l'import, Direction des couleurs, Maintien du contexte visuel et auto-guérison SQLite. (Validé le 17/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : 7855c889fbec1297be4902c5d21b535bf453cfff) (Cpx: 11 / 11)
-- [ ] ✅ **J4-S4-T6** - Implémentation de la suppression logique (`IsDeleted`) dans le référentiel des catégories. 
+- [x] ✅ **J4-S4-T6** - Implémentation de la suppression logique (`IsDeleted`) dans le référentiel des catégories et résolution bidirectionnelle. (Validé le 23/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : <COMMIT_HASH>) (Cpx: 3 / 4)
 - [x] ✅ **J4-S4-T7** - Optimisation des performances de synchronisation (Correction Lenteurs O(N²), Implémentation AddRangeAsync). (Validé le 23/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : eb52f4cd21ade75da033fde3b67fce0d8b68e20c) (Cpx: 2 / 2)
 
 # ⏳ CE QUI RESTE À FAIRE

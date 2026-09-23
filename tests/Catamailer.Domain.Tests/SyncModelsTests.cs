@@ -8,6 +8,7 @@
 //         - 2026-09-16 : Mise à jour de la signature CreateMissingInCatamailer avec optimizedColor (J4-S4-T2).
 //         - 2026-09-17 : Ajout de la propriété IsImplicit pour tracker formellement les parents virtuels (J4-S4-T2).
 //         - 2026-09-17 : Ajout des tests pour le statut Synchronized (J4-S4-T4 - Phase Rouge).
+//         - 2026-09-23 : Ajout des tests pour le statut DeletedInCatamailer (J4-S4-T6 - Phase Rouge).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -93,6 +94,25 @@ namespace Catamailer.Domain.Tests
             Assert.Equal(color, delta.CatamailerColor);
             Assert.False(delta.IsImplicit);
             Assert.Equal(DeltaStatus.Synchronized, delta.Status);
+        }
+        
+        [Fact]
+        public void CategoryDelta_CreateDeletedInCatamailer_ShouldSetProperties()
+        {
+            // Arrange
+            string categoryName = "DeletedCat";
+            string outlookColor = "#000000";
+
+            // Act
+            var delta = CategoryDelta.CreateDeletedInCatamailer(categoryName, outlookColor);
+
+            // Assert
+            Assert.Equal(categoryName, delta.CategoryName);
+            Assert.Equal(outlookColor, delta.OutlookColor);
+            Assert.Null(delta.CatamailerColor);
+            Assert.Null(delta.OptimizedColor);
+            Assert.False(delta.IsImplicit);
+            Assert.Equal(DeltaStatus.DeletedInCatamailer, delta.Status);
         }
 
         [Fact]

@@ -8,6 +8,7 @@
 //         - 2026-09-11 : Mise à jour du FakeRuleRepository pour supporter ExecutionRule (J3-S3-T3-ST2 - Phase Verte).
 //         - 2026-09-17 : Implémentation de UpdateAsync dans FakeCategoryRepository (J4-S4-T4 - Phase Verte).
 //         - 2026-09-23 : Ajout des méthodes AddRangeAsync et UpdateRangeAsync dans FakeCategoryRepository (J4-S4-T7 - Phase Verte).
+//         - 2026-09-23 : Mise à jour de GetAllAsync dans FakeCategoryRepository pour supporter includeDeleted (J4-S4-T6 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -73,7 +74,7 @@ namespace Catamailer.Application.Tests.ViewModels
             public Task UpdateRangeAsync(IEnumerable<CategoryNode> categories) => Task.CompletedTask;
             public Task<CategoryNode?> GetByNameAsync(string name) => Task.FromResult<CategoryNode?>(null);
             
-            public Task<IEnumerable<CategoryNode>> GetAllAsync()
+            public Task<IEnumerable<CategoryNode>> GetAllAsync(bool includeDeleted = false)
             {
                 return Task.FromResult<IEnumerable<CategoryNode>>(new[] 
                 { 

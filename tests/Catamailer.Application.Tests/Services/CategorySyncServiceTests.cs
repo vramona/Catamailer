@@ -12,6 +12,8 @@
 //         - 2026-09-17 : Renforcement du test Trim pour valider la bonne application de l'héritage (J4-S4-T2).
 //         - 2026-09-17 : Ajout du test de détection des catégories synchronisées (J4-S4-T4 - Phase Rouge).
 //         - 2026-09-17 : Ajout du test de détection de conflit d'héritage avec Outlook (J4-S4-T5 - Phase Rouge).
+//         - 2026-09-23 : Ajout du test de détection des catégories supprimées logiquement (J4-S4-T6 - Phase Rouge).
+//         - 2026-09-23 : Mise à jour des Setup Moq pour supporter le paramètre includeDeleted (J4-S4-T6 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -50,7 +52,7 @@ namespace Catamailer.Application.Tests.Services
                 new CategoryNode("Cat1", "#000000"),
                 new CategoryNode("Cat2", "#FFFFFF")
             };
-            _categoryRepositoryMock.Setup(r => r.GetAllAsync()).ReturnsAsync(dbCategories);
+            _categoryRepositoryMock.Setup(r => r.GetAllAsync(It.IsAny<bool>())).ReturnsAsync(dbCategories);
 
             var result = await _sut.AnalyzeSyncDeltasAsync();
 
@@ -65,7 +67,7 @@ namespace Catamailer.Application.Tests.Services
                 .Returns(new List<(string, string?)> { ("Cat1", "#000000") });
 
             var dbCategories = new List<CategoryNode> { new CategoryNode("Cat1", "#000000") };
-            _categoryRepositoryMock.Setup(r => r.GetAllAsync()).ReturnsAsync(dbCategories);
+            _categoryRepositoryMock.Setup(r => r.GetAllAsync(It.IsAny<bool>())).ReturnsAsync(dbCategories);
 
             // Act
             var result = await _sut.AnalyzeSyncDeltasAsync();
@@ -82,7 +84,7 @@ namespace Catamailer.Application.Tests.Services
             _outlookProviderMock.Setup(p => p.GetAllCategories())
                 .Returns(new List<(string, string?)> { ("OutlookOnly", "#FF0000") });
 
-            _categoryRepositoryMock.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<CategoryNode>());
+            _categoryRepositoryMock.Setup(r => r.GetAllAsync(It.IsAny<bool>())).ReturnsAsync(new List<CategoryNode>());
 
             var result = await _sut.AnalyzeSyncDeltasAsync();
 
@@ -98,7 +100,7 @@ namespace Catamailer.Application.Tests.Services
             _outlookProviderMock.Setup(p => p.GetAllCategories()).Returns(new List<(string, string?)>());
 
             var dbCategories = new List<CategoryNode> { new CategoryNode("DbOnly", "#00FF00") };
-            _categoryRepositoryMock.Setup(r => r.GetAllAsync()).ReturnsAsync(dbCategories);
+            _categoryRepositoryMock.Setup(r => r.GetAllAsync(It.IsAny<bool>())).ReturnsAsync(dbCategories);
 
             var result = await _sut.AnalyzeSyncDeltasAsync();
 
@@ -114,7 +116,7 @@ namespace Catamailer.Application.Tests.Services
                 .Returns(new List<(string, string?)> { ("SharedCat", "#OUTLOOK") });
 
             var dbCategories = new List<CategoryNode> { new CategoryNode("SharedCat", "#DBCOLOR") };
-            _categoryRepositoryMock.Setup(r => r.GetAllAsync()).ReturnsAsync(dbCategories);
+            _categoryRepositoryMock.Setup(r => r.GetAllAsync(It.IsAny<bool>())).ReturnsAsync(dbCategories);
 
             var result = await _sut.AnalyzeSyncDeltasAsync();
 
@@ -142,7 +144,7 @@ namespace Catamailer.Application.Tests.Services
             var child = new CategoryNode("Child", null);
             parent.AddChild(child); // EffectiveColor de l'enfant devient #FF0000
             
-            _categoryRepositoryMock.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<CategoryNode> { parent, child });
+            _categoryRepositoryMock.Setup(r => r.GetAllAsync(It.IsAny<bool>())).ReturnsAsync(new List<CategoryNode> { parent, child });
 
             // Act
             var result = await _sut.AnalyzeSyncDeltasAsync("-");
@@ -164,7 +166,7 @@ namespace Catamailer.Application.Tests.Services
             _outlookProviderMock.Setup(p => p.GetAllCategories())
                 .Returns(new List<(string, string?)> { ("CCOEN-Voyage", "#1ABC9C") });
 
-            _categoryRepositoryMock.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<CategoryNode>());
+            _categoryRepositoryMock.Setup(r => r.GetAllAsync(It.IsAny<bool>())).ReturnsAsync(new List<CategoryNode>());
 
             var result = await _sut.AnalyzeSyncDeltasAsync("-");
 
@@ -196,7 +198,7 @@ namespace Catamailer.Application.Tests.Services
                     ("CCOEN-Voyage", "#1ABC9C") 
                 });
 
-            _categoryRepositoryMock.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<CategoryNode>());
+            _categoryRepositoryMock.Setup(r => r.GetAllAsync(It.IsAny<bool>())).ReturnsAsync(new List<CategoryNode>());
 
             var result = await _sut.AnalyzeSyncDeltasAsync("-");
 
@@ -219,7 +221,7 @@ namespace Catamailer.Application.Tests.Services
                     ("DAMSI-DA-AE-Equipiers", "#800000") 
                 });
 
-            _categoryRepositoryMock.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<CategoryNode>());
+            _categoryRepositoryMock.Setup(r => r.GetAllAsync(It.IsAny<bool>())).ReturnsAsync(new List<CategoryNode>());
 
             var result = await _sut.AnalyzeSyncDeltasAsync("-");
 
@@ -245,7 +247,7 @@ namespace Catamailer.Application.Tests.Services
                     ("Cercle A - PAG", "#0000FF") 
                 });
 
-            _categoryRepositoryMock.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<CategoryNode>());
+            _categoryRepositoryMock.Setup(r => r.GetAllAsync(It.IsAny<bool>())).ReturnsAsync(new List<CategoryNode>());
 
             var result = await _sut.AnalyzeSyncDeltasAsync("-");
 
@@ -268,7 +270,7 @@ namespace Catamailer.Application.Tests.Services
             var child = new CategoryNode("Design", null);
             parent.AddChild(child);
 
-            _categoryRepositoryMock.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<CategoryNode> { parent, child });
+            _categoryRepositoryMock.Setup(r => r.GetAllAsync(It.IsAny<bool>())).ReturnsAsync(new List<CategoryNode> { parent, child });
 
             var result = await _sut.AnalyzeSyncDeltasAsync("-");
 
@@ -277,6 +279,33 @@ namespace Catamailer.Application.Tests.Services
             
             Assert.Contains(missingInOutlook, m => m.CategoryName == "Projet Alpha");
             Assert.Contains(missingInOutlook, m => m.CategoryName == "Projet Alpha-Design");
+        }
+
+        [Fact]
+        public async Task AnalyzeSyncDeltasAsync_ShouldDetectDeletedInCatamailer_WhenCategoryIsLogicallyDeleted()
+        {
+            // Arrange
+            _outlookProviderMock.Setup(p => p.GetAllCategories())
+                .Returns(new List<(string, string?)> { ("DeletedCat", "#000000") });
+
+            var deletedNode = new CategoryNode("DeletedCat", "#000000");
+            deletedNode.MarkAsDeleted(); // IsDeleted = true
+
+            _categoryRepositoryMock.Setup(r => r.GetAllAsync(It.IsAny<bool>())).ReturnsAsync(new List<CategoryNode> { deletedNode });
+
+            // Act
+            var result = await _sut.AnalyzeSyncDeltasAsync();
+
+            // Assert
+            Assert.True(result.HasConflicts);
+            var deletedDeltas = result.GetDeletedInCatamailer().ToList();
+            Assert.Single(deletedDeltas);
+            Assert.Equal("DeletedCat", deletedDeltas[0].CategoryName);
+            Assert.Equal("#000000", deletedDeltas[0].OutlookColor);
+            
+            // Ne doit pas apparaître dans les synchronisés ni dans les manquants dans Catamailer
+            Assert.Empty(result.GetSynchronized());
+            Assert.Empty(result.GetMissingInCatamailer());
         }
     }
 }

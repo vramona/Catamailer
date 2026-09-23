@@ -147,6 +147,10 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 - [x] ✅ `J4-S4-T4 - AnalyzeSyncDeltasAsync_ShouldDetectSynchronizedCategories_ToMaintainTreeContext` (Validé le 17/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : 7855c889fbec1297be4902c5d21b535bf453cfff)
 - [x] ✅ `J4-S4-T4 - ApplyResolutionsAsync_ShouldReconstructTree_ForMissingInCatamailer` (Validé le 17/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : 7855c889fbec1297be4902c5d21b535bf453cfff)
 - [x] ✅ `J4-S4-T4 - ApplyResolutionsAsync_ShouldRespectDirection_ForColorMismatches` (Validé le 17/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : 7855c889fbec1297be4902c5d21b535bf453cfff)
+- [x] ✅ `J4-S4-T6 - CategoryDelta_CreateDeletedInCatamailer_ShouldSetProperties` (Validé le 23/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : <COMMIT_HASH>)
+- [x] ✅ `J4-S4-T6 - AnalyzeSyncDeltasAsync_ShouldDetectDeletedInCatamailer_WhenCategoryIsLogicallyDeleted` (Validé le 23/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : <COMMIT_HASH>)
+- [x] ✅ `J4-S4-T6 - ApplyResolutionsAsync_ShouldRespectDirection_ForDeletedInCatamailer` (Validé le 23/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : <COMMIT_HASH>) (Cpx: 3 / 4)
+- [x] ✅ `J4-S4-T7 - SyncCategories_ShouldExecute_WithinAcceptableTimeframe` (Validé le 23/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : eb52f4cd21ade75da033fde3b67fce0d8b68e20c) (Cpx: 2 / 2)
 
 ---
 

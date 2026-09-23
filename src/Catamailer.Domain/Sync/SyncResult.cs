@@ -5,6 +5,7 @@
 //     Description : Résultat global d'une analyse de synchronisation
 //     Historique :
 //         - 2026-09-17 : Ajout de GetSynchronized pour maintenir le contexte de l'arbre (J4-S4-T4 - Phase Verte).
+//         - 2026-09-23 : Ajout de GetDeletedInCatamailer (J4-S4-T6 - Phase Rouge).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -69,6 +70,14 @@ namespace Catamailer.Domain.Sync
         public IEnumerable<CategoryDelta> GetSynchronized()
         {
             return _deltas.Where(d => d.Status == DeltaStatus.Synchronized);
+        }
+
+        /// <summary>
+        /// Récupère la liste des catégories supprimées logiquement dans Catamailer mais toujours présentes dans Outlook.
+        /// </summary>
+        public IEnumerable<CategoryDelta> GetDeletedInCatamailer()
+        {
+            return _deltas.Where(d => d.Status == DeltaStatus.DeletedInCatamailer);
         }
     }
 }

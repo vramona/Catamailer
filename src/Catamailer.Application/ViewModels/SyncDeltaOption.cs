@@ -8,6 +8,7 @@
 //         - 2026-09-16 : Ajout du Trim sur le nom court pour gérer les séparateurs avec espaces (J4-S4-T2).
 //         - 2026-09-17 : Délégation de l'indicateur IsImplicit à l'entité Domain (J4-S4-T2).
 //         - 2026-09-17 : Ajout de la propriété Direction pour la résolution bidirectionnelle (J4-S4-T4 - Phase Verte).
+//         - 2026-09-23 : Mise à jour de la valeur par défaut de Direction selon le statut du Delta (J4-S4-T6 - Phase Bleue).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -24,12 +25,17 @@ namespace Catamailer.Application.ViewModels
         public bool IsImplicitParent => Delta.IsImplicit;
         public bool IsFolder { get; set; }
         
-        // Direction par défaut (Outlook écrase Catamailer)
-        public SyncResolutionDirection Direction { get; set; } = SyncResolutionDirection.OutlookToCatamailer;
+        public SyncResolutionDirection Direction { get; set; }
 
         public SyncDeltaOption(CategoryDelta delta, string separator)
         {
             Delta = delta;
+            
+            // Pour les suppressions logiques, la direction par défaut est "Écraser Outlook" (Catamailer gagne et supprime)
+            // Pour les conflits de couleurs, la direction par défaut reste "Écraser Catamailer" (Outlook gagne)
+            Direction = delta.Status == DeltaStatus.DeletedInCatamailer 
+                ? SyncResolutionDirection.CatamailerToOutlook 
+                : SyncResolutionDirection.OutlookToCatamailer;
             
             string cleanSeparator = separator.Trim();
 

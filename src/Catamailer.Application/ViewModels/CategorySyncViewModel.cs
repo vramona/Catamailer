@@ -14,6 +14,7 @@
 //         - 2026-09-23 : Remplacement de Debug.WriteLine par Console.WriteLine pour diagnostic terminal (J4-S4-T7 - Phase Jaune).
 //         - 2026-09-23 : Optimisation des performances via l'utilisation des opérations de lots (AddRangeAsync, UpdateRangeAsync) (J4-S4-T7 - Phase Orange).
 //         - 2026-09-23 : Ajout de traces Stopwatch unitaires pour mesurer le bottleneck RPC COM (J4-S4-T7).
+//         - 2026-09-23 : Ajout de la liste DeletedInCatamailerOptions et résolution bidirectionnelle (J4-S4-T6 - Phase Bleue).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -40,6 +41,7 @@ namespace Catamailer.Application.ViewModels
         public List<SyncDeltaOption> MissingInCatamailerOptions { get; private set; } = new();
         public List<SyncDeltaOption> MissingInOutlookOptions { get; private set; } = new();
         public List<SyncDeltaOption> ColorMismatchOptions { get; private set; } = new();
+        public List<SyncDeltaOption> DeletedInCatamailerOptions { get; private set; } = new();
 
         public bool SelectAllMissingInCatamailer
         {
@@ -57,6 +59,12 @@ namespace Catamailer.Application.ViewModels
         {
             get => ColorMismatchOptions.Any() && ColorMismatchOptions.All(o => o.IsSelected);
             set { foreach (var o in ColorMismatchOptions) o.IsSelected = value; }
+        }
+        
+        public bool SelectAllDeletedInCatamailer
+        {
+            get => DeletedInCatamailerOptions.Any() && DeletedInCatamailerOptions.All(o => o.IsSelected);
+            set { foreach (var o in DeletedInCatamailerOptions) o.IsSelected = value; }
         }
 
         public CategorySyncViewModel(
@@ -125,6 +133,14 @@ namespace Catamailer.Application.ViewModels
                         : SyncResolutionDirection.OutlookToCatamailer
                 })
                 .ToList();
+                
+            DeletedInCatamailerOptions = syncResult.GetDeletedInCatamailer()
+                .OrderBy(d => d.CategoryName, StringComparer.OrdinalIgnoreCase)
+                .Select(d => new SyncDeltaOption(d, Separator)
+                {
+                    IsSelected = false // Non sélectionné par défaut comme demandé
+                })
+                .ToList();
 
             sw.Stop();
             Console.WriteLine($"[CategorySyncViewModel] Initialisation complète terminée. ({sw.ElapsedMilliseconds}ms supplémentaires)");
@@ -135,7 +151,7 @@ namespace Catamailer.Application.ViewModels
             var sw = Stopwatch.StartNew();
             Console.WriteLine("[CategorySyncViewModel] Début ApplyResolutionsAsync...");
 
-            var existingNodes = (await _categoryRepository.GetAllAsync() ?? Enumerable.Empty<CategoryNode>()).ToList();
+            var existingNodes = (await _categoryRepository.GetAllAsync(includeDeleted: true) ?? Enumerable.Empty<CategoryNode>()).ToList();
             var existingMapByFullName = existingNodes.ToDictionary(
                 n => n.GetFullName(Separator), 
                 n => n, 
@@ -252,14 +268,42 @@ namespace Catamailer.Application.ViewModels
             }
             Console.WriteLine($"[CategorySyncViewModel] COM UpdateCategoryColor Batch ({updateCount} items) terminé en {comSw.ElapsedMilliseconds}ms");
 
+            // --- Résolution des suppressions logiques ---
+            var deletedNodesToRestore = new HashSet<CategoryNode>();
+            comSw.Restart();
+            int deleteCount = 0;
+            
+            foreach (var option in DeletedInCatamailerOptions.Where(o => o.IsSelected))
+            {
+                if (option.Direction == SyncResolutionDirection.CatamailerToOutlook)
+                {
+                    // L'utilisateur donne raison à Catamailer : on supprime physiquement dans Outlook
+                    var itemSw = Stopwatch.StartNew();
+                    _outlookProvider.RemoveCategory(option.Delta.CategoryName);
+                    Console.WriteLine($"[CategorySyncViewModel] COM RemoveCategory '{option.Delta.CategoryName}' en {itemSw.ElapsedMilliseconds}ms");
+                    deleteCount++;
+                }
+                else
+                {
+                    // L'utilisateur donne raison à Outlook : on restaure la catégorie dans Catamailer
+                    if (existingMapByFullName.TryGetValue(option.Delta.CategoryName, out var deletedNode))
+                    {
+                        deletedNode.Restore(); // Passe IsDeleted à false
+                        deletedNodesToRestore.Add(deletedNode);
+                    }
+                }
+            }
+            Console.WriteLine($"[CategorySyncViewModel] COM RemoveCategory Batch ({deleteCount} items) terminé en {comSw.ElapsedMilliseconds}ms");
+
             if (colorNodesToAdd.Any())
             {
                 await _categoryRepository.AddRangeAsync(colorNodesToAdd);
             }
 
-            if (colorNodesToUpdate.Any())
+            if (colorNodesToUpdate.Any() || deletedNodesToRestore.Any())
             {
-                await _categoryRepository.UpdateRangeAsync(colorNodesToUpdate);
+                var combinedUpdates = colorNodesToUpdate.Union(deletedNodesToRestore).ToList();
+                await _categoryRepository.UpdateRangeAsync(combinedUpdates);
             }
             
             sw.Stop();

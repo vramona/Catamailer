@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-23 15:30
+Généré le : 2026-09-23 17:31
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -59,6 +59,7 @@ Généré le : 2026-09-23 15:30
   - *Appelle* ➡️ `CategorySyncService.GetOptimizedOutlookColor()`
   - *Appelle* ➡️ `SyncResult.AddDelta()`
   - *Appelle* ➡️ `CategoryDelta.CreateMissingInCatamailer()`
+  - *Appelle* ➡️ `CategoryDelta.CreateDeletedInCatamailer()`
   - *Appelle* ➡️ `CategoryDelta.CreateColorMismatch()`
   - *Appelle* ➡️ `CategoryDelta.CreateSynchronized()`
   - *Appelle* ➡️ `CategoryDelta.CreateMissingInOutlook()`
@@ -114,13 +115,16 @@ Généré le : 2026-09-23 15:30
 - `List<SyncDeltaOption> MissingInCatamailerOptions { get; set; }`
 - `List<SyncDeltaOption> MissingInOutlookOptions { get; set; }`
 - `List<SyncDeltaOption> ColorMismatchOptions { get; set; }`
+- `List<SyncDeltaOption> DeletedInCatamailerOptions { get; set; }`
 - `bool SelectAllMissingInCatamailer { get; set; }`
 - `bool SelectAllMissingInOutlook { get; set; }`
 - `bool SelectAllColorMismatch { get; set; }`
+- `bool SelectAllDeletedInCatamailer { get; set; }`
 - `Task InitializeAsync()`
   - *Appelle* ➡️ `ICategorySyncService.AnalyzeSyncDeltasAsync()`
   - *Appelle* ➡️ `SyncResult.GetMissingInOutlook()`
   - *Appelle* ➡️ `SyncResult.GetColorConflicts()`
+  - *Appelle* ➡️ `SyncResult.GetDeletedInCatamailer()`
 - `Task ApplyResolutionsAsync()`
   - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
   - *Appelle* ➡️ `CategoryNode.GetFullName()`
@@ -130,6 +134,8 @@ Généré le : 2026-09-23 15:30
   - *Appelle* ➡️ `ICategoryRepository.UpdateRangeAsync()`
   - *Appelle* ➡️ `ICategoryManagerProvider.AddCategory()`
   - *Appelle* ➡️ `ICategoryManagerProvider.UpdateCategoryColor()`
+  - *Appelle* ➡️ `ICategoryManagerProvider.RemoveCategory()`
+  - *Appelle* ➡️ `CategoryNode.Restore()`
 - `Task RefreshAsync()`
   - *Appelle* ➡️ `CategorySyncViewModel.InitializeAsync()`
 
@@ -420,6 +426,7 @@ Généré le : 2026-09-23 15:30
 - `CategoryDelta CreateMissingInOutlook(string categoryName, string? catamailerColor)`
 - `CategoryDelta CreateColorMismatch(string categoryName, string outlookColor, string catamailerColor)`
 - `CategoryDelta CreateSynchronized(string categoryName, string color)`
+- `CategoryDelta CreateDeletedInCatamailer(string categoryName, string? outlookColor)`
 
 ### Class : SyncResult
 **Fichier** : `src\Catamailer.Domain\Sync\SyncResult.cs`
@@ -432,6 +439,7 @@ Généré le : 2026-09-23 15:30
 - `IEnumerable<CategoryDelta> GetMissingInOutlook()` : Récupère la liste des catégories présentes dans Catamailer mais absentes d'Outlook.
 - `IEnumerable<CategoryDelta> GetColorConflicts()` : Récupère la liste des catégories présentant un conflit de couleur.
 - `IEnumerable<CategoryDelta> GetSynchronized()` : Récupère la liste des catégories parfaitement synchronisées pour le tracé de l'arborescence.
+- `IEnumerable<CategoryDelta> GetDeletedInCatamailer()` : Récupère la liste des catégories supprimées logiquement dans Catamailer mais toujours présentes dans Outlook.
 
 ### Class : SystemState
 **Fichier** : `src\Catamailer.Domain\SystemState.cs`
@@ -465,7 +473,7 @@ Généré le : 2026-09-23 15:30
 - `Task UpdateAsync(CategoryNode category)`
 - `Task UpdateRangeAsync(IEnumerable<CategoryNode> categories)`
 - `Task<CategoryNode?> GetByNameAsync(string name)`
-- `Task<IEnumerable<CategoryNode>> GetAllAsync()`
+- `Task<IEnumerable<CategoryNode>> GetAllAsync(bool includeDeleted)`
 
 ### Class : HistoryStateRepository
 **Fichier** : `src\Catamailer.Infrastructure\HistoryStateRepository.cs`
@@ -854,6 +862,14 @@ Généré le : 2026-09-23 15:30
   - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
   - *Appelle* ➡️ `CategorySyncService.AnalyzeSyncDeltasAsync()`
   - *Appelle* ➡️ `SyncResult.GetMissingInOutlook()`
+- `Task AnalyzeSyncDeltasAsync_ShouldDetectDeletedInCatamailer_WhenCategoryIsLogicallyDeleted()`
+  - *Appelle* ➡️ `ICategoryManagerProvider.GetAllCategories()`
+  - *Appelle* ➡️ `CategoryNode.MarkAsDeleted()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `CategorySyncService.AnalyzeSyncDeltasAsync()`
+  - *Appelle* ➡️ `SyncResult.GetDeletedInCatamailer()`
+  - *Appelle* ➡️ `SyncResult.GetSynchronized()`
+  - *Appelle* ➡️ `SyncResult.GetMissingInCatamailer()`
 
 ### Class : ShadowModeServiceTests
 **Fichier** : `tests\Catamailer.Application.Tests\ShadowModeServiceTests.cs`
@@ -897,6 +913,7 @@ Généré le : 2026-09-23 15:30
   - *Appelle* ➡️ `CategoryDelta.CreateMissingInCatamailer()`
   - *Appelle* ➡️ `CategoryDelta.CreateMissingInOutlook()`
   - *Appelle* ➡️ `CategoryDelta.CreateColorMismatch()`
+  - *Appelle* ➡️ `CategoryDelta.CreateDeletedInCatamailer()`
   - *Appelle* ➡️ `ICategorySyncService.AnalyzeSyncDeltasAsync()`
   - *Appelle* ➡️ `CategorySyncViewModel.InitializeAsync()`
 - `Task InitializeAsync_ShouldSetDefaultDirectionToOverwriteOutlook_WhenOutlookLacksInheritedColor()`
@@ -926,6 +943,16 @@ Généré le : 2026-09-23 15:30
   - *Appelle* ➡️ `CategorySyncViewModel.InitializeAsync()`
   - *Appelle* ➡️ `CategorySyncViewModel.ApplyResolutionsAsync()`
   - *Appelle* ➡️ `ICategoryManagerProvider.UpdateCategoryColor()`
+  - *Appelle* ➡️ `ICategoryRepository.UpdateRangeAsync()`
+- `Task ApplyResolutionsAsync_ShouldRespectDirection_ForDeletedInCatamailer()`
+  - *Appelle* ➡️ `SyncResult.AddDelta()`
+  - *Appelle* ➡️ `CategoryDelta.CreateDeletedInCatamailer()`
+  - *Appelle* ➡️ `ICategorySyncService.AnalyzeSyncDeltasAsync()`
+  - *Appelle* ➡️ `CategoryNode.MarkAsDeleted()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `CategorySyncViewModel.InitializeAsync()`
+  - *Appelle* ➡️ `CategorySyncViewModel.ApplyResolutionsAsync()`
+  - *Appelle* ➡️ `ICategoryManagerProvider.RemoveCategory()`
   - *Appelle* ➡️ `ICategoryRepository.UpdateRangeAsync()`
 
 ### Class : CategoryTreeViewModelTests
@@ -1085,6 +1112,8 @@ Généré le : 2026-09-23 15:30
   - *Appelle* ➡️ `CategoryDelta.CreateColorMismatch()`
 - `void CategoryDelta_CreateSynchronized_ShouldSetProperties()`
   - *Appelle* ➡️ `CategoryDelta.CreateSynchronized()`
+- `void CategoryDelta_CreateDeletedInCatamailer_ShouldSetProperties()`
+  - *Appelle* ➡️ `CategoryDelta.CreateDeletedInCatamailer()`
 - `void SyncResult_GetSynchronized_ShouldReturnOnlySynchronizedDeltas()`
   - *Appelle* ➡️ `SyncResult.AddDelta()`
   - *Appelle* ➡️ `CategoryDelta.CreateMissingInCatamailer()`

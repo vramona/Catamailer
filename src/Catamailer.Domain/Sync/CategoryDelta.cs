@@ -7,6 +7,7 @@
 //         - 2026-09-16 : Ajout de OptimizedColor (J4-S4-T2).
 //         - 2026-09-17 : Ajout de IsImplicit pour un tracking formel des parents virtuels (J4-S4-T2).
 //         - 2026-09-17 : Ajout de la méthode CreateSynchronized (J4-S4-T4 - Phase Verte).
+//         - 2026-09-23 : Ajout de la méthode CreateDeletedInCatamailer (J4-S4-T6 - Phase Rouge).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -52,6 +53,11 @@ namespace Catamailer.Domain.Sync
         public static CategoryDelta CreateSynchronized(string categoryName, string color)
         {
             return new CategoryDelta(categoryName, color, color, null, false, DeltaStatus.Synchronized);
+        }
+
+        public static CategoryDelta CreateDeletedInCatamailer(string categoryName, string? outlookColor)
+        {
+            return new CategoryDelta(categoryName, outlookColor, null, null, false, DeltaStatus.DeletedInCatamailer);
         }
     }
 }

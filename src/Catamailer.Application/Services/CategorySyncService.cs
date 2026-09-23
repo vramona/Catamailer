@@ -15,6 +15,7 @@
 //         - 2026-09-17 : Suppression de l'héritage simulé pour Outlook afin de révéler les vrais conflits (J4-S4-T5 - Phase Verte).
 //         - 2026-09-17 : Ajout de traces Stopwatch pour l'analyse de performance (Diag/Refacto).
 //         - 2026-09-23 : Remplacement de Debug.WriteLine par Console.WriteLine pour diagnostic terminal (J4-S4-T7 - Phase Jaune).
+//         - 2026-09-23 : Gestion de la suppression logique (IsDeleted) pour générer les Deltas appropriés (J4-S4-T6 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -46,7 +47,10 @@ namespace Catamailer.Application.Services
             Console.WriteLine("[CategorySyncService] Début AnalyzeSyncDeltasAsync...");
 
             var result = new SyncResult();
-            var dbCategories = await _categoryRepository.GetAllAsync();
+            
+            // On charge TOUTES les catégories SQLite, y compris celles supprimées logiquement, 
+            // pour pouvoir les confronter à Outlook.
+            var dbCategories = await _categoryRepository.GetAllAsync(includeDeleted: true);
             
             string cleanSeparator = separator?.Trim() ?? "";
 
@@ -127,22 +131,32 @@ namespace Catamailer.Application.Services
                 }
                 else
                 {
-                    string? dbEff = dbCat.EffectiveColor;
-                    string? outEff = rawColor;
-
-                    if (!string.Equals(dbEff, outEff, StringComparison.OrdinalIgnoreCase))
+                    if (dbCat.IsDeleted)
                     {
-                        result.AddDelta(CategoryDelta.CreateColorMismatch(outName, outEff ?? "", dbEff ?? ""));
+                        // Si Outlook connaît la catégorie mais que Catamailer l'a supprimée logiquement
+                        result.AddDelta(CategoryDelta.CreateDeletedInCatamailer(outName, rawColor));
                     }
                     else
                     {
-                        result.AddDelta(CategoryDelta.CreateSynchronized(outName, outEff ?? ""));
+                        string? dbEff = dbCat.EffectiveColor;
+                        string? outEff = rawColor;
+
+                        if (!string.Equals(dbEff, outEff, StringComparison.OrdinalIgnoreCase))
+                        {
+                            result.AddDelta(CategoryDelta.CreateColorMismatch(outName, outEff ?? "", dbEff ?? ""));
+                        }
+                        else
+                        {
+                            result.AddDelta(CategoryDelta.CreateSynchronized(outName, outEff ?? ""));
+                        }
                     }
                 }
             }
 
             foreach (var dbCat in dbCategories)
             {
+                if (dbCat.IsDeleted) continue; // Les suppressions logiques non présentes dans Outlook sont déjà réglées
+                
                 string dbFullName = string.IsNullOrEmpty(cleanSeparator) ? dbCat.Name : dbCat.GetFullName(cleanSeparator);
                 
                 if (!outlookDict.ContainsKey(dbFullName))
