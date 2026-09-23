@@ -6,11 +6,16 @@
 //         - 2026-09-15 : Création de la classe concrète (J4-S3-T1 - Phase Verte).
 //         - 2026-09-16 : Remplacement de new Application() par GetTypeFromProgID (Phase Orange).
 //         - 2026-09-16 : Passage en 100% Late Binding (dynamic) pour supprimer la dépendance à office.dll (Phase Orange).
+//         - 2026-09-17 : Implémentation des méthodes CRUD de la MCL et RenameCategory (J4-S4-T3 - Phase Verte).
+//         - 2026-09-17 : Ajustement de la palette hexadécimale pour correspondre aux couleurs natives d'Outlook (J4-S4-T3 - Phase Orange).
+//         - 2026-09-23 : Implémentation de IDisposable pour libération COM (J4-S4-T7 - Phase Orange).
+//         - 2026-09-23 : Remplacement des boucles en O(N) par l'indexeur string en O(1) pour éradiquer la saturation RPC (J4-S4-T7 - Phase Orange).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Catamailer.Domain;
 
 namespace Catamailer.Infrastructure
@@ -66,6 +71,78 @@ namespace Catamailer.Infrastructure
 
             return categoriesList;
         }
+        
+        /// <inheritdoc />
+        public bool CategoryExists(string name)
+        {
+             try
+             {
+                 // Utilisation de l'indexeur direct O(1) au lieu d'une boucle O(N) coûteuse en RPC
+                 var category = _application.Session.Categories[name];
+                 return category != null;
+             }
+             catch
+             {
+                 return false;
+             }
+        }
+
+        /// <inheritdoc />
+        public void AddCategory(string name, string colorCode)
+        {
+            if (CategoryExists(name))
+            {
+                return;
+            }
+            
+            int olColor = MapHexToOlCategoryColor(colorCode);
+            _application.Session.Categories.Add(name, olColor);
+        }
+
+        /// <inheritdoc />
+        public void UpdateCategory(string name, string newColorCode)
+        {
+             try
+             {
+                 var category = _application.Session.Categories[name];
+                 category.Color = MapHexToOlCategoryColor(newColorCode);
+             }
+             catch
+             {
+                 // Ignorer si la catégorie n'existe pas
+             }
+        }
+        
+        /// <inheritdoc />
+        public void RenameCategory(string oldName, string newName)
+        {
+             try
+             {
+                 var category = _application.Session.Categories[oldName];
+                 category.Name = newName;
+             }
+             catch
+             {
+                 // Ignorer si la catégorie n'existe pas
+             }
+        }
+
+        /// <inheritdoc />
+        public void RemoveCategory(string name)
+        {
+             try
+             {
+                 var category = _application.Session.Categories[name];
+                 if (category != null)
+                 {
+                     _application.Session.Categories.Remove(name);
+                 }
+             }
+             catch
+             {
+                 // Ignorer si la catégorie n'existe pas
+             }
+        }
 
         /// <summary>
         /// Convertit l'énumération native OlCategoryColor en code couleur hexadécimal standard.
@@ -74,33 +151,71 @@ namespace Catamailer.Infrastructure
         {
             return olColor switch
             {
-                1 => "#E74C3C",  // olCategoryColorRed
-                2 => "#E67E22",  // olCategoryColorOrange
-                3 => "#FFDAB9",  // olCategoryColorPeach
-                4 => "#F1C40F",  // olCategoryColorYellow
-                5 => "#2ECC71",  // olCategoryColorGreen
-                6 => "#1ABC9C",  // olCategoryColorTeal
-                7 => "#808000",  // olCategoryColorOlive
-                8 => "#3498DB",  // olCategoryColorBlue
-                9 => "#9B59B6",  // olCategoryColorPurple
-                10 => "#800000", // olCategoryColorMaroon
-                11 => "#4682B4", // olCategoryColorSteel
-                12 => "#2F4F4F", // olCategoryColorDarkSteel
-                13 => "#808080", // olCategoryColorGray
-                14 => "#A9A9A9", // olCategoryColorDarkGray
-                15 => "#000000", // olCategoryColorBlack
-                16 => "#8B0000", // olCategoryColorDarkRed
-                17 => "#FF8C00", // olCategoryColorDarkOrange
-                18 => "#FFDAB9", // olCategoryColorDarkPeach (Approximation)
-                19 => "#B8860B", // olCategoryColorDarkYellow
-                20 => "#006400", // olCategoryColorDarkGreen
-                21 => "#008080", // olCategoryColorDarkTeal
-                22 => "#556B2F", // olCategoryColorDarkOlive
-                23 => "#00008B", // olCategoryColorDarkBlue
-                24 => "#800080", // olCategoryColorDarkPurple
-                25 => "#800000", // olCategoryColorDarkMaroon
-                _ => null        // 0 = olCategoryColorNone ou couleur inconnue
+                1 => "#DC626D",
+                2 => "#E8825D",
+                3 => "#FFCD8F",
+                4 => "#FDEE65",
+                5 => "#52CE90",
+                6 => "#57D2DA",
+                7 => "#B6D767",
+                8 => "#5CA9E5",
+                9 => "#B1AAEB",
+                10 => "#E3008C",
+                11 => "#C5CED1",
+                12 => "#4497A9",
+                13 => "#C3C5BB",
+                14 => "#9FADB1",
+                15 => "#8F8F8F",
+                16 => "#AC4E5E",
+                17 => "#DF8E64",
+                18 => "#BC8F6F",
+                19 => "#DAC257",
+                20 => "#4CA64C",
+                21 => "#4BB4B7",
+                22 => "#85B44C",
+                23 => "#4179A3",
+                24 => "#A589CB",
+                25 => "#C34E98",
+                _ => null
             };
+        }
+        
+        /// <summary>
+        /// Convertit un code couleur hexadécimal en entier correspondant à OlCategoryColor.
+        /// </summary>
+        private int MapHexToOlCategoryColor(string? hexColor)
+        {
+             if (string.IsNullOrEmpty(hexColor)) return 0; // olCategoryColorNone
+             
+             return hexColor.ToUpperInvariant() switch
+             {
+                 "#DC626D" => 1,
+                 "#E8825D" => 2,
+                 "#FFCD8F" => 3,
+                 "#FDEE65" => 4,
+                 "#52CE90" => 5,
+                 "#57D2DA" => 6,
+                 "#B6D767" => 7,
+                 "#5CA9E5" => 8,
+                 "#B1AAEB" => 9,
+                 "#E3008C" => 10,
+                 "#C5CED1" => 11,
+                 "#4497A9" => 12,
+                 "#C3C5BB" => 13,
+                 "#9FADB1" => 14,
+                 "#8F8F8F" => 15,
+                 "#AC4E5E" => 16,
+                 "#DF8E64" => 17,
+                 "#BC8F6F" => 18,
+                 "#DAC257" => 19,
+                 "#4CA64C" => 20,
+                 "#4BB4B7" => 21,
+                 "#85B44C" => 22,
+                 "#4179A3" => 23,
+                 "#A589CB" => 24,
+                 "#C34E98" => 25,
+                 _ => 0
+             };
         }
 
         // ====================================================================================
@@ -120,30 +235,6 @@ namespace Catamailer.Infrastructure
         }
 
         /// <inheritdoc />
-        public bool CategoryExists(string name)
-        {
-            throw new NotImplementedException("Implémentation COM manquante.");
-        }
-
-        /// <inheritdoc />
-        public void AddCategory(string name, string colorCode)
-        {
-            throw new NotImplementedException("Implémentation COM manquante.");
-        }
-
-        /// <inheritdoc />
-        public void UpdateCategory(string name, string newColorCode)
-        {
-            throw new NotImplementedException("Implémentation COM manquante.");
-        }
-
-        /// <inheritdoc />
-        public void RemoveCategory(string name)
-        {
-            throw new NotImplementedException("Implémentation COM manquante.");
-        }
-
-        /// <inheritdoc />
         public void ReplaceCategoryOnAllItems(string oldCategoryName, string newCategoryName)
         {
             throw new NotImplementedException("Implémentation COM manquante.");
@@ -153,6 +244,23 @@ namespace Catamailer.Infrastructure
         public IEnumerable<string> GetNextUnprocessedMailEntryIds(string? lastEntryId, int maxItems)
         {
             throw new NotImplementedException("Implémentation COM manquante.");
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            if (_application != null)
+            {
+                try
+                {
+                    Marshal.ReleaseComObject(_application);
+                }
+                catch
+                {
+                    // Ignorer les erreurs de libération COM
+                }
+            }
+            GC.SuppressFinalize(this);
         }
     }
 }

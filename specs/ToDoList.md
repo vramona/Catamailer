@@ -53,7 +53,6 @@
 - [x] ✅ **J3-S3-T6** - Amélioration AiDocGenerator (Extraction des propriétés C#). (Validé le 11/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : 7adbcda98463c58774e96c9283ca58177944036d) (Cpx: 3 / 3).
 - [x] ✅ **J3-S3-T7** - Bouton Quitter Blazor et lien natif. (Validé le 15/09/2026 sur feature/j3-tray-ui_step-3-config - Commit : 5a84daaabac29c06de35006d94d09afa29fa02dc) (Cpx: 2 / 2).
 
-# ⏳ CE QUI RESTE À FAIRE
 
 ## Jalon 4 - Synchronisation Référentiel Catégories - feature/j4-category-sync
 ### Step 1 - Moteur de Détection et Domain - feature/j4-category-sync_step-1-core
@@ -67,10 +66,21 @@
 ### Step 3 - Intégration Infrastructure COM - feature/j4-category-sync_step-3-infra
 - [x] ✅ **J4-S3-T1** - Implémentation de la lecture de la Master Category List via COM et suppression des Dummies. (Validé le 16/09/2026 sur feature/j4-category-sync_step-3-infra - Commit : 65fdf358aa1004d3c444ec976e7a4fbf1a771835) (Cpx: 7 / 7)
 
+### Step 4 - Synchronisation Avancée, UI et Tests d'Intégration COM - feature/j4-category-sync_step-4-advanced-sync
+- [x] ✅ **J4-S4-T1** - Modification de `CategorySyncService` et du Domain pour structurer les deltas en arbre avec gestion du séparateur dynamique. (Validé le 16/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : faae02e697a31159296aab3d678f38ee1d9fbaf7) (Cpx: 10 / 10)
+- [x] ✅ **J4-S4-T2** - UI : Remplacement de la modale par un écran complet, vue comparée arborescente/dense, fix FullName/Trim et Bubbling IsImplicit. (Validé le 17/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : 9b2c1b18e71a851c4520652969405adfe598c0df) (Cpx: 18 / 29)
+- [x] ✅ **J4-S4-T3** - Infrastructure & Tests : Ajout de `RenameCategory` au Wrapper, création du projet `Catamailer.Infrastructure.IntegrationTests` sur profil PST dédié. (Validé le 22/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : 30526a52a8e2b7d67f38968ddf46d833a0dc1ff1)
+- [x] ✅ **J4-S4-T4** - Bugfix : Reconstruction d'arbre à l'import, Direction des couleurs, Maintien du contexte visuel et auto-guérison SQLite. (Validé le 17/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : 7855c889fbec1297be4902c5d21b535bf453cfff) (Cpx: 11 / 11)
+- [x] ✅ **J4-S4-T6** - Implémentation de la suppression logique (`IsDeleted`) dans le référentiel des catégories et résolution bidirectionnelle. (Validé le 23/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : cbc82f8d17948ab88d87c8202cbf6700efd05d87) (Cpx: 3 / 4)
+- [x] ✅ **J4-S4-T7** - Optimisation des performances de synchronisation (Correction Lenteurs O(N²), Implémentation AddRangeAsync). (Validé le 23/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : eb52f4cd21ade75da033fde3b67fce0d8b68e20c) (Cpx: 2 / 2)
+
+# ⏳ CE QUI RESTE À FAIRE
+
 ## Jalon 5 - Parité VBA et Actions d'Exécution - feature/j5-iso-vba
 ### Step 1 - Enrichissement Domain et Exécution - feature/j5-iso-vba_step-1-core
 - [ ] ⚪ **J5-S1-T1** - Ajout des ActionType manquantes (Transférer, Importance, Rappel, SuiviAujourdhui, DeplacerDossier, SignatureHTML) dans `Catamailer.Domain`.
 - [ ] ⚪ **J5-S1-T2** - Mise à jour de l'UI RuleBuilder pour supporter la saisie des paramètres complexes (ex: adresses e-mail pour transfert, délai en jours, dossier de destination).
+
 ### Step 2 - Implémentation Infrastructure COM - feature/j5-iso-vba_step-2-infra
 - [ ] ⚪ **J5-S2-T1** - Implémentation des actions physiques manquantes via `IOutlookApplicationWrapper`.
 - [ ] ⚪ **J5-S2-T2** - Lecture de l'arborescence des dossiers Outlook via COM (`IOutlookApplicationWrapper`).

@@ -4,6 +4,7 @@
 //     Date de création : 2026-09-15
 //     Historique :
 //         - 2026-09-15 : Création de l'interface pour le mock UI (J4-S1-T2).
+//         - 2026-09-16 : Ajout du séparateur dynamique pour la détection hiérarchique (J4-S4-T1 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -20,7 +21,8 @@ namespace Catamailer.Application.Services
         /// <summary>
         /// Analyse les différences de catégories entre Outlook et Catamailer.
         /// </summary>
+        /// <param name="separator">Le séparateur optionnel pour reconstruire la hiérarchie implicite d'Outlook (ex: "-").</param>
         /// <returns>Un objet contenant les écarts détectés.</returns>
-        Task<SyncResult> AnalyzeSyncDeltasAsync();
+        Task<SyncResult> AnalyzeSyncDeltasAsync(string? separator = null);
     }
 }

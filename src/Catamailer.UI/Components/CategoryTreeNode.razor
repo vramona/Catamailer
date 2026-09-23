@@ -4,13 +4,14 @@
 //     Historique :
 //         - 2026-09-09 : Création du composant unitaire pour gérer l'état d'ouverture (J3-S3-T2 - Phase Orange).
 //         - 2026-09-09 : Refactoring CSS pour alignement au pixel (J3-S3-T2 - Phase Orange v2).
+//         - 2026-09-22 : Ajout du bouton de suppression logique et de l'EventCallback (J4-S4-T6 - Phase Bleue).
 // </auto-generated>
 // ------------------------------------------------------------------------------ -->
 
 @using Catamailer.Domain
 
 <li class="cata-tree-node">
-    <div class="cata-tree-node-content">
+    <div class="cata-tree-node-content d-flex align-items-center">
         @if (Node.Children.Any())
         {
             <button class="btn btn-sm btn-link p-0 text-decoration-none text-dark cata-tree-toggle-spacer" @onclick="Toggle" aria-label="Déplier/Replier">
@@ -35,12 +36,16 @@
             <span class="badge me-2 bg-light border text-dark shadow-sm" style="width: 1.2rem; height: 1.2rem; display: inline-block;">&nbsp;</span>
         }
         
-        <span class="fs-6 text-dark">@Node.Name</span>
+        <span class="fs-6 text-dark flex-grow-1">@Node.Name</span>
+
+        <button class="btn btn-sm btn-outline-danger border-0 ms-2" @onclick="DeleteNodeAsync" title="Supprimer la catégorie">
+            🗑️
+        </button>
     </div>
     
     @if (isExpanded && Node.Children.Any())
     {
-        <CategoryTreeView Nodes="Node.Children" />
+        <CategoryTreeView Nodes="Node.Children" OnNodeDeleted="OnNodeDeleted" />
     }
 </li>
 
@@ -51,10 +56,21 @@
     [Parameter, EditorRequired]
     public CategoryNode Node { get; set; } = default!;
 
+    /// <summary>
+    /// Événement déclenché lorsqu'une demande de suppression est émise par ce nœud ou l'un de ses enfants.
+    /// </summary>
+    [Parameter]
+    public EventCallback<CategoryNode> OnNodeDeleted { get; set; }
+
     private bool isExpanded = true;
 
     private void Toggle()
     {
         isExpanded = !isExpanded;
+    }
+
+    private Task DeleteNodeAsync()
+    {
+        return OnNodeDeleted.InvokeAsync(Node);
     }
 }

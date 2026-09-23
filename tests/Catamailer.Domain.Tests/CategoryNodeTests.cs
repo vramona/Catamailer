@@ -1,5 +1,6 @@
 // Historique :
 // 2026-09-07 : Création de la classe de test pour la modélisation CategoryNode.
+// 2026-09-21 : Ajout des tests pour la suppression logique IsDeleted (J4-S4-T6).
 
 using System;
 using System.Linq;
@@ -77,6 +78,43 @@ namespace Catamailer.Domain.Tests
             Assert.Equal("CCOEN", chain[0].Name);
             Assert.Equal("Projet", chain[1].Name);
             Assert.Equal("Dev", chain[2].Name);
+        }
+
+        [Fact]
+        public void CategoryNode_Creation_ShouldSetIsDeletedToFalse()
+        {
+            // Arrange & Act
+            var node = new CategoryNode("Test");
+
+            // Assert
+            Assert.False(node.IsDeleted);
+        }
+
+        [Fact]
+        public void MarkAsDeleted_ShouldSetIsDeletedToTrue()
+        {
+            // Arrange
+            var node = new CategoryNode("Test");
+
+            // Act
+            node.MarkAsDeleted();
+
+            // Assert
+            Assert.True(node.IsDeleted);
+        }
+
+        [Fact]
+        public void Restore_ShouldSetIsDeletedToFalse()
+        {
+            // Arrange
+            var node = new CategoryNode("Test");
+            node.MarkAsDeleted();
+
+            // Act
+            node.Restore();
+
+            // Assert
+            Assert.False(node.IsDeleted);
         }
     }
 }
