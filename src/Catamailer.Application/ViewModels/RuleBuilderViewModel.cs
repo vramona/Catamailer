@@ -5,6 +5,7 @@
 //         - 2026-09-11 : Création initiale (J3-S3-T3-ST2).
 //         - 2026-09-11 : Ajout des méthodes de mutation et sauvegarde (J3-S3-T3-ST2).
 //         - 2026-09-11 : Ajout du flattening pour l'affichage hiérarchique UI (J3-S3-T3-ST2 - Phase Verte).
+//         - 2026-09-23 : Ajout de la gestion d'état des actions complexes (J5-S1-T2 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -29,6 +30,7 @@ namespace Catamailer.Application.ViewModels
     {
         private readonly IRuleRepository _ruleRepository;
         private readonly ICategoryRepository _categoryRepository;
+        private ActionType? _selectedActionType;
 
         /// <summary>
         /// Obtient ou définit le nom descriptif de la règle à sauvegarder.
@@ -41,9 +43,36 @@ namespace Catamailer.Application.ViewModels
         public RuleNode RootNode { get; }
 
         /// <summary>
-        /// Obtient l'action finale à exécuter si l'arbre est validé.
+        /// Obtient ou définit le type d'action sélectionné, en appliquant les règles de réinitialisation des paramètres.
         /// </summary>
-        public RuleAction? FinalAction { get; private set; }
+        public ActionType? SelectedActionType
+        {
+            get => _selectedActionType;
+            set
+            {
+                _selectedActionType = value;
+                if (_selectedActionType == ActionType.SetImportance)
+                {
+                    ActionParameter = "Normale";
+                }
+                else if (_selectedActionType == ActionType.FlagToday || _selectedActionType == ActionType.MarkAsRead)
+                {
+                    ActionParameter = string.Empty;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Obtient ou définit le paramètre de l'action sélectionnée.
+        /// </summary>
+        public string ActionParameter { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Obtient l'action finale calculée en fonction des sélections en cours.
+        /// </summary>
+        public RuleAction? FinalAction => SelectedActionType.HasValue 
+            ? new RuleAction(SelectedActionType.Value, ActionParameter) 
+            : null;
 
         /// <summary>
         /// Obtient la liste brute des catégories disponibles.
@@ -156,7 +185,8 @@ namespace Catamailer.Application.ViewModels
         /// <param name="action">L'action à appliquer.</param>
         public void SetAction(RuleAction action)
         {
-            FinalAction = action;
+            SelectedActionType = action.Type;
+            ActionParameter = action.Parameter;
         }
 
         /// <summary>
@@ -164,12 +194,13 @@ namespace Catamailer.Application.ViewModels
         /// </summary>
         public async Task SaveRuleAsync()
         {
-            if (string.IsNullOrWhiteSpace(RuleName) || FinalAction == null)
+            var finalActionToSave = FinalAction;
+            if (string.IsNullOrWhiteSpace(RuleName) || finalActionToSave == null)
             {
                 return;
             }
 
-            var executionRule = new ExecutionRule(RuleName, RootNode, FinalAction);
+            var executionRule = new ExecutionRule(RuleName, RootNode, finalActionToSave);
             await _ruleRepository.AddExecutionRuleAsync(executionRule);
         }
     }

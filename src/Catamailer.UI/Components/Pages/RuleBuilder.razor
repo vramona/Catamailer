@@ -19,6 +19,7 @@
 //         - 2026-09-11 : Intégration de l'affichage hiérarchique FlatCategories (J3-S3-T3-ST2).
 //         - 2026-09-15 : Remplacement du select natif par un dropdown Bootstrap (J3-S3-T3-ST2).
 //         - 2026-09-15 : Remplacement de data-bs-toggle par une gestion d'état Blazor native (J3-S3-T3-ST2 - Phase Bleue).
+//         - 2026-09-23 : Support des paramètres d'action complexes et correction du binding DateTime (J5-S1-T2 - Phase Bleue).
 // </auto-generated>
 // ------------------------------------------------------------------------------ -->
 
@@ -46,17 +47,36 @@
         <div class="row align-items-end">
             <div class="col-md-4">
                 <label class="form-label fw-medium">Type d'action <span class="text-danger">*</span></label>
-                <select class="form-select" @onchange="OnActionTypeChanged">
+                <select class="form-select" @bind="ViewModel.SelectedActionType">
                     <option value="">-- Sélectionner --</option>
                     @foreach (var actionType in Enum.GetValues(typeof(ActionType)).Cast<ActionType>())
                     {
-                        <option value="@actionType" selected="@(ViewModel.FinalAction?.Type == actionType)">@actionType</option>
+                        <option value="@actionType">@actionType</option>
                     }
                 </select>
             </div>
             <div class="col-md-6">
-                <label class="form-label fw-medium">Paramètre (Dossier, Tag, etc.)</label>
-                <input type="text" class="form-control" value="@ViewModel.FinalAction?.Parameter" @onchange="OnActionParameterChanged" placeholder="Ex: Archives" />
+                <label class="form-label fw-medium">Paramètre</label>
+                @if (ViewModel.SelectedActionType == ActionType.SetImportance)
+                {
+                    <select class="form-select" @bind="ViewModel.ActionParameter">
+                        <option value="Haute">Haute</option>
+                        <option value="Normale">Normale</option>
+                        <option value="Faible">Faible</option>
+                    </select>
+                }
+                else if (ViewModel.SelectedActionType == ActionType.FlagToday || ViewModel.SelectedActionType == ActionType.MarkAsRead || ViewModel.SelectedActionType == null)
+                {
+                    <input type="text" class="form-control" value="N/A" disabled />
+                }
+                else if (ViewModel.SelectedActionType == ActionType.AddReminder)
+                {
+                    <input type="datetime-local" class="form-control" @bind="ReminderDateTime" />
+                }
+                else
+                {
+                    <input type="text" class="form-control" @bind="ViewModel.ActionParameter" placeholder="Dossier, adresses e-mails, etc." />
+                }
             </div>
         </div>
     </div>
@@ -72,21 +92,29 @@
 </div>
 
 @code {
-    private ActionType? _selectedActionType;
-    private string _actionParameter = string.Empty;
     private Dictionary<RuleCriterion, bool> _dropdownStates = new();
 
-    private bool CanSave => !string.IsNullOrWhiteSpace(ViewModel.RuleName) && ViewModel.FinalAction != null;
+    private bool CanSave => !string.IsNullOrWhiteSpace(ViewModel.RuleName) && ViewModel.SelectedActionType.HasValue;
+
+    private DateTime? ReminderDateTime
+    {
+        get
+        {
+            if (DateTime.TryParse(ViewModel.ActionParameter, out var date))
+            {
+                return date;
+            }
+            return null;
+        }
+        set
+        {
+            ViewModel.ActionParameter = value.HasValue ? value.Value.ToString("yyyy-MM-ddTHH:mm") : string.Empty;
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
         await ViewModel.InitializeAsync();
-
-        if (ViewModel.FinalAction != null)
-        {
-            _selectedActionType = ViewModel.FinalAction.Type;
-            _actionParameter = ViewModel.FinalAction.Parameter;
-        }
     }
 
     private RenderFragment RenderNode(RuleNode node, bool isRoot = false) => __builder =>
@@ -204,7 +232,7 @@
     private void ToggleDropdown(RuleCriterion crit)
     {
         var isOpen = IsDropdownOpen(crit);
-        _dropdownStates.Clear(); // Ferme les autres éventuelles listes
+        _dropdownStates.Clear();
         _dropdownStates[crit] = !isOpen;
     }
 
@@ -328,29 +356,6 @@
         ViewModel.UpdateCriterion(node, crit, newCrit);
         CloseDropdowns();
         StateHasChanged();
-    }
-
-    private void OnActionTypeChanged(ChangeEventArgs e)
-    {
-        if (Enum.TryParse<ActionType>(e.Value?.ToString(), out var actionType))
-        {
-            _selectedActionType = actionType;
-            UpdateFinalAction();
-        }
-    }
-
-    private void OnActionParameterChanged(ChangeEventArgs e)
-    {
-        _actionParameter = e.Value?.ToString() ?? string.Empty;
-        UpdateFinalAction();
-    }
-
-    private void UpdateFinalAction()
-    {
-        if (_selectedActionType.HasValue)
-        {
-            ViewModel.SetAction(new RuleAction(_selectedActionType.Value, _actionParameter));
-        }
     }
 
     private async Task SaveRuleAsync()
