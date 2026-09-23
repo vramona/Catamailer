@@ -82,7 +82,7 @@
 - [x] ✅ **J5-S1-T2** - Mise à jour de l'UI RuleBuilder pour supporter la saisie des paramètres complexes (ex: adresses e-mail pour transfert, délai en jours, dossier de destination). (Validé le 23/09/2026 sur feature/j5-iso-vba_step-1-core - Commit : 23edee26cedadd7cc9c087868675d8cd58a1fbb9) (Cpx: 3 / 3)
 
 ### Step 2 - Implémentation Infrastructure COM - feature/j5-iso-vba_step-2-infra
-- [x] ✅ **J5-S2-T1** - Implémentation des actions physiques manquantes via `IOutlookApplicationWrapper`. (Validé le 23/09/2026 sur feature/j5-iso-vba_step-2-infra - Commit : <COMMIT_HASH>) (Cpx: 3 / 3)
+- [x] ✅ **J5-S2-T1** - Implémentation des actions physiques manquantes via `IOutlookApplicationWrapper`. (Validé le 23/09/2026 sur feature/j5-iso-vba_step-2-infra - Commit : d1bd23c717c7900b9ed13e6a8677774a706ccc7e) (Cpx: 3 / 3)
 - [ ] ⚪ **J5-S2-T2** - Lecture de l'arborescence des dossiers Outlook via COM (`IOutlookApplicationWrapper`).
 - [ ] ⚪ **J5-S2-T3** - Lecture des fichiers physiques de signature HTML (%APPDATA%\Microsoft\Signatures).
 
