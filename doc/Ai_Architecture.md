@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-23 17:38
+Généré le : 2026-09-23 18:15
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -229,7 +229,9 @@ Généré le : 2026-09-23 17:38
 **Membres et Invocations :**
 - `string RuleName { get; set; }` : Obtient ou définit le nom descriptif de la règle à sauvegarder.
 - `RuleNode RootNode { get; }` : Obtient le nœud racine de l'arbre des conditions.
-- `RuleAction? FinalAction { get; set; }` : Obtient l'action finale à exécuter si l'arbre est validé.
+- `ActionType? SelectedActionType { get; set; }` : Obtient ou définit le type d'action sélectionné, en appliquant les règles de réinitialisation des paramètres.
+- `string ActionParameter { get; set; }` : Obtient ou définit le paramètre de l'action sélectionnée.
+- `RuleAction? FinalAction { get; }` : Obtient l'action finale calculée en fonction des sélections en cours.
 - `IEnumerable<CategoryNode> AvailableCategories { get; set; }` : Obtient la liste brute des catégories disponibles.
 - `IEnumerable<CategoryOption> FlatCategories { get; set; }` : Obtient la liste aplatie et indentée des catégories prête pour l'affichage UI.
 - `Task InitializeAsync()` : Charge les données de référence nécessaires à l'IHM (catégories) et construit l'arborescence visuelle.
@@ -388,7 +390,7 @@ Généré le : 2026-09-23 17:38
 **Rôle** : Représente l'action finale à exécuter si un arbre de conditions est validé.
 **Membres et Invocations :**
 - `ActionType Type { get; }` : Obtient le type de l'action à exécuter.
-- `string Parameter { get; }` : Obtient le paramètre associé à l'action (par exemple, le nom du dossier cible).
+- `string Parameter { get; }` : Obtient le paramètre associé à l'action. Selon le type d'action, ce paramètre peut représenter un dossier cible, une adresse de transfert, un niveau d'importance ou une date de rappel.
 
 ### Class : RuleCriterion
 **Fichier** : `src\Catamailer.Domain\RuleCriterion.cs`
@@ -1045,6 +1047,10 @@ Généré le : 2026-09-23 17:38
 - `void UpdateCriterion_ShouldReplaceCriterionInTargetNode()`
   - *Appelle* ➡️ `RuleBuilderViewModel.AddCriterion()`
   - *Appelle* ➡️ `RuleBuilderViewModel.UpdateCriterion()`
+- `void SelectedActionType_WhenChangedToSetImportance_ShouldDefaultParameterToNormal()`
+- `void SelectedActionType_WhenChangedToFlagToday_ShouldClearParameter()`
+- `Task SaveRuleAsync_ShouldConstructFinalAction_WhenPropertiesAreSet()`
+  - *Appelle* ➡️ `RuleBuilderViewModel.SaveRuleAsync()`
 - `Task SaveRuleAsync_ShouldCallRepository_WhenNameAndActionAreSet()`
   - *Appelle* ➡️ `RuleBuilderViewModel.SetAction()`
   - *Appelle* ➡️ `RuleBuilderViewModel.SaveRuleAsync()`
@@ -1088,6 +1094,7 @@ Généré le : 2026-09-23 17:38
 **Membres et Invocations :**
 - `void DictionaryRule_Creation_ShouldSetProperties()`
 - `void RuleAction_Creation_ShouldSetActionTypeAndParameter()`
+- `void RuleAction_SupportsNewActionTypes_FromJalon5()`
 - `void RuleCriterion_Creation_ShouldSetConditionFields()`
 - `void RuleCriterion_WithCategoryField_AndValidOperator_ShouldBeValid()`
 - `void RuleCriterion_WithInvalidCombinations_ShouldThrowArgumentException()`

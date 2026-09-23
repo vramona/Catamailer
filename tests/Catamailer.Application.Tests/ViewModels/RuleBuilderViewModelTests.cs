@@ -9,6 +9,7 @@
 //         - 2026-09-17 : Implémentation de UpdateAsync dans FakeCategoryRepository (J4-S4-T4 - Phase Verte).
 //         - 2026-09-23 : Ajout des méthodes AddRangeAsync et UpdateRangeAsync dans FakeCategoryRepository (J4-S4-T7 - Phase Verte).
 //         - 2026-09-23 : Mise à jour de GetAllAsync dans FakeCategoryRepository pour supporter includeDeleted (J4-S4-T6 - Phase Verte).
+//         - 2026-09-23 : Ajout des tests pour la gestion de l'état des actions complexes (J5-S1-T2 - Phase Rouge).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -207,6 +208,61 @@ namespace Catamailer.Application.Tests.ViewModels
             Assert.Single(viewModel.RootNode.Criteria);
             Assert.Equal("new", viewModel.RootNode.Criteria.First().Value);
             Assert.DoesNotContain(oldCriterion, viewModel.RootNode.Criteria);
+        }
+
+        [Fact]
+        public void SelectedActionType_WhenChangedToSetImportance_ShouldDefaultParameterToNormal()
+        {
+            // Arrange
+            var repo = new FakeRuleRepository();
+            var catRepo = new FakeCategoryRepository();
+            var viewModel = new RuleBuilderViewModel(repo, catRepo);
+
+            // Act
+            viewModel.SelectedActionType = ActionType.SetImportance;
+
+            // Assert
+            Assert.Equal("Normale", viewModel.ActionParameter);
+        }
+
+        [Fact]
+        public void SelectedActionType_WhenChangedToFlagToday_ShouldClearParameter()
+        {
+            // Arrange
+            var repo = new FakeRuleRepository();
+            var catRepo = new FakeCategoryRepository();
+            var viewModel = new RuleBuilderViewModel(repo, catRepo);
+            viewModel.ActionParameter = "Previous Value";
+
+            // Act
+            viewModel.SelectedActionType = ActionType.FlagToday;
+
+            // Assert
+            Assert.Empty(viewModel.ActionParameter);
+        }
+
+        [Fact]
+        public async Task SaveRuleAsync_ShouldConstructFinalAction_WhenPropertiesAreSet()
+        {
+            // Arrange
+            var repo = new FakeRuleRepository();
+            var catRepo = new FakeCategoryRepository();
+            var viewModel = new RuleBuilderViewModel(repo, catRepo)
+            {
+                RuleName = "Test Complexe",
+                SelectedActionType = ActionType.Forward,
+                ActionParameter = "boss@company.com"
+            };
+
+            // Act
+            await viewModel.SaveRuleAsync();
+
+            // Assert
+            Assert.Single(repo.ExecutionRules);
+            var savedRule = repo.ExecutionRules.First();
+            Assert.Equal("Test Complexe", savedRule.Name);
+            Assert.Equal(ActionType.Forward, savedRule.Action.Type);
+            Assert.Equal("boss@company.com", savedRule.Action.Parameter);
         }
 
         [Fact]

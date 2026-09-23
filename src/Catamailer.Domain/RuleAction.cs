@@ -1,5 +1,6 @@
 // Historique :
 // 2026-09-07 : Création de l'objet de valeur RuleAction (J1-S1-T2).
+// 2026-09-23 : Mise à jour de la documentation pour refléter les paramètres complexes (J5-S1-T1).
 
 namespace Catamailer.Domain
 {
@@ -14,7 +15,9 @@ namespace Catamailer.Domain
         public ActionType Type { get; }
 
         /// <summary>
-        /// Obtient le paramètre associé à l'action (par exemple, le nom du dossier cible).
+        /// Obtient le paramètre associé à l'action.
+        /// Selon le type d'action, ce paramètre peut représenter un dossier cible, 
+        /// une adresse de transfert, un niveau d'importance ou une date de rappel.
         /// </summary>
         public string Parameter { get; }
 

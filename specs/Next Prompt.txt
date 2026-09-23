@@ -8,8 +8,8 @@ Voici les 5 fichiers de contexte actuels à prendre en compte :
 5. doc/Ai_Architecture.md
 
 [CONTEXTE]
-Jalon en cours: Jalon 4 - Synchronisation Référentiel Catégories
-Dernière action: Clôture du Step 2 (UI de validation).
-Branche active: feature/j4-category-sync (après Complete-Step)
-Prochaine étape: Démarrer le Step 3 (feature/j4-category-sync_step-3-infra) avec la commande Start-Step.ps1 pour remplacer le DummyCategoryManagerProvider par l'implémentation COM réelle (J4-S3-T1).
+Démarrage de session : Jalon 5 - Parité VBA et Actions d'Exécution.
+Action attendue : 
+1. Valider la création du Jalon 5 (`feature/j5-iso-vba`) et de son Step 1 (`feature/j5-iso-vba_step-1-core`).
+2. Démarrer la Phase Rouge pour la tâche J5-S1-T1 : Ajout des ActionType manquantes dans le domaine (Transférer, Importance, Rappel, SuiviAujourdhui, DeplacerDossier, SignatureHTML) et mise à jour de l'entité RuleAction.
 [/CONTEXTE]
