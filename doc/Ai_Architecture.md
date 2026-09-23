@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-23 17:38
+Généré le : 2026-09-23 18:04
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -388,7 +388,7 @@ Généré le : 2026-09-23 17:38
 **Rôle** : Représente l'action finale à exécuter si un arbre de conditions est validé.
 **Membres et Invocations :**
 - `ActionType Type { get; }` : Obtient le type de l'action à exécuter.
-- `string Parameter { get; }` : Obtient le paramètre associé à l'action (par exemple, le nom du dossier cible).
+- `string Parameter { get; }` : Obtient le paramètre associé à l'action. Selon le type d'action, ce paramètre peut représenter un dossier cible, une adresse de transfert, un niveau d'importance ou une date de rappel.
 
 ### Class : RuleCriterion
 **Fichier** : `src\Catamailer.Domain\RuleCriterion.cs`
@@ -1088,6 +1088,7 @@ Généré le : 2026-09-23 17:38
 **Membres et Invocations :**
 - `void DictionaryRule_Creation_ShouldSetProperties()`
 - `void RuleAction_Creation_ShouldSetActionTypeAndParameter()`
+- `void RuleAction_SupportsNewActionTypes_FromJalon5()`
 - `void RuleCriterion_Creation_ShouldSetConditionFields()`
 - `void RuleCriterion_WithCategoryField_AndValidOperator_ShouldBeValid()`
 - `void RuleCriterion_WithInvalidCombinations_ShouldThrowArgumentException()`

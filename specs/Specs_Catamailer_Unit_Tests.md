@@ -154,5 +154,6 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 
 ---
 
-## 🟢 JALON 5 - MIGRATION CSV
-*À compléter.*
+## 🟢 JALON 5 - PARITÉ VBA ET ACTIONS D'EXÉCUTION
+### 🟢 J5-S1 : Enrichissement Domain et Exécution
+- [x] ✅ `J5-S1-T1 - RuleAction_SupportsNewActionTypes_FromJalon5` (Validé le 23/09/2026 sur feature/j5-iso-vba_step-1-core - Commit : <COMMIT_HASH>) (Cpx: 2 / 2)
