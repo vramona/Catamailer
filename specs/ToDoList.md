@@ -78,7 +78,7 @@
 
 ## Jalon 5 - Parité VBA et Actions d'Exécution - feature/j5-iso-vba
 ### Step 1 - Enrichissement Domain et Exécution - feature/j5-iso-vba_step-1-core
-- [x] ✅ **J5-S1-T1** - Ajout des ActionType manquantes (Transférer, Importance, Rappel, SuiviAujourdhui, DeplacerDossier, SignatureHTML) dans `Catamailer.Domain`. (Validé le 23/09/2026 sur feature/j5-iso-vba_step-1-core - Commit : <COMMIT_HASH>) (Cpx: 2 / 2)
+- [x] ✅ **J5-S1-T1** - Ajout des ActionType manquantes (Transférer, Importance, Rappel, SuiviAujourdhui, DeplacerDossier, SignatureHTML) dans `Catamailer.Domain`. (Validé le 23/09/2026 sur feature/j5-iso-vba_step-1-core - Commit : 37bfc82ff148806334e15d7d0aa2191ac1e61ad5) (Cpx: 2 / 2)
 - [ ] ⚪ **J5-S1-T2** - Mise à jour de l'UI RuleBuilder pour supporter la saisie des paramètres complexes (ex: adresses e-mail pour transfert, délai en jours, dossier de destination).
 
 ### Step 2 - Implémentation Infrastructure COM - feature/j5-iso-vba_step-2-infra
