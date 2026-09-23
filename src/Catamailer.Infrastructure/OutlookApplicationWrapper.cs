@@ -8,11 +8,14 @@
 //         - 2026-09-16 : Passage en 100% Late Binding (dynamic) pour supprimer la dépendance à office.dll (Phase Orange).
 //         - 2026-09-17 : Implémentation des méthodes CRUD de la MCL et RenameCategory (J4-S4-T3 - Phase Verte).
 //         - 2026-09-17 : Ajustement de la palette hexadécimale pour correspondre aux couleurs natives d'Outlook (J4-S4-T3 - Phase Orange).
+//         - 2026-09-23 : Implémentation de IDisposable pour libération COM (J4-S4-T7 - Phase Orange).
+//         - 2026-09-23 : Remplacement des boucles en O(N) par l'indexeur string en O(1) pour éradiquer la saturation RPC (J4-S4-T7 - Phase Orange).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Catamailer.Domain;
 
 namespace Catamailer.Infrastructure
@@ -72,16 +75,16 @@ namespace Catamailer.Infrastructure
         /// <inheritdoc />
         public bool CategoryExists(string name)
         {
-             var categories = _application.Session.Categories;
-             int count = categories.Count;
-             for (int i = 1; i <= count; i++)
+             try
              {
-                 if (string.Equals(categories[i].Name, name, StringComparison.OrdinalIgnoreCase))
-                 {
-                     return true;
-                 }
+                 // Utilisation de l'indexeur direct O(1) au lieu d'une boucle O(N) coûteuse en RPC
+                 var category = _application.Session.Categories[name];
+                 return category != null;
              }
-             return false;
+             catch
+             {
+                 return false;
+             }
         }
 
         /// <inheritdoc />
@@ -99,40 +102,46 @@ namespace Catamailer.Infrastructure
         /// <inheritdoc />
         public void UpdateCategory(string name, string newColorCode)
         {
-             var categories = _application.Session.Categories;
-             int count = categories.Count;
-             for (int i = 1; i <= count; i++)
+             try
              {
-                 if (string.Equals(categories[i].Name, name, StringComparison.OrdinalIgnoreCase))
-                 {
-                     categories[i].Color = MapHexToOlCategoryColor(newColorCode);
-                     return;
-                 }
+                 var category = _application.Session.Categories[name];
+                 category.Color = MapHexToOlCategoryColor(newColorCode);
+             }
+             catch
+             {
+                 // Ignorer si la catégorie n'existe pas
              }
         }
         
         /// <inheritdoc />
         public void RenameCategory(string oldName, string newName)
         {
-             var categories = _application.Session.Categories;
-             int count = categories.Count;
-             for (int i = 1; i <= count; i++)
+             try
              {
-                 if (string.Equals(categories[i].Name, oldName, StringComparison.OrdinalIgnoreCase))
-                 {
-                     categories[i].Name = newName;
-                     return;
-                 }
+                 var category = _application.Session.Categories[oldName];
+                 category.Name = newName;
+             }
+             catch
+             {
+                 // Ignorer si la catégorie n'existe pas
              }
         }
 
         /// <inheritdoc />
         public void RemoveCategory(string name)
         {
-            if (CategoryExists(name))
-            {
-                _application.Session.Categories.Remove(name);
-            }
+             try
+             {
+                 var category = _application.Session.Categories[name];
+                 if (category != null)
+                 {
+                     _application.Session.Categories.Remove(name);
+                 }
+             }
+             catch
+             {
+                 // Ignorer si la catégorie n'existe pas
+             }
         }
 
         /// <summary>
@@ -235,6 +244,23 @@ namespace Catamailer.Infrastructure
         public IEnumerable<string> GetNextUnprocessedMailEntryIds(string? lastEntryId, int maxItems)
         {
             throw new NotImplementedException("Implémentation COM manquante.");
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            if (_application != null)
+            {
+                try
+                {
+                    Marshal.ReleaseComObject(_application);
+                }
+                catch
+                {
+                    // Ignorer les erreurs de libération COM
+                }
+            }
+            GC.SuppressFinalize(this);
         }
     }
 }

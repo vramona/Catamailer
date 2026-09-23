@@ -2,6 +2,7 @@
 // 2026-09-07 : Création de l'interface ICategoryRepository (J1-S1-T3).
 // 2026-09-08 : Ajout de la méthode GetAllAsync pour le moteur de recherche (J3-S2-T1).
 // 2026-09-17 : Ajout de la méthode UpdateAsync pour la résolution de conflits (J4-S4-T4 - Phase Verte).
+// 2026-09-23 : Ajout des méthodes par lots AddRangeAsync et UpdateRangeAsync pour optimisation de la synchronisation (J4-S4-T7 - Phase Rouge).
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -21,11 +22,25 @@ namespace Catamailer.Domain
         Task AddAsync(CategoryNode category);
 
         /// <summary>
+        /// Ajoute plusieurs nouvelles catégories au dépôt de données en une seule transaction.
+        /// </summary>
+        /// <param name="categories">Les catégories à ajouter.</param>
+        /// <returns>Une tâche asynchrone représentant l'opération.</returns>
+        Task AddRangeAsync(IEnumerable<CategoryNode> categories);
+
+        /// <summary>
         /// Met à jour une catégorie existante dans le dépôt de données.
         /// </summary>
         /// <param name="category">La catégorie à mettre à jour.</param>
         /// <returns>Une tâche asynchrone représentant l'opération.</returns>
         Task UpdateAsync(CategoryNode category);
+
+        /// <summary>
+        /// Met à jour plusieurs catégories existantes dans le dépôt de données en une seule transaction.
+        /// </summary>
+        /// <param name="categories">Les catégories à mettre à jour.</param>
+        /// <returns>Une tâche asynchrone représentant l'opération.</returns>
+        Task UpdateRangeAsync(IEnumerable<CategoryNode> categories);
 
         /// <summary>
         /// Récupère une catégorie par son nom (identifiant unique de la nomenclature Master Data).

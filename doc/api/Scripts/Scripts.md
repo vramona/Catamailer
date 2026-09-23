@@ -57,6 +57,25 @@
 - `[string] $Prefixe`
 
 ---
+## Script : Invoke-IntegrationTests.ps1
+**Chemin relatif** : `scripts\Invoke-IntegrationTests.ps1`
+
+### Paramètres
+- `[string] $IntegrationProject`
+- `[string] $PSScriptRoot`
+
+### Dépendances (Invocations)
+- *Appelle* ➡️ `Invoke-TestEnvSetup.ps1`
+- *Appelle* ➡️ `Invoke-TestEnvTeardown.ps1`
+
+---
+## Script : Invoke-PurgeDatabase.ps1
+**Chemin relatif** : `scripts\Invoke-PurgeDatabase.ps1`
+
+### Paramètres
+- `[string] $DbName`
+
+---
 ## Script : Invoke-TestEnvSetup.ps1
 **Chemin relatif** : `scripts\Invoke-TestEnvSetup.ps1`
 

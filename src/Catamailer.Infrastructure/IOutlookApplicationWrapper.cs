@@ -9,6 +9,7 @@
 //         - 2026-09-07 : Ajout de GetNextUnprocessedMailEntryIds pour J2-S2-T3 (Phase Rouge).
 //         - 2026-09-15 : Ajout de GetMasterCategories pour J4-S3-T1 (Phase Rouge).
 //         - 2026-09-17 : Ajout de RenameCategory pour J4-S4-T3 (Phase Verte).
+//         - 2026-09-23 : Ajout de IDisposable pour libération explicite COM (J4-S4-T7 - Phase Orange).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -23,7 +24,7 @@ namespace Catamailer.Infrastructure
     /// <summary>
     /// Interface d'abstraction pour l'application COM Outlook, facilitant les tests unitaires.
     /// </summary>
-    public interface IOutlookApplicationWrapper
+    public interface IOutlookApplicationWrapper : IDisposable
     {
         /// <summary>
         /// Événement déclenché nativement par Outlook via NewMailEx.

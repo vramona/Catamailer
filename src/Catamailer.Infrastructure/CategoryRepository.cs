@@ -4,7 +4,10 @@
 // 2026-09-08 : Ajout du chargement explicite (Include) du Parent dans GetAllAsync (J3-S2-T1).
 // 2026-09-17 : Implémentation de UpdateAsync (J4-S4-T4).
 // 2026-09-17 : Ajout de SaveChangesAsync dans AddAsync et UpdateAsync pour garantir la persistance (J4-S4-T4 - Bugfix).
+// 2026-09-23 : Ajout des bouchons pour AddRangeAsync et UpdateRangeAsync (J4-S4-T7 - Phase Rouge).
+// 2026-09-23 : Implémentation de AddRangeAsync et UpdateRangeAsync pour les performances (J4-S4-T7 - Phase Verte).
 
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Catamailer.Domain;
@@ -36,9 +39,23 @@ namespace Catamailer.Infrastructure
         }
 
         /// <inheritdoc />
+        public async Task AddRangeAsync(IEnumerable<CategoryNode> categories)
+        {
+            await _context.Categories.AddRangeAsync(categories);
+            await _context.SaveChangesAsync();
+        }
+
+        /// <inheritdoc />
         public async Task UpdateAsync(CategoryNode category)
         {
             _context.Categories.Update(category);
+            await _context.SaveChangesAsync();
+        }
+
+        /// <inheritdoc />
+        public async Task UpdateRangeAsync(IEnumerable<CategoryNode> categories)
+        {
+            _context.Categories.UpdateRange(categories);
             await _context.SaveChangesAsync();
         }
 

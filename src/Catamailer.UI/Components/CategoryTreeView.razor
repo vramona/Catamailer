@@ -5,6 +5,7 @@
 //         - 2026-09-09 : Création du composant récursif pour l'arborescence (J3-S3-T2 - Phase Bleue).
 //         - 2026-09-09 : Délégation du rendu au composant CategoryTreeNode (J3-S3-T2 - Phase Orange).
 //         - 2026-09-09 : Remplacement des classes Bootstrap par cata-tree (J3-S3-T2 - Phase Orange v2).
+//         - 2026-09-22 : Ajout du paramètre OnNodeDeleted pour remonter les événements (J4-S4-T6 - Phase Bleue).
 // </auto-generated>
 // ------------------------------------------------------------------------------ -->
 
@@ -13,7 +14,7 @@
 <ul class="cata-tree">
     @foreach (var node in Nodes)
     {
-        <CategoryTreeNode Node="node" />
+        <CategoryTreeNode Node="node" OnNodeDeleted="OnNodeDeleted" />
     }
 </ul>
 
@@ -23,4 +24,10 @@
     /// </summary>
     [Parameter, EditorRequired]
     public IEnumerable<CategoryNode> Nodes { get; set; } = Enumerable.Empty<CategoryNode>();
+
+    /// <summary>
+    /// Événement déclenché lorsqu'une demande de suppression est émise par un nœud enfant.
+    /// </summary>
+    [Parameter]
+    public EventCallback<CategoryNode> OnNodeDeleted { get; set; }
 }

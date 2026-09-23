@@ -9,9 +9,11 @@
 //         - 2026-09-17 : Ajout des tests de reconstruction d'arbre et de résolution bidirectionnelle des couleurs (J4-S4-T4 - Phase Rouge).
 //         - 2026-09-17 : Ajustement de l'assertion InitializeAsync pour intégrer les ColorMismatch dans l'arbre (J4-S4-T5 - Phase Bleue).
 //         - 2026-09-17 : Ajout du test vérifiant la direction par défaut sur écraser Outlook lors d'une perte d'héritage (J4-S4-T5 - Phase Bleue).
+//         - 2026-09-23 : Mise à jour des assertions pour utiliser les opérations de lot AddRangeAsync/UpdateRangeAsync (J4-S4-T7 - Phase Orange).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Catamailer.Application.Services;
@@ -101,17 +103,19 @@ namespace Catamailer.Application.Tests.ViewModels
             await _sut.ApplyResolutionsAsync();
 
             // Assert
-            // Le ViewModel doit avoir reconstruit la hiérarchie avant de sauvegarder.
+            // Le ViewModel doit avoir reconstruit la hiérarchie avant de sauvegarder par lots.
             // On s'attend à ce que le nœud "Parent" soit sauvegardé avec un enfant "Child".
-            _categoryRepositoryMock.Verify(r => r.AddAsync(It.Is<CategoryNode>(c => 
-                c.Name == "Parent" && 
-                c.Children.Count == 1 && 
-                c.Children[0].Name == "Child" && 
-                c.Children[0].EffectiveColor == "#000000"
+            _categoryRepositoryMock.Verify(r => r.AddRangeAsync(It.Is<IEnumerable<CategoryNode>>(list => 
+                list.Any(c => 
+                    c.Name == "Parent" && 
+                    c.Children.Count == 1 && 
+                    c.Children.First().Name == "Child" && 
+                    c.Children.First().EffectiveColor == "#000000"
+                )
             )), Times.Once);
             
             // On ne doit PAS avoir d'insertion d'un nœud plat nommé "Parent-Child"
-            _categoryRepositoryMock.Verify(r => r.AddAsync(It.Is<CategoryNode>(c => c.Name == "Parent-Child")), Times.Never);
+            _categoryRepositoryMock.Verify(r => r.AddRangeAsync(It.Is<IEnumerable<CategoryNode>>(list => list.Any(c => c.Name == "Parent-Child"))), Times.Never);
         }
 
         [Fact]
@@ -141,6 +145,10 @@ namespace Catamailer.Application.Tests.ViewModels
             syncResult.AddDelta(CategoryDelta.CreateColorMismatch("ToCatamailer", "#222", "#333"));
             _syncServiceMock.Setup(s => s.AnalyzeSyncDeltasAsync(It.IsAny<string?>())).ReturnsAsync(syncResult);
             
+            // On mock un nœud existant pour ToCatamailer pour qu'il soit détecté dans existNodes et mis à jour
+            var existingNode = new CategoryNode("ToCatamailer", "#333");
+            _categoryRepositoryMock.Setup(r => r.GetAllAsync()).ReturnsAsync(new[] { existingNode });
+            
             await _sut.InitializeAsync();
 
             // Act : On modifie les directions
@@ -156,7 +164,7 @@ namespace Catamailer.Application.Tests.ViewModels
 
             // Assert
             _outlookProviderMock.Verify(p => p.UpdateCategoryColor("ToOutlook", "#111"), Times.Once);
-            _categoryRepositoryMock.Verify(r => r.UpdateAsync(It.Is<CategoryNode>(c => c.Name == "ToCatamailer" && c.Color == "#222")), Times.Once);
+            _categoryRepositoryMock.Verify(r => r.UpdateRangeAsync(It.Is<IEnumerable<CategoryNode>>(list => list.Any(c => c.Name == "ToCatamailer" && c.Color == "#222"))), Times.Once);
         }
     }
 }

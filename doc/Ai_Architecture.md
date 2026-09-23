@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-22 16:22
+Généré le : 2026-09-23 15:30
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -126,11 +126,10 @@ Généré le : 2026-09-22 16:22
   - *Appelle* ➡️ `CategoryNode.GetFullName()`
   - *Appelle* ➡️ `CategoryNode.UpdateColor()`
   - *Appelle* ➡️ `CategoryNode.AddChild()`
-  - *Appelle* ➡️ `ICategoryRepository.UpdateAsync()`
-  - *Appelle* ➡️ `ICategoryRepository.AddAsync()`
+  - *Appelle* ➡️ `ICategoryRepository.AddRangeAsync()`
+  - *Appelle* ➡️ `ICategoryRepository.UpdateRangeAsync()`
   - *Appelle* ➡️ `ICategoryManagerProvider.AddCategory()`
   - *Appelle* ➡️ `ICategoryManagerProvider.UpdateCategoryColor()`
-  - *Appelle* ➡️ `ICategoryRepository.GetByNameAsync()`
 - `Task RefreshAsync()`
   - *Appelle* ➡️ `CategorySyncViewModel.InitializeAsync()`
 
@@ -141,6 +140,10 @@ Généré le : 2026-09-22 16:22
 - `IReadOnlyList<CategoryNode> RootCategories { get; set; }` : Obtient la liste des catégories de niveau racine (n'ayant aucun parent).
 - `Task InitializeAsync()` : Charge l'ensemble des catégories depuis le dépôt et construit la liste des nœuds racines.
   - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+- `Task DeleteCategoryAsync(CategoryNode node)` : Marque la catégorie comme supprimée logiquement, met à jour le dépôt et rafraîchit l'arbre.
+  - *Appelle* ➡️ `CategoryNode.MarkAsDeleted()`
+  - *Appelle* ➡️ `ICategoryRepository.UpdateAsync()`
+  - *Appelle* ➡️ `CategoryTreeViewModel.InitializeAsync()`
 
 ### Class : DictionaryEditorViewModel
 **Fichier** : `src\Catamailer.Application\ViewModels\DictionaryEditorViewModel.cs`
@@ -458,7 +461,9 @@ Généré le : 2026-09-22 16:22
 **Rôle** : Implémentation SQLite du dépôt pour les catégories utilisant Entity Framework Core.
 **Membres et Invocations :**
 - `Task AddAsync(CategoryNode category)`
+- `Task AddRangeAsync(IEnumerable<CategoryNode> categories)`
 - `Task UpdateAsync(CategoryNode category)`
+- `Task UpdateRangeAsync(IEnumerable<CategoryNode> categories)`
 - `Task<CategoryNode?> GetByNameAsync(string name)`
 - `Task<IEnumerable<CategoryNode>> GetAllAsync()`
 
@@ -488,11 +493,11 @@ Généré le : 2026-09-22 16:22
   - *Appelle* ➡️ `OutlookApplicationWrapper.MapHexToOlCategoryColor()`
 - `void RenameCategory(string oldName, string newName)`
 - `void RemoveCategory(string name)`
-  - *Appelle* ➡️ `OutlookApplicationWrapper.CategoryExists()`
 - `MailMetadata GetMailMetadata(string entryId)`
 - `string? GetSelectedEntryId()`
 - `void ReplaceCategoryOnAllItems(string oldCategoryName, string newCategoryName)`
 - `IEnumerable<string> GetNextUnprocessedMailEntryIds(string? lastEntryId, int maxItems)`
+- `void Dispose()`
 
 ### Class : OutlookCategoryManagerProvider
 **Fichier** : `src\Catamailer.Infrastructure\OutlookCategoryManagerProvider.cs`
@@ -905,7 +910,7 @@ Généré le : 2026-09-22 16:22
   - *Appelle* ➡️ `ICategorySyncService.AnalyzeSyncDeltasAsync()`
   - *Appelle* ➡️ `CategorySyncViewModel.InitializeAsync()`
   - *Appelle* ➡️ `CategorySyncViewModel.ApplyResolutionsAsync()`
-  - *Appelle* ➡️ `ICategoryRepository.AddAsync()`
+  - *Appelle* ➡️ `ICategoryRepository.AddRangeAsync()`
 - `Task ApplyResolutionsAsync_ShouldNotProcess_WhenNotSelected()`
   - *Appelle* ➡️ `SyncResult.AddDelta()`
   - *Appelle* ➡️ `CategoryDelta.CreateMissingInOutlook()`
@@ -917,10 +922,11 @@ Généré le : 2026-09-22 16:22
   - *Appelle* ➡️ `SyncResult.AddDelta()`
   - *Appelle* ➡️ `CategoryDelta.CreateColorMismatch()`
   - *Appelle* ➡️ `ICategorySyncService.AnalyzeSyncDeltasAsync()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
   - *Appelle* ➡️ `CategorySyncViewModel.InitializeAsync()`
   - *Appelle* ➡️ `CategorySyncViewModel.ApplyResolutionsAsync()`
   - *Appelle* ➡️ `ICategoryManagerProvider.UpdateCategoryColor()`
-  - *Appelle* ➡️ `ICategoryRepository.UpdateAsync()`
+  - *Appelle* ➡️ `ICategoryRepository.UpdateRangeAsync()`
 
 ### Class : CategoryTreeViewModelTests
 **Fichier** : `tests\Catamailer.Application.Tests\ViewModels\CategoryTreeViewModelTests.cs`
@@ -1092,10 +1098,14 @@ Généré le : 2026-09-22 16:22
   - *Appelle* ➡️ `SyncResult.GetColorConflicts()`
 
 ## Projet : Catamailer.Infrastructure.IntegrationTests
-### Class : UnitTest1
-**Fichier** : `tests\Catamailer.Infrastructure.IntegrationTests\UnitTest1.cs`
+### Class : CategorySyncPerformanceTests
+**Fichier** : `tests\Catamailer.Infrastructure.IntegrationTests\CategorySyncPerformanceTests.cs`
 **Membres et Invocations :**
-- `void Test1()`
+- `Task SyncCategories_ShouldExecute_WithinAcceptableTimeframe()`
+  - *Appelle* ➡️ `CategoryNode.AddChild()`
+  - *Appelle* ➡️ `CategorySyncViewModel.InitializeAsync()`
+  - *Appelle* ➡️ `CategorySyncViewModel.ApplyResolutionsAsync()`
+- `void Dispose()`
 
 ## Projet : Catamailer.Infrastructure.Tests
 ### Class : CatamailerDbContextTests
@@ -1104,6 +1114,10 @@ Généré le : 2026-09-22 16:22
 **Membres et Invocations :**
 - `void EnsureCreated_ShouldCreateDatabaseAndTables()`
 - `void CanSaveAndRetrieve_CategoryNode()`
+- `void GlobalQueryFilter_ShouldHideDeletedCategories_ByDefault()`
+  - *Appelle* ➡️ `CategoryNode.MarkAsDeleted()`
+- `void IgnoreQueryFilters_ShouldReturnDeletedCategories()`
+  - *Appelle* ➡️ `CategoryNode.MarkAsDeleted()`
 
 ### Class : CategoryRepositoryTests
 **Fichier** : `tests\Catamailer.Infrastructure.Tests\CategoryRepositoryTests.cs`
@@ -1115,6 +1129,13 @@ Généré le : 2026-09-22 16:22
 - `Task GetByNameAsync_ShouldReturnCategory_WhenExists()`
   - *Appelle* ➡️ `CategoryRepositoryTests.GetInMemoryContext()`
   - *Appelle* ➡️ `CategoryRepository.GetByNameAsync()`
+- `Task AddRangeAsync_ShouldPersistMultipleCategories_InOneTransaction()`
+  - *Appelle* ➡️ `CategoryRepositoryTests.GetInMemoryContext()`
+  - *Appelle* ➡️ `CategoryRepository.AddRangeAsync()`
+- `Task UpdateRangeAsync_ShouldUpdateMultipleCategories_InOneTransaction()`
+  - *Appelle* ➡️ `CategoryRepositoryTests.GetInMemoryContext()`
+  - *Appelle* ➡️ `CategoryNode.UpdateColor()`
+  - *Appelle* ➡️ `CategoryRepository.UpdateRangeAsync()`
 
 ### Class : OutlookCategoryManagerProviderTests
 **Fichier** : `tests\Catamailer.Infrastructure.Tests\OutlookCategoryManagerProviderTests.cs`
@@ -1227,6 +1248,13 @@ Généré le : 2026-09-22 16:22
 - **Generate-FileList.ps1** : `scripts\Generate-FileList.ps1`
   - Paramètre : `[string] $Chemin`
   - Paramètre : `[string] $Prefixe`
+- **Invoke-IntegrationTests.ps1** : `scripts\Invoke-IntegrationTests.ps1`
+  - Paramètre : `[string] $IntegrationProject`
+  - Paramètre : `[string] $PSScriptRoot`
+  - *Appelle* ➡️ `Invoke-TestEnvSetup.ps1`
+  - *Appelle* ➡️ `Invoke-TestEnvTeardown.ps1`
+- **Invoke-PurgeDatabase.ps1** : `scripts\Invoke-PurgeDatabase.ps1`
+  - Paramètre : `[string] $DbName`
 - **Invoke-TestEnvSetup.ps1** : `scripts\Invoke-TestEnvSetup.ps1`
   - Paramètre : `[string] $TestProfile`
   - Paramètre : `[string] $BasePstPath`

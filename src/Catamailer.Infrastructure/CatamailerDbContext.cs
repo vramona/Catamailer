@@ -1,6 +1,7 @@
 // Historique :
 // 2026-09-07 : Création du DbContext pour SQLite (J1-S1-T3).
 // 2026-09-07 : Ajout des entités SystemState et AppSetting (J2-S2-T1).
+// 2026-09-22 : Ajout du filtre de requête global (Global Query Filter) pour IsDeleted sur CategoryNode (J4-S4-T6).
 
 using Catamailer.Domain;
 using Microsoft.EntityFrameworkCore;
@@ -62,6 +63,9 @@ namespace Catamailer.Infrastructure
                 {
                     childrenNavigation.SetPropertyAccessMode(PropertyAccessMode.Field);
                 }
+
+                // Filtre global : exclure les catégories supprimées logiquement par défaut
+                entity.HasQueryFilter(e => !e.IsDeleted);
             });
 
             // Configuration de l'entité SystemState

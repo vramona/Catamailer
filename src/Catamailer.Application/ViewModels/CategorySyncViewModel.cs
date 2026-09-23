@@ -11,6 +11,9 @@
 //         - 2026-09-17 : Inclusion des ColorMismatch pour maintenir la continuité visuelle de l'arbre (J4-S4-T5 - Phase Bleue).
 //         - 2026-09-17 : Direction par défaut "Écraser Outlook" si Outlook n'a pas de couleur et Catamailer en a une (J4-S4-T5 - Phase Bleue).
 //         - 2026-09-17 : Ajout de traces Stopwatch et optimisation O(1) de la boucle IsFolder (Refacto Perf).
+//         - 2026-09-23 : Remplacement de Debug.WriteLine par Console.WriteLine pour diagnostic terminal (J4-S4-T7 - Phase Jaune).
+//         - 2026-09-23 : Optimisation des performances via l'utilisation des opérations de lots (AddRangeAsync, UpdateRangeAsync) (J4-S4-T7 - Phase Orange).
+//         - 2026-09-23 : Ajout de traces Stopwatch unitaires pour mesurer le bottleneck RPC COM (J4-S4-T7).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -69,12 +72,12 @@ namespace Catamailer.Application.ViewModels
         public async Task InitializeAsync()
         {
             var sw = Stopwatch.StartNew();
-            Debug.WriteLine("[CategorySyncViewModel] Début InitializeAsync...");
+            Console.WriteLine("[CategorySyncViewModel] Début InitializeAsync...");
 
             var syncResult = await _syncService.AnalyzeSyncDeltasAsync(Separator);
             HasConflicts = syncResult.HasConflicts;
 
-            Debug.WriteLine($"[CategorySyncViewModel] Analyse terminée. Confits: {HasConflicts}. Temps d'attente du service: {sw.ElapsedMilliseconds}ms");
+            Console.WriteLine($"[CategorySyncViewModel] Analyse terminée. Confits: {HasConflicts}. Temps d'attente du service: {sw.ElapsedMilliseconds}ms");
             sw.Restart();
 
             var combinedCatamailerList = syncResult.Deltas
@@ -90,7 +93,6 @@ namespace Catamailer.Application.ViewModels
 
             MissingInCatamailerOptions = combinedCatamailerList;
 
-            // Optimisation O(N) au lieu de O(N²) : On extrait tous les chemins "parents" existants
             var parentPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (var opt in MissingInCatamailerOptions)
             {
@@ -106,7 +108,7 @@ namespace Catamailer.Application.ViewModels
                 opt.IsFolder = parentPaths.Contains(opt.Delta.CategoryName);
             }
 
-            Debug.WriteLine($"[CategorySyncViewModel] Résolution de l'arbre Catamailer et IsFolder terminée. {MissingInCatamailerOptions.Count} éléments. ({sw.ElapsedMilliseconds}ms)");
+            Console.WriteLine($"[CategorySyncViewModel] Résolution de l'arbre Catamailer et IsFolder terminée. {MissingInCatamailerOptions.Count} éléments. ({sw.ElapsedMilliseconds}ms)");
             sw.Restart();
 
             MissingInOutlookOptions = syncResult.GetMissingInOutlook()
@@ -125,13 +127,13 @@ namespace Catamailer.Application.ViewModels
                 .ToList();
 
             sw.Stop();
-            Debug.WriteLine($"[CategorySyncViewModel] Initialisation complète terminée. ({sw.ElapsedMilliseconds}ms supplémentaires)");
+            Console.WriteLine($"[CategorySyncViewModel] Initialisation complète terminée. ({sw.ElapsedMilliseconds}ms supplémentaires)");
         }
 
         public async Task ApplyResolutionsAsync()
         {
             var sw = Stopwatch.StartNew();
-            Debug.WriteLine("[CategorySyncViewModel] Début ApplyResolutionsAsync...");
+            Console.WriteLine("[CategorySyncViewModel] Début ApplyResolutionsAsync...");
 
             var existingNodes = (await _categoryRepository.GetAllAsync() ?? Enumerable.Empty<CategoryNode>()).ToList();
             var existingMapByFullName = existingNodes.ToDictionary(
@@ -143,6 +145,9 @@ namespace Catamailer.Application.ViewModels
                 .Where(o => o.IsSelected && o.Delta.Status == DeltaStatus.MissingInCatamailer)
                 .OrderBy(o => o.Depth)
                 .ToList();
+
+            var nodesToAdd = new List<CategoryNode>();
+            var nodesToUpdate = new HashSet<CategoryNode>();
 
             foreach (var option in selectedToCatamailer)
             {
@@ -158,6 +163,7 @@ namespace Catamailer.Application.ViewModels
                 else
                 {
                     targetNode.UpdateColor(option.Delta.OptimizedColor);
+                    nodesToUpdate.Add(targetNode);
                 }
 
                 existingMapByFullName[option.Delta.CategoryName] = targetNode;
@@ -174,7 +180,7 @@ namespace Catamailer.Application.ViewModels
                             if (targetNode.Parent != parentNode)
                             {
                                 parentNode.AddChild(targetNode);
-                                await _categoryRepository.UpdateAsync(parentNode);
+                                nodesToUpdate.Add(parentNode);
                             }
                         }
                     }
@@ -182,37 +188,82 @@ namespace Catamailer.Application.ViewModels
 
                 if (isNew && targetNode.Parent == null)
                 {
-                    await _categoryRepository.AddAsync(targetNode);
+                    nodesToAdd.Add(targetNode);
                 }
                 else if (!isNew)
                 {
-                    await _categoryRepository.UpdateAsync(targetNode);
+                    nodesToUpdate.Add(targetNode);
                 }
             }
 
-            foreach (var option in MissingInOutlookOptions.Where(o => o.IsSelected))
+            var dbSw = Stopwatch.StartNew();
+            if (nodesToAdd.Any())
             {
-                _outlookProvider.AddCategory(option.Delta.CategoryName, option.Delta.CatamailerColor ?? "");
+                await _categoryRepository.AddRangeAsync(nodesToAdd);
             }
 
+            if (nodesToUpdate.Any())
+            {
+                await _categoryRepository.UpdateRangeAsync(nodesToUpdate);
+            }
+            Console.WriteLine($"[CategorySyncViewModel] DB Persistance SQLite (Add/Update) terminée en {dbSw.ElapsedMilliseconds}ms");
+
+            var comSw = Stopwatch.StartNew();
+            int addCount = 0;
+            foreach (var option in MissingInOutlookOptions.Where(o => o.IsSelected))
+            {
+                var itemSw = Stopwatch.StartNew();
+                _outlookProvider.AddCategory(option.Delta.CategoryName, option.Delta.CatamailerColor ?? "");
+                Console.WriteLine($"[CategorySyncViewModel] COM AddCategory '{option.Delta.CategoryName}' en {itemSw.ElapsedMilliseconds}ms");
+                addCount++;
+            }
+            Console.WriteLine($"[CategorySyncViewModel] COM AddCategory Batch ({addCount} items) terminé en {comSw.ElapsedMilliseconds}ms");
+
+            var colorNodesToAdd = new List<CategoryNode>();
+            var colorNodesToUpdate = new HashSet<CategoryNode>();
+
+            comSw.Restart();
+            int updateCount = 0;
             foreach (var option in ColorMismatchOptions.Where(o => o.IsSelected))
             {
                 if (option.Direction == SyncResolutionDirection.CatamailerToOutlook)
                 {
+                    var itemSw = Stopwatch.StartNew();
                     _outlookProvider.UpdateCategoryColor(option.Delta.CategoryName, option.Delta.CatamailerColor ?? "");
+                    Console.WriteLine($"[CategorySyncViewModel] COM UpdateCategoryColor '{option.Delta.CategoryName}' en {itemSw.ElapsedMilliseconds}ms");
+                    updateCount++;
                 }
                 else
                 {
-                    var dbNode = await _categoryRepository.GetByNameAsync(option.ShortName) 
-                                 ?? new CategoryNode(option.ShortName, option.Delta.OutlookColor);
+                    var dbNode = existingNodes.FirstOrDefault(n => string.Equals(n.Name, option.ShortName, StringComparison.OrdinalIgnoreCase));
                     
-                    dbNode.UpdateColor(option.Delta.OutlookColor);
-                    await _categoryRepository.UpdateAsync(dbNode);
+                    if (dbNode == null)
+                    {
+                        dbNode = new CategoryNode(option.ShortName, option.Delta.OutlookColor);
+                        existingNodes.Add(dbNode);
+                        colorNodesToAdd.Add(dbNode);
+                    }
+                    else
+                    {
+                        dbNode.UpdateColor(option.Delta.OutlookColor);
+                        colorNodesToUpdate.Add(dbNode);
+                    }
                 }
             }
+            Console.WriteLine($"[CategorySyncViewModel] COM UpdateCategoryColor Batch ({updateCount} items) terminé en {comSw.ElapsedMilliseconds}ms");
 
+            if (colorNodesToAdd.Any())
+            {
+                await _categoryRepository.AddRangeAsync(colorNodesToAdd);
+            }
+
+            if (colorNodesToUpdate.Any())
+            {
+                await _categoryRepository.UpdateRangeAsync(colorNodesToUpdate);
+            }
+            
             sw.Stop();
-            Debug.WriteLine($"[CategorySyncViewModel] Résolutions appliquées avec succès. ({sw.ElapsedMilliseconds}ms)");
+            Console.WriteLine($"[CategorySyncViewModel] Résolutions appliquées avec succès. ({sw.ElapsedMilliseconds}ms)");
         }
         
         public async Task RefreshAsync()
