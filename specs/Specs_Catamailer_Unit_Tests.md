@@ -117,8 +117,40 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 
 ---
 
-## 🟢 JALON 4 - INBOX NOTES, AGENDA & ACTIONS INTERNES
-*À compléter.*
+## 🟢 JALON 4 - SYNCHRONISATION RÉFÉRENTIEL CATÉGORIES
+### 🟢 J4-S1 : Moteur de Détection et Domain
+- [x] ✅ `J4-S1-T1 - CategoryDelta_CreateMissingInCatamailer_ShouldSetProperties` (Validé le 15/09/2026 sur feature/j4-category-sync_step-1-core - Commit : c4bb8617b86d6b3921da6408fc012ccc3afe6eef)
+- [x] ✅ `J4-S1-T1 - CategoryDelta_CreateMissingInOutlook_ShouldSetProperties` (Validé le 15/09/2026 sur feature/j4-category-sync_step-1-core - Commit : c4bb8617b86d6b3921da6408fc012ccc3afe6eef)
+- [x] ✅ `J4-S1-T1 - CategoryDelta_CreateColorMismatch_ShouldSetBothColors` (Validé le 15/09/2026 sur feature/j4-category-sync_step-1-core - Commit : c4bb8617b86d6b3921da6408fc012ccc3afe6eef)
+- [x] ✅ `J4-S1-T1 - SyncResult_AddDelta_ShouldUpdateConflictsAndLists` (Validé le 15/09/2026 sur feature/j4-category-sync_step-1-core - Commit : c4bb8617b86d6b3921da6408fc012ccc3afe6eef)
+- [x] ✅ `J4-S1-T2 - AnalyzeSyncDeltasAsync_ShouldReturnNoConflicts_WhenRepositoriesMatchPerfectly` (Validé le 15/09/2026 sur feature/j4-category-sync_step-1-core - Commit : c9ea11acbebd2e4bbcf7ddc894908c3426fb12be)
+- [x] ✅ `J4-S1-T2 - AnalyzeSyncDeltasAsync_ShouldDetectMissingInCatamailer` (Validé le 15/09/2026 sur feature/j4-category-sync_step-1-core - Commit : c9ea11acbebd2e4bbcf7ddc894908c3426fb12be)
+- [x] ✅ `J4-S1-T2 - AnalyzeSyncDeltasAsync_ShouldDetectMissingInOutlook` (Validé le 15/09/2026 sur feature/j4-category-sync_step-1-core - Commit : c9ea11acbebd2e4bbcf7ddc894908c3426fb12be)
+- [x] ✅ `J4-S1-T2 - AnalyzeSyncDeltasAsync_ShouldDetectColorMismatch` (Validé le 15/09/2026 sur feature/j4-category-sync_step-1-core - Commit : c9ea11acbebd2e4bbcf7ddc894908c3426fb12be)
+
+### 🟢 J4-S2 : Interface de Validation au Démarrage
+- [x] ✅ `J4-S2-T1 - InitializeAsync_ShouldPopulateOptions_WhenConflictsExist` (Validé le 15/09/2026 sur feature/j4-category-sync_step-2-ui - Commit : 446e031435b349db4f35f5769c47cae0bba1155f)
+- [x] ✅ `J4-S2-T1 - ApplyResolutionsAsync_ShouldAddMissingInCatamailer_WhenSelected` (Validé le 15/09/2026 sur feature/j4-category-sync_step-2-ui - Commit : 446e031435b349db4f35f5769c47cae0bba1155f)
+- [x] ✅ `J4-S2-T1 - ApplyResolutionsAsync_ShouldNotProcess_WhenNotSelected` (Validé le 15/09/2026 sur feature/j4-category-sync_step-2-ui - Commit : 446e031435b349db4f35f5769c47cae0bba1155f)
+- [x] ✅ `J4-S2-T1 - ApplyResolutionsAsync_ShouldPushCatamailerColorToOutlook_ForMismatches` (Validé le 15/09/2026 sur feature/j4-category-sync_step-2-ui - Commit : 446e031435b349db4f35f5769c47cae0bba1155f)
+
+### 🟢 J4-S3 : Intégration Infrastructure COM
+- [x] ✅ `J4-S3-T1 - GetAllCategories_ShouldReturnMappedCategories_FromWrapper` (Validé le 16/09/2026 sur feature/j4-category-sync_step-3-infra - Commit : 65fdf358aa1004d3c444ec976e7a4fbf1a771835)
+
+### 🟢 J4-S4 : Synchronisation Avancée, UI et Tests d'Intégration COM
+- [x] ✅ `J4-S4-T1 - AnalyzeSyncDeltasAsync_ShouldCreateImplicitParent_WhenOnlyChildExistsInOutlook` (Validé le 16/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : faae02e697a31159296aab3d678f38ee1d9fbaf7)
+- [x] ✅ `J4-S4-T1 - AnalyzeSyncDeltasAsync_ShouldApplyInheritance_WhenOutlookReturnsSameColorForHierarchy` (Validé le 16/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : faae02e697a31159296aab3d678f38ee1d9fbaf7)
+- [x] ✅ `J4-S4-T2 - AnalyzeSyncDeltasAsync_ShouldBubbleUpColorToImplicitParents_WhenAllChildrenShareSameColor` (Validé le 17/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : 9b2c1b18e71a851c4520652969405adfe598c0df)
+- [x] ✅ `J4-S4-T2 - AnalyzeSyncDeltasAsync_ShouldTrimSpacesAroundSeparator_ToGroupCorrectly` (Validé le 17/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : 9b2c1b18e71a851c4520652969405adfe598c0df)
+- [x] ✅ `J4-S4-T2 - AnalyzeSyncDeltasAsync_ShouldUseFullName_WhenPushingToOutlook` (Validé le 17/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : 9b2c1b18e71a851c4520652969405adfe598c0df)
+
+- [x] ✅ `J4-S4-T4 - AnalyzeSyncDeltasAsync_ShouldDetectSynchronizedCategories_ToMaintainTreeContext` (Validé le 17/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : 7855c889fbec1297be4902c5d21b535bf453cfff)
+- [x] ✅ `J4-S4-T4 - ApplyResolutionsAsync_ShouldReconstructTree_ForMissingInCatamailer` (Validé le 17/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : 7855c889fbec1297be4902c5d21b535bf453cfff)
+- [x] ✅ `J4-S4-T4 - ApplyResolutionsAsync_ShouldRespectDirection_ForColorMismatches` (Validé le 17/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : 7855c889fbec1297be4902c5d21b535bf453cfff)
+- [x] ✅ `J4-S4-T6 - CategoryDelta_CreateDeletedInCatamailer_ShouldSetProperties` (Validé le 23/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : cbc82f8d17948ab88d87c8202cbf6700efd05d87)
+- [x] ✅ `J4-S4-T6 - AnalyzeSyncDeltasAsync_ShouldDetectDeletedInCatamailer_WhenCategoryIsLogicallyDeleted` (Validé le 23/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : cbc82f8d17948ab88d87c8202cbf6700efd05d87)
+- [x] ✅ `J4-S4-T6 - ApplyResolutionsAsync_ShouldRespectDirection_ForDeletedInCatamailer` (Validé le 23/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : cbc82f8d17948ab88d87c8202cbf6700efd05d87) (Cpx: 3 / 4)
+- [x] ✅ `J4-S4-T7 - SyncCategories_ShouldExecute_WithinAcceptableTimeframe` (Validé le 23/09/2026 sur feature/j4-category-sync_step-4-advanced-sync - Commit : eb52f4cd21ade75da033fde3b67fce0d8b68e20c) (Cpx: 2 / 2)
 
 ---
 

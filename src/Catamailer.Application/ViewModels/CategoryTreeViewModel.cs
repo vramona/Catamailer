@@ -4,6 +4,7 @@
 //     Historique :
 //         - 2026-09-09 : Création initiale pour J3-S3-T2 (Phase Verte).
 //         - 2026-09-09 : Correction de la propriété Parent (J3-S3-T2).
+//         - 2026-09-22 : Ajout de la méthode DeleteCategoryAsync pour la suppression logique (J4-S4-T6 - Phase Bleue).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -49,6 +50,17 @@ namespace Catamailer.Application.ViewModels
                 .Where(c => c.Parent == null)
                 .OrderBy(c => c.Name)
                 .ToList();
+        }
+
+        /// <summary>
+        /// Marque la catégorie comme supprimée logiquement, met à jour le dépôt et rafraîchit l'arbre.
+        /// </summary>
+        /// <param name="node">Le nœud de catégorie à supprimer.</param>
+        public async Task DeleteCategoryAsync(CategoryNode node)
+        {
+            node.MarkAsDeleted();
+            await _categoryRepository.UpdateAsync(node);
+            await InitializeAsync();
         }
     }
 }

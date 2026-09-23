@@ -8,6 +8,7 @@
 //     Date de création : 2026-09-09
 //     Historique :
 //         - 2026-09-09 : Création de la page de l'éditeur de référentiel (J3-S3-T2 - Phase Bleue).
+//         - 2026-09-22 : Ajout du branchement de l'événement OnNodeDeleted (J4-S4-T6 - Phase Bleue).
 // </auto-generated>
 // ------------------------------------------------------------------------------ -->
 
@@ -19,7 +20,7 @@
         @if (ViewModel.RootCategories.Any())
         {
             <div class="ms-n3">
-                <CategoryTreeView Nodes="ViewModel.RootCategories" />
+                <CategoryTreeView Nodes="ViewModel.RootCategories" OnNodeDeleted="ViewModel.DeleteCategoryAsync" />
             </div>
         }
         else

@@ -20,7 +20,7 @@
         <ApplicationTitle>Catamailer</ApplicationTitle>
 
         <!-- App Identifier -->
-        <ApplicationId>com.companyname.catamailer</ApplicationId>
+        <ApplicationId>com.vramona.catamailer</ApplicationId>
 
         <!-- Versions -->
         <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>

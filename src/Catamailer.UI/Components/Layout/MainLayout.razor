@@ -11,7 +11,8 @@
 //         - 2026-09-15 : Ajout de la barre de navigation supérieure (J3-S3-T4).
 //         - 2026-09-15 : Abonnement au IBlazorNavigationService pour navigation depuis TrayIcon (J3-S3-T7).
 //         - 2026-09-15 : Ajout du bouton Quitter pour stopper l'application (J3-S3-T8).
-//         - 2026-09-15 : Intégration du composant global ActivationPrompt (J3-S3-T5 - Phase Bleue).
+//         - 2026-09-15 : Intégration du composant global ActivationPrompt (J3-S3-T5).
+//         - 2026-09-16 : Suppression de CategorySyncModal et ajout du lien vers la page complète (J4-S4-T2).
 // </auto-generated>
 // ------------------------------------------------------------------------------ -->
 
@@ -20,6 +21,7 @@
         <div class="fw-bold fs-5">Catamailer</div>
         <nav class="d-flex align-items-center">
             <a href="/" class="text-white text-decoration-none me-3">Dashboard</a>
+            <a href="/category-sync" class="text-white text-decoration-none me-3">Synchronisation</a>
             <a href="/rule-builder" class="text-white text-decoration-none me-3">Règles</a>
             <a href="/preferences" class="text-white text-decoration-none me-4">Préférences</a>
             <button class="btn btn-outline-light btn-sm" @onclick="RequestExit">Quitter</button>

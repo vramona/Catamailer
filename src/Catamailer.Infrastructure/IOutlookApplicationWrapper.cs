@@ -7,6 +7,9 @@
 //         - 2026-09-07 : Ajout des méthodes CRUD pour les catégories J2-S1-T3 (Phase Rouge).
 //         - 2026-09-07 : Ajout de ReplaceCategoryOnAllItems pour J2-S1-T4 (Phase Rouge).
 //         - 2026-09-07 : Ajout de GetNextUnprocessedMailEntryIds pour J2-S2-T3 (Phase Rouge).
+//         - 2026-09-15 : Ajout de GetMasterCategories pour J4-S3-T1 (Phase Rouge).
+//         - 2026-09-17 : Ajout de RenameCategory pour J4-S4-T3 (Phase Verte).
+//         - 2026-09-23 : Ajout de IDisposable pour libération explicite COM (J4-S4-T7 - Phase Orange).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -21,7 +24,7 @@ namespace Catamailer.Infrastructure
     /// <summary>
     /// Interface d'abstraction pour l'application COM Outlook, facilitant les tests unitaires.
     /// </summary>
-    public interface IOutlookApplicationWrapper
+    public interface IOutlookApplicationWrapper : IDisposable
     {
         /// <summary>
         /// Événement déclenché nativement par Outlook via NewMailEx.
@@ -40,6 +43,12 @@ namespace Catamailer.Infrastructure
         /// </summary>
         /// <returns>L'EntryID de l'élément sélectionné, ou null si la sélection est vide ou invalide.</returns>
         string? GetSelectedEntryId();
+
+        /// <summary>
+        /// Lit l'intégralité de la Master Category List d'Outlook.
+        /// </summary>
+        /// <returns>Une énumération contenant le nom et le code couleur (Hexa) de chaque catégorie.</returns>
+        IEnumerable<(string Name, string? ColorCode)> GetMasterCategories();
 
         /// <summary>
         /// Vérifie si une catégorie existe dans la Master Category List.
@@ -61,6 +70,13 @@ namespace Catamailer.Infrastructure
         /// <param name="name">Le nom de la catégorie.</param>
         /// <param name="newColorCode">Le nouveau code couleur.</param>
         void UpdateCategory(string name, string newColorCode);
+        
+        /// <summary>
+        /// Renomme une catégorie existante dans la Master Category List.
+        /// </summary>
+        /// <param name="oldName">Le nom actuel de la catégorie.</param>
+        /// <param name="newName">Le nouveau nom de la catégorie.</param>
+        void RenameCategory(string oldName, string newName);
 
         /// <summary>
         /// Supprime une catégorie de la Master Category List.

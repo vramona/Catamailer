@@ -3,11 +3,14 @@
 //     Date de création : 2026-09-07
 //     Historique :
 //         - 2026-09-07 : Création initiale (Phase Rouge).
+//         - 2026-09-15 : Ajout du test GetAllCategories_ShouldReturnMappedCategories_FromWrapper (Phase Rouge).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
 #nullable enable
 
+using System.Collections.Generic;
+using System.Linq;
 using Catamailer.Infrastructure;
 using Moq;
 using Xunit;
@@ -19,6 +22,30 @@ namespace Catamailer.Infrastructure.Tests
     /// </summary>
     public class OutlookCategoryManagerProviderTests
     {
+        [Fact]
+        public void GetAllCategories_ShouldReturnMappedCategories_FromWrapper()
+        {
+            // Arrange
+            var mockWrapper = new Mock<IOutlookApplicationWrapper>();
+            var expectedCategories = new List<(string Name, string? ColorCode)>
+            {
+                ("Urba-Veille", "#FF0000"),
+                ("Comitologie", "#00FF00")
+            };
+            mockWrapper.Setup(w => w.GetMasterCategories()).Returns(expectedCategories);
+
+            var provider = new OutlookCategoryManagerProvider(mockWrapper.Object);
+
+            // Act
+            var result = provider.GetAllCategories().ToList();
+
+            // Assert
+            Assert.Equal(2, result.Count);
+            Assert.Contains(result, c => c.Name == "Urba-Veille" && c.ColorCode == "#FF0000");
+            Assert.Contains(result, c => c.Name == "Comitologie" && c.ColorCode == "#00FF00");
+            mockWrapper.Verify(w => w.GetMasterCategories(), Times.Once);
+        }
+
         [Fact]
         public void AddCategory_ShouldCallWrapperAdd_WhenCategoryDoesNotExist()
         {
