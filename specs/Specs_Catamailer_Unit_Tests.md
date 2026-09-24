@@ -171,3 +171,10 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 - [x] ✅ `J5-S2-T1 - FlagToday_ShouldNotThrowNotImplementedException` (Validé le 23/09/2026 sur feature/j5-iso-vba_step-2-infra - Commit : d1bd23c717c7900b9ed13e6a8677774a706ccc7e)
 - [x] ✅ `J5-S2-T1 - InsertHtmlSignature_ShouldNotThrowNotImplementedException` (Validé le 23/09/2026 sur feature/j5-iso-vba_step-2-infra - Commit : d1bd23c717c7900b9ed13e6a8677774a706ccc7e)
 - [x] ✅ `J5-S2-T3 - InsertHtmlSignature_ShouldThrowFileNotFoundException_WhenSignatureDoesNotExist` (Validé le 24/09/2026 sur feature/j5-iso-vba_step-2-infra - Commit : 305c8648b243d7c87bf5d6bb00ef483d3ca9fbbd) (Cpx: 3 / 3)
+
+### 🟢 J5-S3 : Support des actions multiples
+- [x] ✅ `J5-S3-T1 - ExecutionRule_Creation_ShouldSetPropertiesWithMultipleActions` (Validé le 24/09/2026 sur feature/j5-iso-vba_step-3-multiple-actions - Commit : <COMMIT_HASH>)
+- [x] ✅ `J5-S3-T2 - SetAction_ShouldReplaceActionsList` (Validé le 24/09/2026 sur feature/j5-iso-vba_step-3-multiple-actions - Commit : <COMMIT_HASH>)
+- [x] ✅ `J5-S3-T2 - AddAction_ShouldAppendToList` (Validé le 24/09/2026 sur feature/j5-iso-vba_step-3-multiple-actions - Commit : <COMMIT_HASH>)
+- [x] ✅ `J5-S3-T2 - SaveRuleAsync_ShouldConstructFinalActions_WhenPropertiesAreSet` (Validé le 24/09/2026 sur feature/j5-iso-vba_step-3-multiple-actions - Commit : <COMMIT_HASH>)
+
