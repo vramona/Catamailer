@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-24 14:23
+Généré le : 2026-09-24 14:45
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -229,9 +229,7 @@ Généré le : 2026-09-24 14:23
 **Membres et Invocations :**
 - `string RuleName { get; set; }` : Obtient ou définit le nom descriptif de la règle à sauvegarder.
 - `RuleNode RootNode { get; }` : Obtient le nœud racine de l'arbre des conditions.
-- `ActionType? SelectedActionType { get; set; }` : Obtient ou définit le type d'action sélectionné, en appliquant les règles de réinitialisation des paramètres.
-- `string ActionParameter { get; set; }` : Obtient ou définit le paramètre de l'action sélectionnée.
-- `RuleAction? FinalAction { get; }` : Obtient l'action finale calculée en fonction des sélections en cours.
+- `ObservableCollection<RuleAction> Actions { get; }` : Obtient la liste observable des actions séquentielles à exécuter.
 - `IEnumerable<CategoryNode> AvailableCategories { get; set; }` : Obtient la liste brute des catégories disponibles.
 - `IEnumerable<CategoryOption> FlatCategories { get; set; }` : Obtient la liste aplatie et indentée des catégories prête pour l'affichage UI.
 - `Task InitializeAsync()` : Charge les données de référence nécessaires à l'IHM (catégories) et construit l'arborescence visuelle.
@@ -248,7 +246,10 @@ Généré le : 2026-09-24 14:23
   - *Appelle* ➡️ `RuleNode.RemoveCriterion()`
 - `void AddChildNode(RuleNode targetNode, RuleNode childNode)` : Ajoute un sous-nœud à un nœud spécifique.
   - *Appelle* ➡️ `RuleNode.AddChildNode()`
-- `void SetAction(RuleAction action)` : Définit l'action finale de la règle.
+- `void AddAction(RuleAction action)` : Ajoute une nouvelle action à la fin de la liste d'exécution.
+- `void UpdateAction(RuleAction oldAction, RuleAction newAction)` : Met à jour une action existante dans la liste.
+- `void RemoveAction(RuleAction action)` : Supprime une action de la liste d'exécution.
+- `void SetAction(RuleAction action)` : Réinitialise complètement la liste des actions. Utilisé principalement pour la rétrocompatibilité ou le ré-amorçage.
 - `Task SaveRuleAsync()` : Sauvegarde la règle en base de données si elle est correctement configurée.
   - *Appelle* ➡️ `IRuleRepository.AddExecutionRuleAsync()`
 
@@ -318,7 +319,7 @@ Généré le : 2026-09-24 14:23
 **Membres et Invocations :**
 - `string Name { get; }` : Obtient le nom descriptif de la règle.
 - `RuleNode RootNode { get; }` : Obtient le nœud racine de l'arbre des conditions d'exécution.
-- `RuleAction Action { get; }` : Obtient l'action finale à exécuter si l'arbre est validé.
+- `IReadOnlyList<RuleAction> Actions { get; }` : Obtient la liste ordonnée des actions à exécuter si l'arbre est validé.
 
 ### Interface : IAppSettingsRepository
 **Fichier** : `src\Catamailer.Domain\IAppSettingsRepository.cs`
@@ -465,6 +466,7 @@ Généré le : 2026-09-24 14:23
 - `DbSet<CategoryNode> Categories { get; set; }` : Obtient ou définit la collection des nœuds de catégories.
 - `DbSet<SystemState> SystemStates { get; set; }` : Obtient ou définit la collection des états systèmes.
 - `DbSet<AppSetting> AppSettings { get; set; }` : Obtient ou définit la collection des paramètres d'application.
+- `DbSet<ExecutionRule> ExecutionRules { get; set; }` : Obtient ou définit la collection des règles d'exécution.
 
 ### Class : CategoryRepository
 **Fichier** : `src\Catamailer.Infrastructure\CategoryRepository.cs`
@@ -1059,19 +1061,21 @@ Généré le : 2026-09-24 14:23
   - *Appelle* ➡️ `RuleBuilderViewModel.RemoveCriterion()`
 - `void AddChildNode_ShouldAddNodeToTargetNode()`
   - *Appelle* ➡️ `RuleBuilderViewModel.AddChildNode()`
-- `void SetAction_ShouldUpdateFinalActionProperty()`
+- `void SetAction_ShouldReplaceActionsList()`
+  - *Appelle* ➡️ `RuleBuilderViewModel.AddAction()`
   - *Appelle* ➡️ `RuleBuilderViewModel.SetAction()`
+- `void AddAction_ShouldAppendToList()`
+  - *Appelle* ➡️ `RuleBuilderViewModel.AddAction()`
 - `void SetOperator_ShouldUpdateTargetNodeOperator()`
   - *Appelle* ➡️ `RuleBuilderViewModel.SetOperator()`
 - `void UpdateCriterion_ShouldReplaceCriterionInTargetNode()`
   - *Appelle* ➡️ `RuleBuilderViewModel.AddCriterion()`
   - *Appelle* ➡️ `RuleBuilderViewModel.UpdateCriterion()`
-- `void SelectedActionType_WhenChangedToSetImportance_ShouldDefaultParameterToNormal()`
-- `void SelectedActionType_WhenChangedToFlagToday_ShouldClearParameter()`
-- `Task SaveRuleAsync_ShouldConstructFinalAction_WhenPropertiesAreSet()`
+- `Task SaveRuleAsync_ShouldConstructFinalActions_WhenPropertiesAreSet()`
+  - *Appelle* ➡️ `RuleBuilderViewModel.AddAction()`
   - *Appelle* ➡️ `RuleBuilderViewModel.SaveRuleAsync()`
-- `Task SaveRuleAsync_ShouldCallRepository_WhenNameAndActionAreSet()`
-  - *Appelle* ➡️ `RuleBuilderViewModel.SetAction()`
+- `Task SaveRuleAsync_ShouldCallRepository_WhenNameAndActionsAreSet()`
+  - *Appelle* ➡️ `RuleBuilderViewModel.AddAction()`
   - *Appelle* ➡️ `RuleBuilderViewModel.SaveRuleAsync()`
 
 ### Class : ShadowModeDashboardViewModelTests
@@ -1125,7 +1129,7 @@ Généré le : 2026-09-24 14:23
 - `void RuleNode_UpdateCriterion_ShouldReplaceOldCriterionWithNewOne()`
   - *Appelle* ➡️ `RuleNode.AddCriterion()`
   - *Appelle* ➡️ `RuleNode.UpdateCriterion()`
-- `void ExecutionRule_Creation_ShouldSetProperties()`
+- `void ExecutionRule_Creation_ShouldSetPropertiesWithMultipleActions()`
 
 ### Class : SyncModelsTests
 **Fichier** : `tests\Catamailer.Domain.Tests\SyncModelsTests.cs`

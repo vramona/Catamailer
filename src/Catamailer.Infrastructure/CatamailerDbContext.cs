@@ -2,9 +2,12 @@
 // 2026-09-07 : Création du DbContext pour SQLite (J1-S1-T3).
 // 2026-09-07 : Ajout des entités SystemState et AppSetting (J2-S2-T1).
 // 2026-09-22 : Ajout du filtre de requête global (Global Query Filter) pour IsDeleted sur CategoryNode (J4-S4-T6).
+// 2026-09-24 : Ajout de ExecutionRule et configuration JSON pour IReadOnlyList<RuleAction> (J5-S3-T1 - Phase Verte).
 
 using Catamailer.Domain;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Text.Json;
 
 namespace Catamailer.Infrastructure
 {
@@ -27,6 +30,11 @@ namespace Catamailer.Infrastructure
         /// Obtient ou définit la collection des paramètres d'application.
         /// </summary>
         public DbSet<AppSetting> AppSettings { get; set; } = null!;
+
+        /// <summary>
+        /// Obtient ou définit la collection des règles d'exécution.
+        /// </summary>
+        public DbSet<ExecutionRule> ExecutionRules { get; set; } = null!;
 
         /// <summary>
         /// Initialise une nouvelle instance de la classe <see cref="CatamailerDbContext"/>.
@@ -78,6 +86,24 @@ namespace Catamailer.Infrastructure
             modelBuilder.Entity<AppSetting>(entity =>
             {
                 entity.HasKey(e => e.Key);
+            });
+
+            // Configuration de l'entité ExecutionRule
+            modelBuilder.Entity<ExecutionRule>(entity =>
+            {
+                entity.HasKey(e => e.Name);
+
+                // Configuration de la racine de l'arbre des conditions en JSON
+                entity.Property(e => e.RootNode)
+                      .HasConversion(
+                          v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                          v => JsonSerializer.Deserialize<RuleNode>(v, (JsonSerializerOptions?)null)!);
+
+                // Configuration de la liste d'actions séquentielles en JSON
+                entity.Property(e => e.Actions)
+                      .HasConversion(
+                          v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                          v => JsonSerializer.Deserialize<IReadOnlyList<RuleAction>>(v, (JsonSerializerOptions?)null)!);
             });
         }
     }

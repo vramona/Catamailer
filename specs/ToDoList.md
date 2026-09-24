@@ -87,8 +87,8 @@
 - [x] ✅ **J5-S2-T3** - Lecture des fichiers physiques de signature HTML (%APPDATA%\Microsoft\Signatures). (Validé le 24/09/2026 sur feature/j5-iso-vba_step-2-infra - Commit : 305c8648b243d7c87bf5d6bb00ef483d3ca9fbbd) (Cpx: 3 / 3)
 
 ### Step 3 - Support des actions multiples par règle - feature/j5-iso-vba_step-3-multiple-actions
-- [ ] ⚪ **J5-S3-T1** - Refonte Domain & Infrastructure : Remplacement de l'action unique par `IReadOnlyList<RuleAction>` dans `ExecutionRule` et adaptation du `CatamailerDbContext` (Conversion JSON SQLite).
-- [ ] ⚪ **J5-S3-T2** - Refonte Application & UI : Adaptation de `RuleBuilderViewModel` et `RuleBuilder.razor` pour permettre l'ajout, la modification et la suppression d'une liste d'actions empilables.
+- [x] ✅ **J5-S3-T1** - Refonte Domain & Infrastructure : Remplacement de l'action unique par `IReadOnlyList<RuleAction>` dans `ExecutionRule` et adaptation du `CatamailerDbContext` (Conversion JSON SQLite). (Validé le 24/09/2026 sur feature/j5-iso-vba_step-3-multiple-actions - Commit : 1530f8625c79d7116eb5f72e5f00b045791a8ff1) (Cpx: 5 / 5)
+- [x] ✅ **J5-S3-T2** - Refonte Application & UI : Adaptation de `RuleBuilderViewModel` et `RuleBuilder.razor` pour permettre l'ajout, la modification et la suppression d'une liste d'actions empilables. (Validé le 24/09/2026 sur feature/j5-iso-vba_step-3-multiple-actions - Commit : 1530f8625c79d7116eb5f72e5f00b045791a8ff1) (Cpx: 5 / 5)
 
 ## Jalon 6 - Outil de Migration CSV (Standalone) - feature/j6-csv-migrator
 - [ ] ⚪ **J6-S1-T1** - Console App isolée : Parser le CSV VBA, nettoyer, mapper les nouvelles actions, et générer le fichier `rules.db` SQLite.
