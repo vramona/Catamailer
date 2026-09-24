@@ -186,3 +186,7 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 - [x] ✅ `J6-S1-T2 - ParseLines_ShouldExtractFieldCategoryAndKeywords` (Validé le 24/09/2026 sur feature/j6-csv-migrator_step-1-core - Commit : 76d1cb15bca64a37b1f6a7cd7aa9ec3e810e7ce8)
 - [x] ✅ `J6-S1-T2 - ParseLines_ShouldTrimSpacesAndIgnoreEmptyKeywords` (Validé le 24/09/2026 sur feature/j6-csv-migrator_step-1-core - Commit : 76d1cb15bca64a37b1f6a7cd7aa9ec3e810e7ce8)
 - [x] ✅ `J6-S1-T2 - ParseLines_ShouldIgnoreLinesWithLessThanTwoColumns` (Validé le 24/09/2026 sur feature/j6-csv-migrator_step-1-core - Commit : 76d1cb15bca64a37b1f6a7cd7aa9ec3e810e7ce8)
+- [x] ✅ `J6-S1-T3 - Map_ShouldGroupRecordsBySameCategory_IntoSingleDictionaryRule` (Validé le 24/09/2026 sur feature/j6-csv-migrator_step-1-core - Commit : <COMMIT_HASH>)
+- [x] ✅ `J6-S1-T3 - Map_ShouldDispatchKeywordsToCorrectFields` (Validé le 24/09/2026 sur feature/j6-csv-migrator_step-1-core - Commit : <COMMIT_HASH>)
+- [x] ✅ `J6-S1-T3 - Map_ShouldIgnoreRecordsWithUnknownFields` (Validé le 24/09/2026 sur feature/j6-csv-migrator_step-1-core - Commit : <COMMIT_HASH>)
+

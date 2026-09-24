@@ -8,13 +8,13 @@ Arborescence / Fichier                                        Taille      Date d
 ├── doc                                                                   2026-09-24 14:46
 │   ├── api                                                               2026-09-07 11:22
 │   │   ├── Scripts                                                       2026-09-23 17:39
-│   │   │   ├── Scripts.md                                    3,55 Ko     2026-09-24 16:31
-│   │   │   └── toc.yml                                       49 octets   2026-09-24 16:31
+│   │   │   ├── Scripts.md                                    3,55 Ko     2026-09-24 18:03
+│   │   │   └── toc.yml                                       49 octets   2026-09-24 18:03
 │   │   ├── TestsReport                                                   2026-09-07 11:22
-│   │   │   ├── TestResults.md                                92 octets   2026-09-24 16:31
-│   │   │   └── toc.yml                                       59 octets   2026-09-24 16:31
-│   │   └── toc.yml                                           280 octets  2026-09-24 16:31
-│   └── Ai_Architecture.md                                    83,82 Ko    2026-09-24 16:31
+│   │   │   ├── TestResults.md                                92 octets   2026-09-24 18:03
+│   │   │   └── toc.yml                                       59 octets   2026-09-24 18:03
+│   │   └── toc.yml                                           280 octets  2026-09-24 18:03
+│   └── Ai_Architecture.md                                    84,77 Ko    2026-09-24 18:03
 ├── GEM                                                                   2026-09-07 13:38
 │   └── GEM Catamailer.md                                     8,19 Ko     2026-09-07 13:38
 ├── scripts                                                               2026-09-24 14:46
@@ -41,8 +41,8 @@ Arborescence / Fichier                                        Taille      Date d
 ├── specs                                                                 2026-09-24 14:46
 │   ├── Next Prompt.txt                                       777 octets  2026-09-24 14:46
 │   ├── Specs_Catamailer.md                                   8,82 Ko     2026-09-24 14:46
-│   ├── Specs_Catamailer_Unit_Tests.md                        27,50 Ko    2026-09-24 16:29
-│   └── ToDoList.md                                           15,71 Ko    2026-09-24 16:29
+│   ├── Specs_Catamailer_Unit_Tests.md                        28,08 Ko    2026-09-24 18:02
+│   └── ToDoList.md                                           15,73 Ko    2026-09-24 16:31
 ├── src                                                                   2026-09-07 10:58
 │   ├── Catamailer.Application                                            2026-09-15 18:45
 │   │   ├── Services                                                      2026-09-24 14:46
@@ -114,7 +114,10 @@ Arborescence / Fichier                                        Taille      Date d
 │   │   ├── OutlookMassUpdateProvider.cs                      1,33 Ko     2026-09-07 18:58
 │   │   ├── OutlookSelectionProvider.cs                       1,88 Ko     2026-09-15 18:45
 │   │   └── Win32GlobalHotkeyService.cs                       3,78 Ko     2026-09-15 18:45
-│   ├── Catamailer.Migrator                                               2026-09-24 16:15
+│   ├── Catamailer.Migrator                                               2026-09-24 17:53
+│   │   ├── Mapping                                                       2026-09-24 17:54
+│   │   │   ├── IRuleMapper.cs                                1,12 Ko     2026-09-24 17:53
+│   │   │   └── RuleMapper.cs                                 3,16 Ko     2026-09-24 18:00
 │   │   ├── Parsing                                                       2026-09-24 16:20
 │   │   │   ├── CsvParser.cs                                  2,55 Ko     2026-09-24 16:26
 │   │   │   ├── CsvRuleRecord.cs                              1,63 Ko     2026-09-24 16:22
@@ -258,12 +261,13 @@ Arborescence / Fichier                                        Taille      Date d
 │   │   ├── OutlookSelectionProviderTests.cs                  2,31 Ko     2026-09-15 18:45
 │   │   ├── StateAndSettingsRepositoriesTests.cs              2,67 Ko     2026-09-07 18:58
 │   │   └── Win32GlobalHotkeyServiceTests.cs                  2,01 Ko     2026-09-15 18:45
-│   ├── Catamailer.Migrator.Tests                                         2026-09-24 16:21
+│   ├── Catamailer.Migrator.Tests                                         2026-09-24 17:54
 │   │   ├── Catamailer.Migrator.Tests.csproj                  760 octets  2026-09-24 16:12
-│   │   └── CsvParserTests.cs                                 3,41 Ko     2026-09-24 16:22
-│   ├── Data                                                              2026-09-24 16:30
-│   │   ├── base_test.pst                                     842,83 Mo   2026-09-24 16:29
-│   │   └── ~base_test.pst.tmp                                0 octets    2026-09-24 16:30
+│   │   ├── CsvParserTests.cs                                 3,41 Ko     2026-09-24 16:22
+│   │   └── RuleMapperTests.cs                                3,16 Ko     2026-09-24 17:54
+│   ├── Data                                                              2026-09-24 18:00
+│   │   ├── base_test.pst                                     842,83 Mo   2026-09-24 18:00
+│   │   └── ~base_test.pst.tmp                                128,00 Ko   2026-09-24 18:00
 │   └── Tools.AiDocGenerator.Tests                                        2026-09-15 18:45
 │       ├── CatamailerTocBuilderTests.cs                      977 octets  2026-09-07 11:00
 │       ├── CSharpAnalyzerTests.cs                            1,79 Ko     2026-09-15 18:45
@@ -278,6 +282,6 @@ Arborescence / Fichier                                        Taille      Date d
 │   └── Gemini_Generated_Image_xxc2nmxxc2nmxxc2.png           5,19 Mo     2026-09-15 18:45
 ├── .gitignore                                                8,32 Ko     2026-09-23 17:39
 ├── Catamailer.slnx                                           1,15 Ko     2026-09-24 16:12
-└── FileList.txt                                              0 octets    2026-09-24 16:31
+└── FileList.txt                                              0 octets    2026-09-24 18:03
 
 

@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-24 16:30
+Généré le : 2026-09-24 18:03
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -592,6 +592,17 @@ Généré le : 2026-09-24 16:30
   - *Appelle* ➡️ `Win32GlobalHotkeyService.UnregisterHotKey()`
 
 ## Projet : Catamailer.Migrator
+### Interface : IRuleMapper
+**Fichier** : `src\Catamailer.Migrator\Mapping\IRuleMapper.cs`
+**Rôle** : Définit le contrat pour la transformation des enregistrements CSV bruts en règles de domaine (DictionaryRule).
+**Membres et Invocations :**
+
+### Class : RuleMapper
+**Fichier** : `src\Catamailer.Migrator\Mapping\RuleMapper.cs`
+**Rôle** : Implémentation du mappeur traduisant les enregistrements CSV en DictionaryRule.
+**Membres et Invocations :**
+- `IEnumerable<DictionaryRule> Map(IEnumerable<CsvRuleRecord> records)`
+
 ### Class : CsvParser
 **Fichier** : `src\Catamailer.Migrator\Parsing\CsvParser.cs`
 **Rôle** : Implémentation du parseur CSV spécifique au format historique de Catamailer.
@@ -1339,6 +1350,16 @@ Généré le : 2026-09-24 16:30
   - *Appelle* ➡️ `CsvParser.ParseLines()`
 - `void ParseLines_ShouldIgnoreLinesWithLessThanTwoColumns()`
   - *Appelle* ➡️ `CsvParser.ParseLines()`
+
+### Class : RuleMapperTests
+**Fichier** : `tests\Catamailer.Migrator.Tests\RuleMapperTests.cs`
+**Membres et Invocations :**
+- `void Map_ShouldGroupRecordsBySameCategory_IntoSingleDictionaryRule()`
+  - *Appelle* ➡️ `RuleMapper.Map()`
+- `void Map_ShouldDispatchKeywordsToCorrectFields()`
+  - *Appelle* ➡️ `RuleMapper.Map()`
+- `void Map_ShouldIgnoreRecordsWithUnknownFields()`
+  - *Appelle* ➡️ `RuleMapper.Map()`
 
 ## Projet : Tools.AiDocGenerator.Tests
 ### Class : CatamailerTocBuilderTests
