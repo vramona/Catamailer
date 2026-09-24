@@ -11,6 +11,7 @@
 //         - 2026-09-17 : Ajout de RenameCategory pour J4-S4-T3 (Phase Verte).
 //         - 2026-09-23 : Ajout de IDisposable pour libération explicite COM (J4-S4-T7 - Phase Orange).
 //         - 2026-09-23 : Ajout des signatures pour les actions physiques (J5-S2-T1 - Phase Rouge).
+//         - 2026-09-24 : Ajout de la lecture de l'arborescence des dossiers (J5-S2-T2 - Phase Rouge).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -99,6 +100,16 @@ namespace Catamailer.Infrastructure
         /// <param name="maxItems">Nombre maximal d'éléments à retourner.</param>
         /// <returns>Une liste d'EntryIDs d'e-mails.</returns>
         IEnumerable<string> GetNextUnprocessedMailEntryIds(string? lastEntryId, int maxItems);
+
+        // ====================================================================================
+        // LECTURE DE L'ENVIRONNEMENT ET ARBORESCENCE (J5-S2-T2)
+        // ====================================================================================
+
+        /// <summary>
+        /// Récupère l'arborescence complète des chemins de dossiers disponibles sous la Boîte de réception.
+        /// </summary>
+        /// <returns>Une liste de chemins de dossiers (ex: "Boîte de réception/Projets/2026").</returns>
+        IEnumerable<string> GetAvailableFolderPaths();
 
         // ====================================================================================
         // ACTIONS PHYSIQUES D'EXÉCUTION (J5-S2-T1)

@@ -12,6 +12,8 @@
 //         - 2026-09-23 : Remplacement des boucles en O(N) par l'indexeur string en O(1) pour éradiquer la saturation RPC (J4-S4-T7 - Phase Orange).
 //         - 2026-09-23 : Ajout des bouchons pour les actions physiques (J5-S2-T1 - Phase Rouge).
 //         - 2026-09-23 : Implémentation des actions physiques via Late Binding COM (J5-S2-T1 - Phase Verte).
+//         - 2026-09-24 : Ajout du bouchon pour l'arborescence des dossiers (J5-S2-T2 - Phase Rouge).
+//         - 2026-09-24 : Implémentation de GetAvailableFolderPaths récursive à la racine (J5-S2-T2 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -229,6 +231,53 @@ namespace Catamailer.Infrastructure
         }
 
         // ====================================================================================
+        // LECTURE DE L'ENVIRONNEMENT ET ARBORESCENCE (J5-S2-T2)
+        // ====================================================================================
+
+        /// <inheritdoc />
+        public IEnumerable<string> GetAvailableFolderPaths()
+        {
+            var folderPaths = new List<string>();
+            try
+            {
+                // On récupère la boîte de réception (Inbox = 6)
+                dynamic inbox = _application.Session.GetDefaultFolder(6);
+                
+                // On remonte au compte principal (la racine du fichier PST/OST)
+                dynamic rootStore = inbox.Parent;
+                
+                // On lance le parcours récursif à partir des dossiers de la racine
+                TraverseFolders(rootStore.Folders, "", folderPaths);
+            }
+            catch
+            {
+                // En cas d'erreur COM (ex: compte inaccessible), on retourne une liste vide
+            }
+            return folderPaths;
+        }
+
+        private void TraverseFolders(dynamic foldersCollection, string currentPath, List<string> folderPaths)
+        {
+            int count = foldersCollection.Count;
+            // On privilégie for (1..count) en Late Binding pour éviter les crashs de l'énumérateur COM
+            for (int i = 1; i <= count; i++)
+            {
+                dynamic folder = foldersCollection[i];
+                
+                string folderName = folder.Name;
+                string fullPath = string.IsNullOrEmpty(currentPath) ? folderName : $"{currentPath}/{folderName}";
+                
+                folderPaths.Add(fullPath);
+
+                // Appel récursif si le dossier contient des sous-dossiers
+                if (folder.Folders.Count > 0)
+                {
+                    TraverseFolders(folder.Folders, fullPath, folderPaths);
+                }
+            }
+        }
+
+        // ====================================================================================
         // ACTIONS PHYSIQUES D'EXÉCUTION (J5-S2-T1)
         // ====================================================================================
 
@@ -237,11 +286,54 @@ namespace Catamailer.Infrastructure
         {
             var item = GetItemFromId(entryId);
             
-            // TODO J5-S2-T2 : Remplacer ce bloc temporaire par le resolveur complet de chemin
-            // En attendant le Step 2 (Lecture de l'arborescence), on fallback sur la Boîte de réception
-            dynamic destinationFolder = _application.Session.GetDefaultFolder(6); // olFolderInbox
+            // On résout le chemin complet du dossier depuis la racine
+            dynamic rootStore = _application.Session.GetDefaultFolder(6).Parent;
+            dynamic? targetFolder = ResolveFolderFromPath(rootStore.Folders, folderPath);
             
-            item.Move(destinationFolder);
+            if (targetFolder != null)
+            {
+                item.Move(targetFolder);
+            }
+            else
+            {
+                // Fallback sur la Boîte de réception si le dossier cible est introuvable
+                dynamic fallbackFolder = _application.Session.GetDefaultFolder(6);
+                item.Move(fallbackFolder);
+            }
+        }
+        
+        /// <summary>
+        /// Révout une instance de MAPIFolder à partir de son chemin (ex: "Boîte de réception/Projets/2026")
+        /// </summary>
+        private dynamic? ResolveFolderFromPath(dynamic rootFolders, string path)
+        {
+            var parts = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length == 0) return null;
+
+            dynamic currentCollection = rootFolders;
+            dynamic? currentFolder = null;
+
+            foreach (var part in parts)
+            {
+                bool found = false;
+                int count = currentCollection.Count;
+                
+                for (int i = 1; i <= count; i++)
+                {
+                    dynamic f = currentCollection[i];
+                    if (string.Equals(f.Name, part, StringComparison.OrdinalIgnoreCase))
+                    {
+                        currentFolder = f;
+                        currentCollection = f.Folders;
+                        found = true;
+                        break;
+                    }
+                }
+                
+                if (!found) return null; // Un segment du chemin n'existe pas
+            }
+
+            return currentFolder;
         }
 
         /// <inheritdoc />

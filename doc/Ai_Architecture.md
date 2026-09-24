@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-23 18:42
+Généré le : 2026-09-24 13:58
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -503,8 +503,11 @@ Généré le : 2026-09-23 18:42
   - *Appelle* ➡️ `OutlookApplicationWrapper.MapHexToOlCategoryColor()`
 - `void RenameCategory(string oldName, string newName)`
 - `void RemoveCategory(string name)`
+- `IEnumerable<string> GetAvailableFolderPaths()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.TraverseFolders()`
 - `void MoveToFolder(string entryId, string folderPath)`
   - *Appelle* ➡️ `OutlookApplicationWrapper.GetItemFromId()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.ResolveFolderFromPath()`
 - `void MarkAsRead(string entryId)`
   - *Appelle* ➡️ `OutlookApplicationWrapper.GetItemFromId()`
 - `void FlagForFollowUp(string entryId)`
@@ -1161,8 +1164,10 @@ Généré le : 2026-09-23 18:42
 
 ### Class : OutlookActionsIntegrationTests
 **Fichier** : `tests\Catamailer.Infrastructure.IntegrationTests\OutlookActionsIntegrationTests.cs`
-**Rôle** : Classe de tests d'intégration pour les actions physiques COM. En Phase Rouge, ces tests s'attendent à ce que l'appel N'ÉCHOUE PAS avec une NotImplementedException.
+**Rôle** : Classe de tests d'intégration pour les actions physiques COM et la lecture de l'arborescence.
 **Membres et Invocations :**
+- `void GetAvailableFolderPaths_ShouldReturnNonEmptyList()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.GetAvailableFolderPaths()`
 - `void MoveToFolder_ShouldNotThrowNotImplementedException()`
   - *Appelle* ➡️ `OutlookApplicationWrapper.MoveToFolder()`
 - `void MarkAsRead_ShouldNotThrowNotImplementedException()`

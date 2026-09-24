@@ -3,17 +3,18 @@
 //     Date de création : 2026-09-23
 //     Historique :
 //         - 2026-09-23 : Création initiale des tests d'intégration des actions (J5-S2-T1 - Phase Rouge).
+//         - 2026-09-24 : Ajout des tests pour l'arborescence des dossiers (J5-S2-T2 - Phase Rouge).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
 using System;
+using System.Linq;
 using Xunit;
 
 namespace Catamailer.Infrastructure.IntegrationTests
 {
     /// <summary>
-    /// Classe de tests d'intégration pour les actions physiques COM. 
-    /// En Phase Rouge, ces tests s'attendent à ce que l'appel N'ÉCHOUE PAS avec une NotImplementedException.
+    /// Classe de tests d'intégration pour les actions physiques COM et la lecture de l'arborescence.
     /// </summary>
     public class OutlookActionsIntegrationTests : IDisposable
     {
@@ -22,6 +23,17 @@ namespace Catamailer.Infrastructure.IntegrationTests
         public OutlookActionsIntegrationTests()
         {
             _wrapper = new OutlookApplicationWrapper();
+        }
+
+        [Fact]
+        public void GetAvailableFolderPaths_ShouldReturnNonEmptyList()
+        {
+            // Act
+            var result = _wrapper.GetAvailableFolderPaths();
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.NotEmpty(result);
         }
 
         [Fact]

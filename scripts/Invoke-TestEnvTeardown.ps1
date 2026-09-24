@@ -16,7 +16,7 @@ function Stop-OutlookGracefully {
         [System.GC]::Collect();
         [System.GC]::WaitForPendingFinalizers();
         
-        $timeout = 10;
+        $timeout = 120;
         while ((Get-Process -Name "outlook" -ErrorAction SilentlyContinue) -and $timeout -gt 0) {
             Start-Sleep -Seconds 1;
             $timeout--;
