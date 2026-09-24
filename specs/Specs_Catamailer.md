@@ -23,14 +23,14 @@ L'analyse d'un e-mail suit un flux séquentiel strict.
     *   *Règle :* Dès qu'une correspondance est trouvée, le système déduit le Nœud de Catégorie principal.
 *   **Étape 2 - Exécution :**
     *   À partir de la catégorie déduite, le système évalue un arbre de conditions composite (Opérateurs ET/OU infinis, correspondances exactes, partielles ou Regex).
-    *   *Règle :* Si l'arbre est validé, le système exécute une action finale. Les actions supportées sont :
+    *   *Règle :* Si l'arbre est validé, le système exécute **une liste d'actions séquentielles**. Les actions supportées sont :
         *   **Déplacer vers un dossier**
         *   **Marquer comme lu**
         *   **Transférer le message** (Nécessite la définition d'un ou plusieurs destinataires).
         *   **Définir l'importance** (Haute, Normale, Faible).
         *   **Ajouter un rappel** (Date/Heure spécifiques ou relance standardisée).
         *   **Assurer un suivi (Aujourd'hui)** (Drapeau de tâche Outlook).
-
+        *   **Insérer une signature HTML** lors d'un transfert ou d'une réponse.
 ### 3. Prise de Notes "Inbox", Tâches et Agenda (Module PKM)
 Catamailer intègre un module de productivité croisant les notes, l'agenda et les communications.
 *   **Saisie au kilomètre (Outliner) :** Interface de notes rapides. Chaque ligne tapée génère un bloc indépendant possédant un horodatage de création/modification. Le rendu visuel est polymorphe (texte, case à cocher, etc.).

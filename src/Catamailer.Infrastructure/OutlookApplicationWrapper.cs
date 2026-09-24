@@ -14,11 +14,13 @@
 //         - 2026-09-23 : Implémentation des actions physiques via Late Binding COM (J5-S2-T1 - Phase Verte).
 //         - 2026-09-24 : Ajout du bouchon pour l'arborescence des dossiers (J5-S2-T2 - Phase Rouge).
 //         - 2026-09-24 : Implémentation de GetAvailableFolderPaths récursive à la racine (J5-S2-T2 - Phase Verte).
+//         - 2026-09-24 : Implémentation de la lecture des fichiers de signature HTML (J5-S2-T3 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.InteropServices;
 using Catamailer.Domain;
 
@@ -394,10 +396,29 @@ namespace Catamailer.Infrastructure
         /// <inheritdoc />
         public void InsertHtmlSignature(string entryId, string signatureName)
         {
+            string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            string signatureDir = Path.Combine(appDataPath, "Microsoft", "Signatures");
+            string signatureFilePath = Path.Combine(signatureDir, $"{signatureName}.htm");
+
+            if (!File.Exists(signatureFilePath))
+            {
+                throw new FileNotFoundException($"Signature introuvable sur le disque : {signatureFilePath}");
+            }
+
+            string htmlContent = File.ReadAllText(signatureFilePath);
+
+            // Outlook stocke les images d'une signature dans un sous-dossier "{NomSignature}_files".
+            // Il faut convertir les chemins relatifs en chemins absolus pour l'injection.
+            string imageFolderRelative = $"{signatureName}_files/";
+            string imageFolderRelativeEncoded = $"{signatureName.Replace(" ", "%20")}_files/";
+            string imageFolderAbsolute = Path.Combine(signatureDir, $"{signatureName}_files/");
+
+            htmlContent = htmlContent.Replace(imageFolderRelative, imageFolderAbsolute);
+            htmlContent = htmlContent.Replace(imageFolderRelativeEncoded, imageFolderAbsolute);
+
+            // On récupère le mail seulement si le fichier de signature a bien été trouvé.
             var item = GetItemFromId(entryId);
-            // TODO J5-S2-T3 : Implémenter la lecture du fichier physique de signature depuis %APPDATA%
-            // Injection basique en attendant l'implémentation de la lecture de fichier
-            item.HTMLBody = item.HTMLBody + $"<br/><br/>[Signature: {signatureName}]";
+            item.HTMLBody = item.HTMLBody + "<br/><br/>" + htmlContent;
             item.Save();
         }
 

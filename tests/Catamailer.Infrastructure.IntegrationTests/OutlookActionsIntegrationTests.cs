@@ -4,17 +4,18 @@
 //     Historique :
 //         - 2026-09-23 : Création initiale des tests d'intégration des actions (J5-S2-T1 - Phase Rouge).
 //         - 2026-09-24 : Ajout des tests pour l'arborescence des dossiers (J5-S2-T2 - Phase Rouge).
+//         - 2026-09-24 : Ajout du test d'erreur pour la lecture de signature (J5-S2-T3 - Phase Rouge).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
 using System;
-using System.Linq;
+using System.IO;
 using Xunit;
 
 namespace Catamailer.Infrastructure.IntegrationTests
 {
     /// <summary>
-    /// Classe de tests d'intégration pour les actions physiques COM et la lecture de l'arborescence.
+    /// Classe de tests d'intégration pour les actions physiques COM. 
     /// </summary>
     public class OutlookActionsIntegrationTests : IDisposable
     {
@@ -28,10 +29,7 @@ namespace Catamailer.Infrastructure.IntegrationTests
         [Fact]
         public void GetAvailableFolderPaths_ShouldReturnNonEmptyList()
         {
-            // Act
             var result = _wrapper.GetAvailableFolderPaths();
-
-            // Assert
             Assert.NotNull(result);
             Assert.NotEmpty(result);
         }
@@ -90,6 +88,14 @@ namespace Catamailer.Infrastructure.IntegrationTests
         {
             var exception = Record.Exception(() => _wrapper.InsertHtmlSignature("dummy_id", "Signature_Default"));
             Assert.IsNotType<NotImplementedException>(exception);
+        }
+
+        [Fact]
+        public void InsertHtmlSignature_ShouldThrowFileNotFoundException_WhenSignatureDoesNotExist()
+        {
+            // Act & Assert
+            // L'appel doit échouer avec FileNotFoundException car le fichier n'existe pas physiquement.
+            Assert.Throws<FileNotFoundException>(() => _wrapper.InsertHtmlSignature("dummy_id", "Signature_Inexistante_12345"));
         }
 
         public void Dispose()

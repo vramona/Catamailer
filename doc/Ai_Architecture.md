@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-24 13:58
+Généré le : 2026-09-24 14:23
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -1164,7 +1164,7 @@ Généré le : 2026-09-24 13:58
 
 ### Class : OutlookActionsIntegrationTests
 **Fichier** : `tests\Catamailer.Infrastructure.IntegrationTests\OutlookActionsIntegrationTests.cs`
-**Rôle** : Classe de tests d'intégration pour les actions physiques COM et la lecture de l'arborescence.
+**Rôle** : Classe de tests d'intégration pour les actions physiques COM.
 **Membres et Invocations :**
 - `void GetAvailableFolderPaths_ShouldReturnNonEmptyList()`
   - *Appelle* ➡️ `OutlookApplicationWrapper.GetAvailableFolderPaths()`
@@ -1183,6 +1183,8 @@ Généré le : 2026-09-24 13:58
 - `void FlagToday_ShouldNotThrowNotImplementedException()`
   - *Appelle* ➡️ `OutlookApplicationWrapper.FlagToday()`
 - `void InsertHtmlSignature_ShouldNotThrowNotImplementedException()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.InsertHtmlSignature()`
+- `void InsertHtmlSignature_ShouldThrowFileNotFoundException_WhenSignatureDoesNotExist()`
   - *Appelle* ➡️ `OutlookApplicationWrapper.InsertHtmlSignature()`
 - `void Dispose()`
   - *Appelle* ➡️ `OutlookApplicationWrapper.Dispose()`
