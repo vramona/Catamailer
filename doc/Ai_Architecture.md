@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-23 17:38
+Généré le : 2026-09-24 14:45
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -229,7 +229,7 @@ Généré le : 2026-09-23 17:38
 **Membres et Invocations :**
 - `string RuleName { get; set; }` : Obtient ou définit le nom descriptif de la règle à sauvegarder.
 - `RuleNode RootNode { get; }` : Obtient le nœud racine de l'arbre des conditions.
-- `RuleAction? FinalAction { get; set; }` : Obtient l'action finale à exécuter si l'arbre est validé.
+- `ObservableCollection<RuleAction> Actions { get; }` : Obtient la liste observable des actions séquentielles à exécuter.
 - `IEnumerable<CategoryNode> AvailableCategories { get; set; }` : Obtient la liste brute des catégories disponibles.
 - `IEnumerable<CategoryOption> FlatCategories { get; set; }` : Obtient la liste aplatie et indentée des catégories prête pour l'affichage UI.
 - `Task InitializeAsync()` : Charge les données de référence nécessaires à l'IHM (catégories) et construit l'arborescence visuelle.
@@ -246,7 +246,10 @@ Généré le : 2026-09-23 17:38
   - *Appelle* ➡️ `RuleNode.RemoveCriterion()`
 - `void AddChildNode(RuleNode targetNode, RuleNode childNode)` : Ajoute un sous-nœud à un nœud spécifique.
   - *Appelle* ➡️ `RuleNode.AddChildNode()`
-- `void SetAction(RuleAction action)` : Définit l'action finale de la règle.
+- `void AddAction(RuleAction action)` : Ajoute une nouvelle action à la fin de la liste d'exécution.
+- `void UpdateAction(RuleAction oldAction, RuleAction newAction)` : Met à jour une action existante dans la liste.
+- `void RemoveAction(RuleAction action)` : Supprime une action de la liste d'exécution.
+- `void SetAction(RuleAction action)` : Réinitialise complètement la liste des actions. Utilisé principalement pour la rétrocompatibilité ou le ré-amorçage.
 - `Task SaveRuleAsync()` : Sauvegarde la règle en base de données si elle est correctement configurée.
   - *Appelle* ➡️ `IRuleRepository.AddExecutionRuleAsync()`
 
@@ -316,7 +319,7 @@ Généré le : 2026-09-23 17:38
 **Membres et Invocations :**
 - `string Name { get; }` : Obtient le nom descriptif de la règle.
 - `RuleNode RootNode { get; }` : Obtient le nœud racine de l'arbre des conditions d'exécution.
-- `RuleAction Action { get; }` : Obtient l'action finale à exécuter si l'arbre est validé.
+- `IReadOnlyList<RuleAction> Actions { get; }` : Obtient la liste ordonnée des actions à exécuter si l'arbre est validé.
 
 ### Interface : IAppSettingsRepository
 **Fichier** : `src\Catamailer.Domain\IAppSettingsRepository.cs`
@@ -388,7 +391,7 @@ Généré le : 2026-09-23 17:38
 **Rôle** : Représente l'action finale à exécuter si un arbre de conditions est validé.
 **Membres et Invocations :**
 - `ActionType Type { get; }` : Obtient le type de l'action à exécuter.
-- `string Parameter { get; }` : Obtient le paramètre associé à l'action (par exemple, le nom du dossier cible).
+- `string Parameter { get; }` : Obtient le paramètre associé à l'action. Selon le type d'action, ce paramètre peut représenter un dossier cible, une adresse de transfert, un niveau d'importance ou une date de rappel.
 
 ### Class : RuleCriterion
 **Fichier** : `src\Catamailer.Domain\RuleCriterion.cs`
@@ -463,6 +466,7 @@ Généré le : 2026-09-23 17:38
 - `DbSet<CategoryNode> Categories { get; set; }` : Obtient ou définit la collection des nœuds de catégories.
 - `DbSet<SystemState> SystemStates { get; set; }` : Obtient ou définit la collection des états systèmes.
 - `DbSet<AppSetting> AppSettings { get; set; }` : Obtient ou définit la collection des paramètres d'application.
+- `DbSet<ExecutionRule> ExecutionRules { get; set; }` : Obtient ou définit la collection des règles d'exécution.
 
 ### Class : CategoryRepository
 **Fichier** : `src\Catamailer.Infrastructure\CategoryRepository.cs`
@@ -501,6 +505,25 @@ Généré le : 2026-09-23 17:38
   - *Appelle* ➡️ `OutlookApplicationWrapper.MapHexToOlCategoryColor()`
 - `void RenameCategory(string oldName, string newName)`
 - `void RemoveCategory(string name)`
+- `IEnumerable<string> GetAvailableFolderPaths()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.TraverseFolders()`
+- `void MoveToFolder(string entryId, string folderPath)`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.GetItemFromId()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.ResolveFolderFromPath()`
+- `void MarkAsRead(string entryId)`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.GetItemFromId()`
+- `void FlagForFollowUp(string entryId)`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.GetItemFromId()`
+- `void Forward(string entryId, string recipients)`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.GetItemFromId()`
+- `void SetImportance(string entryId, string importanceLevel)`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.GetItemFromId()`
+- `void AddReminder(string entryId, DateTime reminderTime)`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.GetItemFromId()`
+- `void FlagToday(string entryId)`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.GetItemFromId()`
+- `void InsertHtmlSignature(string entryId, string signatureName)`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.GetItemFromId()`
 - `MailMetadata GetMailMetadata(string entryId)`
 - `string? GetSelectedEntryId()`
 - `void ReplaceCategoryOnAllItems(string oldCategoryName, string newCategoryName)`
@@ -1038,15 +1061,21 @@ Généré le : 2026-09-23 17:38
   - *Appelle* ➡️ `RuleBuilderViewModel.RemoveCriterion()`
 - `void AddChildNode_ShouldAddNodeToTargetNode()`
   - *Appelle* ➡️ `RuleBuilderViewModel.AddChildNode()`
-- `void SetAction_ShouldUpdateFinalActionProperty()`
+- `void SetAction_ShouldReplaceActionsList()`
+  - *Appelle* ➡️ `RuleBuilderViewModel.AddAction()`
   - *Appelle* ➡️ `RuleBuilderViewModel.SetAction()`
+- `void AddAction_ShouldAppendToList()`
+  - *Appelle* ➡️ `RuleBuilderViewModel.AddAction()`
 - `void SetOperator_ShouldUpdateTargetNodeOperator()`
   - *Appelle* ➡️ `RuleBuilderViewModel.SetOperator()`
 - `void UpdateCriterion_ShouldReplaceCriterionInTargetNode()`
   - *Appelle* ➡️ `RuleBuilderViewModel.AddCriterion()`
   - *Appelle* ➡️ `RuleBuilderViewModel.UpdateCriterion()`
-- `Task SaveRuleAsync_ShouldCallRepository_WhenNameAndActionAreSet()`
-  - *Appelle* ➡️ `RuleBuilderViewModel.SetAction()`
+- `Task SaveRuleAsync_ShouldConstructFinalActions_WhenPropertiesAreSet()`
+  - *Appelle* ➡️ `RuleBuilderViewModel.AddAction()`
+  - *Appelle* ➡️ `RuleBuilderViewModel.SaveRuleAsync()`
+- `Task SaveRuleAsync_ShouldCallRepository_WhenNameAndActionsAreSet()`
+  - *Appelle* ➡️ `RuleBuilderViewModel.AddAction()`
   - *Appelle* ➡️ `RuleBuilderViewModel.SaveRuleAsync()`
 
 ### Class : ShadowModeDashboardViewModelTests
@@ -1088,6 +1117,7 @@ Généré le : 2026-09-23 17:38
 **Membres et Invocations :**
 - `void DictionaryRule_Creation_ShouldSetProperties()`
 - `void RuleAction_Creation_ShouldSetActionTypeAndParameter()`
+- `void RuleAction_SupportsNewActionTypes_FromJalon5()`
 - `void RuleCriterion_Creation_ShouldSetConditionFields()`
 - `void RuleCriterion_WithCategoryField_AndValidOperator_ShouldBeValid()`
 - `void RuleCriterion_WithInvalidCombinations_ShouldThrowArgumentException()`
@@ -1099,7 +1129,7 @@ Généré le : 2026-09-23 17:38
 - `void RuleNode_UpdateCriterion_ShouldReplaceOldCriterionWithNewOne()`
   - *Appelle* ➡️ `RuleNode.AddCriterion()`
   - *Appelle* ➡️ `RuleNode.UpdateCriterion()`
-- `void ExecutionRule_Creation_ShouldSetProperties()`
+- `void ExecutionRule_Creation_ShouldSetPropertiesWithMultipleActions()`
 
 ### Class : SyncModelsTests
 **Fichier** : `tests\Catamailer.Domain.Tests\SyncModelsTests.cs`
@@ -1135,6 +1165,33 @@ Généré le : 2026-09-23 17:38
   - *Appelle* ➡️ `CategorySyncViewModel.InitializeAsync()`
   - *Appelle* ➡️ `CategorySyncViewModel.ApplyResolutionsAsync()`
 - `void Dispose()`
+
+### Class : OutlookActionsIntegrationTests
+**Fichier** : `tests\Catamailer.Infrastructure.IntegrationTests\OutlookActionsIntegrationTests.cs`
+**Rôle** : Classe de tests d'intégration pour les actions physiques COM.
+**Membres et Invocations :**
+- `void GetAvailableFolderPaths_ShouldReturnNonEmptyList()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.GetAvailableFolderPaths()`
+- `void MoveToFolder_ShouldNotThrowNotImplementedException()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.MoveToFolder()`
+- `void MarkAsRead_ShouldNotThrowNotImplementedException()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.MarkAsRead()`
+- `void FlagForFollowUp_ShouldNotThrowNotImplementedException()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.FlagForFollowUp()`
+- `void Forward_ShouldNotThrowNotImplementedException()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.Forward()`
+- `void SetImportance_ShouldNotThrowNotImplementedException()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.SetImportance()`
+- `void AddReminder_ShouldNotThrowNotImplementedException()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.AddReminder()`
+- `void FlagToday_ShouldNotThrowNotImplementedException()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.FlagToday()`
+- `void InsertHtmlSignature_ShouldNotThrowNotImplementedException()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.InsertHtmlSignature()`
+- `void InsertHtmlSignature_ShouldThrowFileNotFoundException_WhenSignatureDoesNotExist()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.InsertHtmlSignature()`
+- `void Dispose()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.Dispose()`
 
 ## Projet : Catamailer.Infrastructure.Tests
 ### Class : CatamailerDbContextTests

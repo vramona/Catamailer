@@ -4,8 +4,11 @@
 // 2026-09-11 : Ajout des tests pour la mutation de RuleNode (J3-S3-T3-ST2).
 // 2026-09-11 : Ajout des tests pour ExecutionRule et MailField.Category (J3-S3-T3-ST2).
 // 2026-09-11 : Ajout des tests de validation croisée (Guard clauses) pour RuleCriterion (J3-S3-T3-ST2 - Phase Rouge).
+// 2026-09-23 : Ajout des tests pour les nouvelles ActionType du Jalon 5 (J5-S1-T1 - Phase Rouge).
+// 2026-09-24 : Remplacement de l'action unique par une collection d'actions dans ExecutionRule (J5-S3-T1 - Phase Rouge).
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
@@ -44,6 +47,25 @@ namespace Catamailer.Domain.Tests
             // Assert
             Assert.Equal(ActionType.MoveToFolder, action.Type);
             Assert.Equal("Comptabilité", action.Parameter);
+        }
+
+        [Fact]
+        public void RuleAction_SupportsNewActionTypes_FromJalon5()
+        {
+            // Arrange & Act
+            // Ces instanciations doivent provoquer une erreur de compilation (Phase Rouge) car les membres n'existent pas encore dans l'enum ActionType.
+            var forwardAction = new RuleAction(ActionType.Forward, "boss@company.com");
+            var importanceAction = new RuleAction(ActionType.SetImportance, "High");
+            var reminderAction = new RuleAction(ActionType.AddReminder, "2026-10-01T09:00:00");
+            var flagTodayAction = new RuleAction(ActionType.FlagToday, string.Empty);
+            var signatureAction = new RuleAction(ActionType.InsertHtmlSignature, "Signature_Commerciale");
+
+            // Assert
+            Assert.Equal(ActionType.Forward, forwardAction.Type);
+            Assert.Equal(ActionType.SetImportance, importanceAction.Type);
+            Assert.Equal(ActionType.AddReminder, reminderAction.Type);
+            Assert.Equal(ActionType.FlagToday, flagTodayAction.Type);
+            Assert.Equal(ActionType.InsertHtmlSignature, signatureAction.Type);
         }
 
         [Fact]
@@ -139,19 +161,23 @@ namespace Catamailer.Domain.Tests
         }
 
         [Fact]
-        public void ExecutionRule_Creation_ShouldSetProperties()
+        public void ExecutionRule_Creation_ShouldSetPropertiesWithMultipleActions()
         {
             // Arrange
             var rootNode = new RuleNode(LogicalOperator.And);
-            var action = new RuleAction(ActionType.MoveToFolder, "Archives");
+            var action1 = new RuleAction(ActionType.SetImportance, "Haute");
+            var action2 = new RuleAction(ActionType.MoveToFolder, "Archives");
+            var actions = new List<RuleAction> { action1, action2 };
 
             // Act
-            var rule = new ExecutionRule("Règle Archivage", rootNode, action);
+            var rule = new ExecutionRule("Règle Multi-Actions", rootNode, actions);
 
             // Assert
-            Assert.Equal("Règle Archivage", rule.Name);
+            Assert.Equal("Règle Multi-Actions", rule.Name);
             Assert.Equal(rootNode, rule.RootNode);
-            Assert.Equal(action, rule.Action);
+            Assert.Equal(2, rule.Actions.Count);
+            Assert.Equal(ActionType.SetImportance, rule.Actions[0].Type);
+            Assert.Equal(ActionType.MoveToFolder, rule.Actions[1].Type);
         }
     }
 }

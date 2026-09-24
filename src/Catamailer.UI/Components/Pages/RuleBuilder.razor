@@ -19,6 +19,9 @@
 //         - 2026-09-11 : Intégration de l'affichage hiérarchique FlatCategories (J3-S3-T3-ST2).
 //         - 2026-09-15 : Remplacement du select natif par un dropdown Bootstrap (J3-S3-T3-ST2).
 //         - 2026-09-15 : Remplacement de data-bs-toggle par une gestion d'état Blazor native (J3-S3-T3-ST2 - Phase Bleue).
+//         - 2026-09-23 : Support des paramètres d'action complexes et correction du binding DateTime (J5-S1-T2 - Phase Bleue).
+//         - 2026-09-24 : Refonte pour supporter la liste d'actions multiples (J5-S3-T1 - Phase Bleue).
+//         - 2026-09-24 : Correction du parsing Razor sur les enums et lambdas onchange (J5-S3-T1 - Phase Bleue fix).
 // </auto-generated>
 // ------------------------------------------------------------------------------ -->
 
@@ -39,26 +42,56 @@
 </div>
 
 <div class="card shadow-sm border-0 bg-white mb-4">
-    <div class="card-header bg-light">
-        <h5 class="mb-0">Action Finale</h5>
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Actions Finales Séquentielles</h5>
+        <button class="btn btn-sm btn-outline-primary" @onclick="AddNewAction">+ Ajouter une action</button>
     </div>
     <div class="card-body">
-        <div class="row align-items-end">
-            <div class="col-md-4">
-                <label class="form-label fw-medium">Type d'action <span class="text-danger">*</span></label>
-                <select class="form-select" @onchange="OnActionTypeChanged">
-                    <option value="">-- Sélectionner --</option>
-                    @foreach (var actionType in Enum.GetValues(typeof(ActionType)).Cast<ActionType>())
+        @if (!ViewModel.Actions.Any())
+        {
+            <div class="text-muted fst-italic">Aucune action définie. Ajoutez une action pour sauvegarder la règle.</div>
+        }
+
+        @foreach (var action in ViewModel.Actions.ToList())
+        {
+            <div class="row align-items-end mb-3 pb-3 border-bottom">
+                <div class="col-md-4">
+                    <label class="form-label fw-medium">Type d'action <span class="text-danger">*</span></label>
+                    <select class="form-select" value="@action.Type" @onchange="@(e => UpdateActionType(action, e))">
+                        @foreach (ActionType actionType in Enum.GetValues(typeof(ActionType)))
+                        {
+                            <option value="@actionType">@actionType</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-medium">Paramètre</label>
+                    @if (action.Type == ActionType.SetImportance)
                     {
-                        <option value="@actionType" selected="@(ViewModel.FinalAction?.Type == actionType)">@actionType</option>
+                        <select class="form-select" value="@action.Parameter" @onchange="@(e => UpdateActionParameter(action, e.Value?.ToString() ?? string.Empty))">
+                            <option value="Haute">Haute</option>
+                            <option value="Normale">Normale</option>
+                            <option value="Faible">Faible</option>
+                        </select>
                     }
-                </select>
+                    else if (action.Type == ActionType.FlagToday || action.Type == ActionType.MarkAsRead)
+                    {
+                        <input type="text" class="form-control" value="N/A" disabled />
+                    }
+                    else if (action.Type == ActionType.AddReminder)
+                    {
+                        <input type="datetime-local" class="form-control" value="@GetDateString(action.Parameter)" @onchange="@(e => UpdateActionParameterDate(action, e.Value?.ToString() ?? string.Empty))" />
+                    }
+                    else
+                    {
+                        <input type="text" class="form-control" value="@action.Parameter" @onchange="@(e => UpdateActionParameter(action, e.Value?.ToString() ?? string.Empty))" placeholder="Dossier, adresses e-mails, etc." />
+                    }
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-outline-danger" @onclick="@(() => ViewModel.RemoveAction(action))">Supprimer</button>
+                </div>
             </div>
-            <div class="col-md-6">
-                <label class="form-label fw-medium">Paramètre (Dossier, Tag, etc.)</label>
-                <input type="text" class="form-control" value="@ViewModel.FinalAction?.Parameter" @onchange="OnActionParameterChanged" placeholder="Ex: Archives" />
-            </div>
-        </div>
+        }
     </div>
 </div>
 
@@ -72,21 +105,68 @@
 </div>
 
 @code {
-    private ActionType? _selectedActionType;
-    private string _actionParameter = string.Empty;
     private Dictionary<RuleCriterion, bool> _dropdownStates = new();
 
-    private bool CanSave => !string.IsNullOrWhiteSpace(ViewModel.RuleName) && ViewModel.FinalAction != null;
+    private bool CanSave => !string.IsNullOrWhiteSpace(ViewModel.RuleName) && ViewModel.Actions.Any();
+
+    private string GetDateString(string paramValue)
+    {
+        if (DateTime.TryParse(paramValue, out var date))
+        {
+            return date.ToString("yyyy-MM-ddTHH:mm");
+        }
+        return string.Empty;
+    }
 
     protected override async Task OnInitializedAsync()
     {
         await ViewModel.InitializeAsync();
+    }
 
-        if (ViewModel.FinalAction != null)
+    private void AddNewAction()
+    {
+        ViewModel.AddAction(new RuleAction(ActionType.MoveToFolder, string.Empty));
+        StateHasChanged();
+    }
+
+    private void UpdateActionType(RuleAction oldAction, ChangeEventArgs e)
+    {
+        if (Enum.TryParse<ActionType>(e.Value?.ToString(), out var newType))
         {
-            _selectedActionType = ViewModel.FinalAction.Type;
-            _actionParameter = ViewModel.FinalAction.Parameter;
+            string newParam = oldAction.Parameter;
+
+            if (newType == ActionType.SetImportance)
+            {
+                newParam = "Normale";
+            }
+            else if (newType == ActionType.FlagToday || newType == ActionType.MarkAsRead)
+            {
+                newParam = string.Empty;
+            }
+
+            var newAction = new RuleAction(newType, newParam);
+            ViewModel.UpdateAction(oldAction, newAction);
+            StateHasChanged();
         }
+    }
+
+    private void UpdateActionParameter(RuleAction oldAction, string newParameter)
+    {
+        var newAction = new RuleAction(oldAction.Type, newParameter);
+        ViewModel.UpdateAction(oldAction, newAction);
+        StateHasChanged();
+    }
+
+    private void UpdateActionParameterDate(RuleAction oldAction, string newValue)
+    {
+        string formattedValue = string.Empty;
+        if (DateTime.TryParse(newValue, out var date))
+        {
+            formattedValue = date.ToString("yyyy-MM-ddTHH:mm");
+        }
+        var newAction = new RuleAction(oldAction.Type, formattedValue);
+        ViewModel.UpdateAction(oldAction, newAction);
+        StateHasChanged();
     }
 
     private RenderFragment RenderNode(RuleNode node, bool isRoot = false) => __builder =>
@@ -95,19 +175,19 @@
             <div class="card-header d-flex justify-content-between align-items-center @(isRoot ? "bg-primary text-white" : "bg-light")">
                 <div class="d-flex align-items-center">
                     <span class="fw-bold me-2">Opérateur Logique :</span>
-                    <select class="form-select form-select-sm w-auto d-inline-block" @onchange="(e) => UpdateNodeOperator(node, e)">
-                        @foreach (var op in Enum.GetValues(typeof(LogicalOperator)).Cast<LogicalOperator>())
+                    <select class="form-select form-select-sm w-auto d-inline-block" @onchange="@(e => UpdateNodeOperator(node, e))">
+                        @foreach (LogicalOperator op in Enum.GetValues(typeof(LogicalOperator)))
                         {
                             <option value="@op" selected="@(node.Operator == op)">@op</option>
                         }
                     </select>
                 </div>
                 <div>
-                    <button class="btn btn-sm @(isRoot ? "btn-light text-primary" : "btn-outline-primary") me-2" @onclick="() => AddCriterion(node)">+ Ajouter un Critère</button>
-                    <button class="btn btn-sm @(isRoot ? "btn-light text-primary" : "btn-outline-secondary") me-2" @onclick="() => AddChildNode(node)">+ Ajouter un Groupe</button>
+                    <button class="btn btn-sm @(isRoot ? "btn-light text-primary" : "btn-outline-primary") me-2" @onclick="@(() => AddCriterion(node))">+ Ajouter un Critère</button>
+                    <button class="btn btn-sm @(isRoot ? "btn-light text-primary" : "btn-outline-secondary") me-2" @onclick="@(() => AddChildNode(node))">+ Ajouter un Groupe</button>
                     @if (!isRoot)
                     {
-                        <button class="btn btn-sm btn-danger" @onclick="() => RemoveNode(node)">Supprimer ce groupe</button>
+                        <button class="btn btn-sm btn-danger" @onclick="@(() => RemoveNode(node))">Supprimer ce groupe</button>
                     }
                 </div>
             </div>
@@ -124,15 +204,15 @@
                             <span class="badge bg-secondary px-3 py-2">Critère</span>
                         </div>
                         <div class="col-md-3">
-                            <select class="form-select form-select-sm" @onchange="(e) => UpdateCriterionField(node, crit, e)">
-                                @foreach (var field in Enum.GetValues(typeof(MailField)).Cast<MailField>())
+                            <select class="form-select form-select-sm" @onchange="@(e => UpdateCriterionField(node, crit, e))">
+                                @foreach (MailField field in Enum.GetValues(typeof(MailField)))
                                 {
                                     <option value="@field" selected="@(crit.Field == field)">@field</option>
                                 }
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <select class="form-select form-select-sm" @onchange="(e) => UpdateCriterionOperator(node, crit, e)">
+                            <select class="form-select form-select-sm" @onchange="@(e => UpdateCriterionOperator(node, crit, e))">
                                 @foreach (var matchOp in GetAvailableOperators(crit.Field))
                                 {
                                     <option value="@matchOp" selected="@(crit.Operator == matchOp)">@matchOp</option>
@@ -147,7 +227,7 @@
                                 var selectedName = selectedCat?.FullName ?? "-- Sélectionner une catégorie --";
 
                                 <div class="dropdown position-relative">
-                                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle w-100 text-start d-flex align-items-center justify-content-between bg-white" type="button" @onclick="() => ToggleDropdown(crit)">
+                                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle w-100 text-start d-flex align-items-center justify-content-between bg-white" type="button" @onclick="@(() => ToggleDropdown(crit))">
                                         <div class="d-flex align-items-center text-truncate">
                                             @if (selectedCat != null)
                                             {
@@ -160,7 +240,7 @@
                                     {
                                         <ul class="dropdown-menu w-100 shadow-sm show" style="display: block; max-height: 300px; overflow-y: auto; position: absolute; z-index: 1050; top: 100%; left: 0;">
                                             <li>
-                                                <button type="button" class="dropdown-item text-muted" @onclick="() => UpdateCategoryCriterionValue(node, crit, string.Empty)">
+                                                <button type="button" class="dropdown-item text-muted" @onclick="@(() => UpdateCategoryCriterionValue(node, crit, string.Empty))">
                                                     -- Sélectionner une catégorie --
                                                 </button>
                                             </li>
@@ -168,7 +248,7 @@
                                             {
                                                 var color = cat.Node.EffectiveColor ?? "transparent";
                                                 <li>
-                                                    <button type="button" class="dropdown-item d-flex align-items-center" @onclick="() => UpdateCategoryCriterionValue(node, crit, cat.FullName)">
+                                                    <button type="button" class="dropdown-item d-flex align-items-center" @onclick="@(() => UpdateCategoryCriterionValue(node, crit, cat.FullName))">
                                                         <span style="width: 12px; height: 12px; border-radius: 50%; display: inline-block; background-color: @color; margin-right: 8px; flex-shrink: 0; border: 1px solid #dee2e6;"></span>
                                                         <span style="white-space: pre-wrap;">@cat.DisplayName</span>
                                                     </button>
@@ -180,11 +260,11 @@
                             }
                             else
                             {
-                                <input type="text" class="form-control form-control-sm" value="@crit.Value" @onchange="(e) => UpdateCriterionValue(node, crit, e)" placeholder="Valeur" />
+                                <input type="text" class="form-control form-control-sm" value="@crit.Value" @onchange="@(e => UpdateCriterionValue(node, crit, e))" placeholder="Valeur" />
                             }
                         </div>
                         <div class="col-auto">
-                            <button class="btn btn-sm btn-outline-danger" @onclick="() => RemoveCriterion(node, crit)">X</button>
+                            <button class="btn btn-sm btn-outline-danger" @onclick="@(() => RemoveCriterion(node, crit))">X</button>
                         </div>
                     </div>
                 }
@@ -204,7 +284,7 @@
     private void ToggleDropdown(RuleCriterion crit)
     {
         var isOpen = IsDropdownOpen(crit);
-        _dropdownStates.Clear(); // Ferme les autres éventuelles listes
+        _dropdownStates.Clear();
         _dropdownStates[crit] = !isOpen;
     }
 
@@ -328,29 +408,6 @@
         ViewModel.UpdateCriterion(node, crit, newCrit);
         CloseDropdowns();
         StateHasChanged();
-    }
-
-    private void OnActionTypeChanged(ChangeEventArgs e)
-    {
-        if (Enum.TryParse<ActionType>(e.Value?.ToString(), out var actionType))
-        {
-            _selectedActionType = actionType;
-            UpdateFinalAction();
-        }
-    }
-
-    private void OnActionParameterChanged(ChangeEventArgs e)
-    {
-        _actionParameter = e.Value?.ToString() ?? string.Empty;
-        UpdateFinalAction();
-    }
-
-    private void UpdateFinalAction()
-    {
-        if (_selectedActionType.HasValue)
-        {
-            ViewModel.SetAction(new RuleAction(_selectedActionType.Value, _actionParameter));
-        }
     }
 
     private async Task SaveRuleAsync()

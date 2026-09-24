@@ -33,7 +33,8 @@ try {
     Write-Host "[Integration] Exécution des tests d'intégration..." -ForegroundColor Yellow
     
     # Exécution des tests avec le flag forçant la propriété IsTestProject=true
-    dotnet test $IntegrationProject --logger "console;verbosity=detailed" -p:ForceIntegrationTests=true
+    # Utilisation d'une verbosité minimale pour conserver l'affichage silencieux sur le succès.
+    dotnet test $IntegrationProject --logger "console;verbosity=quiet" -p:ForceIntegrationTests=true 
 
 }
 catch {

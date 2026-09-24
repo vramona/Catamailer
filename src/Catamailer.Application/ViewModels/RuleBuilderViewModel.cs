@@ -5,12 +5,15 @@
 //         - 2026-09-11 : Création initiale (J3-S3-T3-ST2).
 //         - 2026-09-11 : Ajout des méthodes de mutation et sauvegarde (J3-S3-T3-ST2).
 //         - 2026-09-11 : Ajout du flattening pour l'affichage hiérarchique UI (J3-S3-T3-ST2 - Phase Verte).
+//         - 2026-09-23 : Ajout de la gestion d'état des actions complexes (J5-S1-T2 - Phase Verte).
+//         - 2026-09-24 : Remplacement de l'action unique par une ObservableCollection d'actions (J5-S3-T1 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
 #nullable enable
 
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Catamailer.Domain;
@@ -41,9 +44,9 @@ namespace Catamailer.Application.ViewModels
         public RuleNode RootNode { get; }
 
         /// <summary>
-        /// Obtient l'action finale à exécuter si l'arbre est validé.
+        /// Obtient la liste observable des actions séquentielles à exécuter.
         /// </summary>
-        public RuleAction? FinalAction { get; private set; }
+        public ObservableCollection<RuleAction> Actions { get; } = new ObservableCollection<RuleAction>();
 
         /// <summary>
         /// Obtient la liste brute des catégories disponibles.
@@ -151,12 +154,46 @@ namespace Catamailer.Application.ViewModels
         }
 
         /// <summary>
-        /// Définit l'action finale de la règle.
+        /// Ajoute une nouvelle action à la fin de la liste d'exécution.
         /// </summary>
-        /// <param name="action">L'action à appliquer.</param>
+        /// <param name="action">L'action à ajouter.</param>
+        public void AddAction(RuleAction action)
+        {
+            Actions.Add(action);
+        }
+
+        /// <summary>
+        /// Met à jour une action existante dans la liste.
+        /// </summary>
+        /// <param name="oldAction">L'ancienne action.</param>
+        /// <param name="newAction">La nouvelle action.</param>
+        public void UpdateAction(RuleAction oldAction, RuleAction newAction)
+        {
+            int index = Actions.IndexOf(oldAction);
+            if (index >= 0)
+            {
+                Actions[index] = newAction;
+            }
+        }
+
+        /// <summary>
+        /// Supprime une action de la liste d'exécution.
+        /// </summary>
+        /// <param name="action">L'action à supprimer.</param>
+        public void RemoveAction(RuleAction action)
+        {
+            Actions.Remove(action);
+        }
+
+        /// <summary>
+        /// Réinitialise complètement la liste des actions.
+        /// Utilisé principalement pour la rétrocompatibilité ou le ré-amorçage.
+        /// </summary>
+        /// <param name="action">L'action unique de remplacement.</param>
         public void SetAction(RuleAction action)
         {
-            FinalAction = action;
+            Actions.Clear();
+            Actions.Add(action);
         }
 
         /// <summary>
@@ -164,12 +201,12 @@ namespace Catamailer.Application.ViewModels
         /// </summary>
         public async Task SaveRuleAsync()
         {
-            if (string.IsNullOrWhiteSpace(RuleName) || FinalAction == null)
+            if (string.IsNullOrWhiteSpace(RuleName) || !Actions.Any())
             {
                 return;
             }
 
-            var executionRule = new ExecutionRule(RuleName, RootNode, FinalAction);
+            var executionRule = new ExecutionRule(RuleName, RootNode, Actions.ToList());
             await _ruleRepository.AddExecutionRuleAsync(executionRule);
         }
     }

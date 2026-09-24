@@ -15,12 +15,12 @@
 //         - 2026-09-23 : Optimisation des performances via l'utilisation des opérations de lots (AddRangeAsync, UpdateRangeAsync) (J4-S4-T7 - Phase Orange).
 //         - 2026-09-23 : Ajout de traces Stopwatch unitaires pour mesurer le bottleneck RPC COM (J4-S4-T7).
 //         - 2026-09-23 : Ajout de la liste DeletedInCatamailerOptions et résolution bidirectionnelle (J4-S4-T6 - Phase Bleue).
+//         - 2026-09-24 : Nettoyage des traces de performance pour respecter le silence sur succès (J5-S2-T2 - Phase Orange).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Catamailer.Application.Services;
@@ -79,14 +79,8 @@ namespace Catamailer.Application.ViewModels
 
         public async Task InitializeAsync()
         {
-            var sw = Stopwatch.StartNew();
-            Console.WriteLine("[CategorySyncViewModel] Début InitializeAsync...");
-
             var syncResult = await _syncService.AnalyzeSyncDeltasAsync(Separator);
             HasConflicts = syncResult.HasConflicts;
-
-            Console.WriteLine($"[CategorySyncViewModel] Analyse terminée. Confits: {HasConflicts}. Temps d'attente du service: {sw.ElapsedMilliseconds}ms");
-            sw.Restart();
 
             var combinedCatamailerList = syncResult.Deltas
                 .Where(d => d.Status == DeltaStatus.MissingInCatamailer || 
@@ -116,9 +110,6 @@ namespace Catamailer.Application.ViewModels
                 opt.IsFolder = parentPaths.Contains(opt.Delta.CategoryName);
             }
 
-            Console.WriteLine($"[CategorySyncViewModel] Résolution de l'arbre Catamailer et IsFolder terminée. {MissingInCatamailerOptions.Count} éléments. ({sw.ElapsedMilliseconds}ms)");
-            sw.Restart();
-
             MissingInOutlookOptions = syncResult.GetMissingInOutlook()
                 .OrderBy(d => d.CategoryName, StringComparer.OrdinalIgnoreCase)
                 .Select(d => new SyncDeltaOption(d, Separator))
@@ -141,16 +132,10 @@ namespace Catamailer.Application.ViewModels
                     IsSelected = false // Non sélectionné par défaut comme demandé
                 })
                 .ToList();
-
-            sw.Stop();
-            Console.WriteLine($"[CategorySyncViewModel] Initialisation complète terminée. ({sw.ElapsedMilliseconds}ms supplémentaires)");
         }
 
         public async Task ApplyResolutionsAsync()
         {
-            var sw = Stopwatch.StartNew();
-            Console.WriteLine("[CategorySyncViewModel] Début ApplyResolutionsAsync...");
-
             var existingNodes = (await _categoryRepository.GetAllAsync(includeDeleted: true) ?? Enumerable.Empty<CategoryNode>()).ToList();
             var existingMapByFullName = existingNodes.ToDictionary(
                 n => n.GetFullName(Separator), 
@@ -212,7 +197,6 @@ namespace Catamailer.Application.ViewModels
                 }
             }
 
-            var dbSw = Stopwatch.StartNew();
             if (nodesToAdd.Any())
             {
                 await _categoryRepository.AddRangeAsync(nodesToAdd);
@@ -222,32 +206,20 @@ namespace Catamailer.Application.ViewModels
             {
                 await _categoryRepository.UpdateRangeAsync(nodesToUpdate);
             }
-            Console.WriteLine($"[CategorySyncViewModel] DB Persistance SQLite (Add/Update) terminée en {dbSw.ElapsedMilliseconds}ms");
 
-            var comSw = Stopwatch.StartNew();
-            int addCount = 0;
             foreach (var option in MissingInOutlookOptions.Where(o => o.IsSelected))
             {
-                var itemSw = Stopwatch.StartNew();
                 _outlookProvider.AddCategory(option.Delta.CategoryName, option.Delta.CatamailerColor ?? "");
-                Console.WriteLine($"[CategorySyncViewModel] COM AddCategory '{option.Delta.CategoryName}' en {itemSw.ElapsedMilliseconds}ms");
-                addCount++;
             }
-            Console.WriteLine($"[CategorySyncViewModel] COM AddCategory Batch ({addCount} items) terminé en {comSw.ElapsedMilliseconds}ms");
 
             var colorNodesToAdd = new List<CategoryNode>();
             var colorNodesToUpdate = new HashSet<CategoryNode>();
 
-            comSw.Restart();
-            int updateCount = 0;
             foreach (var option in ColorMismatchOptions.Where(o => o.IsSelected))
             {
                 if (option.Direction == SyncResolutionDirection.CatamailerToOutlook)
                 {
-                    var itemSw = Stopwatch.StartNew();
                     _outlookProvider.UpdateCategoryColor(option.Delta.CategoryName, option.Delta.CatamailerColor ?? "");
-                    Console.WriteLine($"[CategorySyncViewModel] COM UpdateCategoryColor '{option.Delta.CategoryName}' en {itemSw.ElapsedMilliseconds}ms");
-                    updateCount++;
                 }
                 else
                 {
@@ -266,22 +238,16 @@ namespace Catamailer.Application.ViewModels
                     }
                 }
             }
-            Console.WriteLine($"[CategorySyncViewModel] COM UpdateCategoryColor Batch ({updateCount} items) terminé en {comSw.ElapsedMilliseconds}ms");
 
             // --- Résolution des suppressions logiques ---
             var deletedNodesToRestore = new HashSet<CategoryNode>();
-            comSw.Restart();
-            int deleteCount = 0;
             
             foreach (var option in DeletedInCatamailerOptions.Where(o => o.IsSelected))
             {
                 if (option.Direction == SyncResolutionDirection.CatamailerToOutlook)
                 {
                     // L'utilisateur donne raison à Catamailer : on supprime physiquement dans Outlook
-                    var itemSw = Stopwatch.StartNew();
                     _outlookProvider.RemoveCategory(option.Delta.CategoryName);
-                    Console.WriteLine($"[CategorySyncViewModel] COM RemoveCategory '{option.Delta.CategoryName}' en {itemSw.ElapsedMilliseconds}ms");
-                    deleteCount++;
                 }
                 else
                 {
@@ -293,7 +259,6 @@ namespace Catamailer.Application.ViewModels
                     }
                 }
             }
-            Console.WriteLine($"[CategorySyncViewModel] COM RemoveCategory Batch ({deleteCount} items) terminé en {comSw.ElapsedMilliseconds}ms");
 
             if (colorNodesToAdd.Any())
             {
@@ -305,9 +270,6 @@ namespace Catamailer.Application.ViewModels
                 var combinedUpdates = colorNodesToUpdate.Union(deletedNodesToRestore).ToList();
                 await _categoryRepository.UpdateRangeAsync(combinedUpdates);
             }
-            
-            sw.Stop();
-            Console.WriteLine($"[CategorySyncViewModel] Résolutions appliquées avec succès. ({sw.ElapsedMilliseconds}ms)");
         }
         
         public async Task RefreshAsync()

@@ -16,7 +16,7 @@ function Stop-OutlookGracefully {
         [System.GC]::Collect();
         [System.GC]::WaitForPendingFinalizers();
         
-        $timeout = 10;
+        $timeout = 120;
         while ((Get-Process -Name "outlook" -ErrorAction SilentlyContinue) -and $timeout -gt 0) {
             Start-Sleep -Seconds 1;
             $timeout--;
@@ -44,11 +44,11 @@ if (Test-Path $TargetPstPath) { Remove-Item -Path $TargetPstPath -Force }
 
 Write-Host "[Setup v1.3.1] 3/4 Création du nouveau profil PIM..." -ForegroundColor Cyan
 Start-Process "outlook.exe" -ArgumentList "/pim `"$TestProfile`""
-Start-Sleep -Seconds 10 # Attente nécessaire pour qu'Outlook génère les clés de registre et le PST vide
+Start-Sleep -Seconds 5 # Attente nécessaire pour qu'Outlook génère les clés de registre et le PST vide
 
 if (Test-Path $BasePstPath) {
-    Write-Host "[Setup v1.3.1] 4/4 Injection du PST de base..." -ForegroundColor Cyan
     Stop-OutlookGracefully
+    Write-Host "[Setup v1.3.1] 4/4 Injection du PST de base..." -ForegroundColor Cyan
     
     Copy-Item -Path $BasePstPath -Destination $TargetPstPath -Force
     Write-Host "[Setup v1.3.1] Fichier PST restauré avec succès dans $TargetPstPath. Réouverture d'Outlook..." -ForegroundColor Green

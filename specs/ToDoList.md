@@ -78,13 +78,17 @@
 
 ## Jalon 5 - Parité VBA et Actions d'Exécution - feature/j5-iso-vba
 ### Step 1 - Enrichissement Domain et Exécution - feature/j5-iso-vba_step-1-core
-- [ ] ⚪ **J5-S1-T1** - Ajout des ActionType manquantes (Transférer, Importance, Rappel, SuiviAujourdhui, DeplacerDossier, SignatureHTML) dans `Catamailer.Domain`.
-- [ ] ⚪ **J5-S1-T2** - Mise à jour de l'UI RuleBuilder pour supporter la saisie des paramètres complexes (ex: adresses e-mail pour transfert, délai en jours, dossier de destination).
+- [x] ✅ **J5-S1-T1** - Ajout des ActionType manquantes (Transférer, Importance, Rappel, SuiviAujourdhui, DeplacerDossier, SignatureHTML) dans `Catamailer.Domain`. (Validé le 23/09/2026 sur feature/j5-iso-vba_step-1-core - Commit : 37bfc82ff148806334e15d7d0aa2191ac1e61ad5) (Cpx: 2 / 2)
+- [x] ✅ **J5-S1-T2** - Mise à jour de l'UI RuleBuilder pour supporter la saisie des paramètres complexes (ex: adresses e-mail pour transfert, délai en jours, dossier de destination). (Validé le 23/09/2026 sur feature/j5-iso-vba_step-1-core - Commit : 23edee26cedadd7cc9c087868675d8cd58a1fbb9) (Cpx: 3 / 3)
 
 ### Step 2 - Implémentation Infrastructure COM - feature/j5-iso-vba_step-2-infra
-- [ ] ⚪ **J5-S2-T1** - Implémentation des actions physiques manquantes via `IOutlookApplicationWrapper`.
-- [ ] ⚪ **J5-S2-T2** - Lecture de l'arborescence des dossiers Outlook via COM (`IOutlookApplicationWrapper`).
-- [ ] ⚪ **J5-S2-T3** - Lecture des fichiers physiques de signature HTML (%APPDATA%\Microsoft\Signatures).
+- [x] ✅ **J5-S2-T1** - Implémentation des actions physiques manquantes via `IOutlookApplicationWrapper`. (Validé le 23/09/2026 sur feature/j5-iso-vba_step-2-infra - Commit : d1bd23c717c7900b9ed13e6a8677774a706ccc7e) (Cpx: 3 / 3)
+- [x] ✅ **J5-S2-T2** - Lecture de l'arborescence des dossiers Outlook via COM (`IOutlookApplicationWrapper`). (Validé le 23/09/2026 sur feature/j5-iso-vba_step-2-infra - Commit : 8413201c89739a1f87b4a196629c5c7a74e1303d)
+- [x] ✅ **J5-S2-T3** - Lecture des fichiers physiques de signature HTML (%APPDATA%\Microsoft\Signatures). (Validé le 24/09/2026 sur feature/j5-iso-vba_step-2-infra - Commit : 305c8648b243d7c87bf5d6bb00ef483d3ca9fbbd) (Cpx: 3 / 3)
+
+### Step 3 - Support des actions multiples par règle - feature/j5-iso-vba_step-3-multiple-actions
+- [x] ✅ **J5-S3-T1** - Refonte Domain & Infrastructure : Remplacement de l'action unique par `IReadOnlyList<RuleAction>` dans `ExecutionRule` et adaptation du `CatamailerDbContext` (Conversion JSON SQLite). (Validé le 24/09/2026 sur feature/j5-iso-vba_step-3-multiple-actions - Commit : 1530f8625c79d7116eb5f72e5f00b045791a8ff1) (Cpx: 5 / 5)
+- [x] ✅ **J5-S3-T2** - Refonte Application & UI : Adaptation de `RuleBuilderViewModel` et `RuleBuilder.razor` pour permettre l'ajout, la modification et la suppression d'une liste d'actions empilables. (Validé le 24/09/2026 sur feature/j5-iso-vba_step-3-multiple-actions - Commit : 1530f8625c79d7116eb5f72e5f00b045791a8ff1) (Cpx: 5 / 5)
 
 ## Jalon 6 - Outil de Migration CSV (Standalone) - feature/j6-csv-migrator
 - [ ] ⚪ **J6-S1-T1** - Console App isolée : Parser le CSV VBA, nettoyer, mapper les nouvelles actions, et générer le fichier `rules.db` SQLite.

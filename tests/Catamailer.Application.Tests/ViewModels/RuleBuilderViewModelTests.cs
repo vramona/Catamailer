@@ -9,6 +9,8 @@
 //         - 2026-09-17 : Implémentation de UpdateAsync dans FakeCategoryRepository (J4-S4-T4 - Phase Verte).
 //         - 2026-09-23 : Ajout des méthodes AddRangeAsync et UpdateRangeAsync dans FakeCategoryRepository (J4-S4-T7 - Phase Verte).
 //         - 2026-09-23 : Mise à jour de GetAllAsync dans FakeCategoryRepository pour supporter includeDeleted (J4-S4-T6 - Phase Verte).
+//         - 2026-09-23 : Ajout des tests pour la gestion de l'état des actions complexes (J5-S1-T2 - Phase Rouge).
+//         - 2026-09-24 : Refonte des tests pour supporter la liste d'actions (J5-S3-T1 - Phase Orange).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -84,7 +86,7 @@ namespace Catamailer.Application.Tests.ViewModels
             // Assert
             Assert.NotNull(viewModel.RootNode);
             Assert.Equal(LogicalOperator.And, viewModel.RootNode.Operator);
-            Assert.Null(viewModel.FinalAction);
+            Assert.Empty(viewModel.Actions);
             Assert.Empty(viewModel.RuleName);
             Assert.Empty(viewModel.AvailableCategories);
         }
@@ -157,7 +159,27 @@ namespace Catamailer.Application.Tests.ViewModels
         }
 
         [Fact]
-        public void SetAction_ShouldUpdateFinalActionProperty()
+        public void SetAction_ShouldReplaceActionsList()
+        {
+            // Arrange
+            var repo = new FakeRuleRepository();
+            var catRepo = new FakeCategoryRepository();
+            var viewModel = new RuleBuilderViewModel(repo, catRepo);
+            var action1 = new RuleAction(ActionType.MoveToFolder, "Archives");
+            var action2 = new RuleAction(ActionType.SetImportance, "Haute");
+            viewModel.AddAction(action1);
+            
+            // Act
+            viewModel.SetAction(action2);
+
+            // Assert
+            Assert.Single(viewModel.Actions);
+            Assert.Equal(ActionType.SetImportance, viewModel.Actions.First().Type);
+            Assert.Equal("Haute", viewModel.Actions.First().Parameter);
+        }
+
+        [Fact]
+        public void AddAction_ShouldAppendToList()
         {
             // Arrange
             var repo = new FakeRuleRepository();
@@ -166,12 +188,11 @@ namespace Catamailer.Application.Tests.ViewModels
             var action = new RuleAction(ActionType.MoveToFolder, "Archives");
             
             // Act
-            viewModel.SetAction(action);
+            viewModel.AddAction(action);
 
             // Assert
-            Assert.NotNull(viewModel.FinalAction);
-            Assert.Equal(ActionType.MoveToFolder, viewModel.FinalAction.Type);
-            Assert.Equal("Archives", viewModel.FinalAction.Parameter);
+            Assert.Single(viewModel.Actions);
+            Assert.Equal(ActionType.MoveToFolder, viewModel.Actions.First().Type);
         }
 
         [Fact]
@@ -210,7 +231,33 @@ namespace Catamailer.Application.Tests.ViewModels
         }
 
         [Fact]
-        public async Task SaveRuleAsync_ShouldCallRepository_WhenNameAndActionAreSet()
+        public async Task SaveRuleAsync_ShouldConstructFinalActions_WhenPropertiesAreSet()
+        {
+            // Arrange
+            var repo = new FakeRuleRepository();
+            var catRepo = new FakeCategoryRepository();
+            var viewModel = new RuleBuilderViewModel(repo, catRepo)
+            {
+                RuleName = "Test Complexe"
+            };
+            viewModel.AddAction(new RuleAction(ActionType.Forward, "boss@company.com"));
+            viewModel.AddAction(new RuleAction(ActionType.AddReminder, "2026-10-01"));
+
+            // Act
+            await viewModel.SaveRuleAsync();
+
+            // Assert
+            Assert.Single(repo.ExecutionRules);
+            var savedRule = repo.ExecutionRules.First();
+            Assert.Equal("Test Complexe", savedRule.Name);
+            Assert.Equal(2, savedRule.Actions.Count);
+            Assert.Equal(ActionType.Forward, savedRule.Actions[0].Type);
+            Assert.Equal("boss@company.com", savedRule.Actions[0].Parameter);
+            Assert.Equal(ActionType.AddReminder, savedRule.Actions[1].Type);
+        }
+
+        [Fact]
+        public async Task SaveRuleAsync_ShouldCallRepository_WhenNameAndActionsAreSet()
         {
             // Arrange
             var repo = new FakeRuleRepository();
@@ -219,7 +266,7 @@ namespace Catamailer.Application.Tests.ViewModels
             {
                 RuleName = "Test Execution Rule"
             };
-            viewModel.SetAction(new RuleAction(ActionType.MoveToFolder, "Inbox"));
+            viewModel.AddAction(new RuleAction(ActionType.MoveToFolder, "Inbox"));
 
             // Act
             await viewModel.SaveRuleAsync();
