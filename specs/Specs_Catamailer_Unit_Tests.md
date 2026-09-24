@@ -178,3 +178,7 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 - [x] ✅ `J5-S3-T2 - AddAction_ShouldAppendToList` (Validé le 24/09/2026 sur feature/j5-iso-vba_step-3-multiple-actions - Commit : 1530f8625c79d7116eb5f72e5f00b045791a8ff1)
 - [x] ✅ `J5-S3-T2 - SaveRuleAsync_ShouldConstructFinalActions_WhenPropertiesAreSet` (Validé le 24/09/2026 sur feature/j5-iso-vba_step-3-multiple-actions - Commit : 1530f8625c79d7116eb5f72e5f00b045791a8ff1)
 
+## Jalon 6 - Outil de Migration CSV (Standalone) - feature/j6-csv-migrator
+### 🟢 J6-S1 : Parsing et Mapping (Outil de Migration CSV)
+- [x] ✅ `J6-S1-T1 - GetAvailableSignatures_ShouldReturnListWithoutThrowing` (Validé le 24/09/2026 sur feature/j6-csv-migrator_step-1-core - Commit : <COMMIT_HASH>)
+- [x] ✅ `J6-S1-T1 - InitializeAsync_ShouldLoadCategoriesAndExternalResources` (Validé le 24/09/2026 sur feature/j6-csv-migrator_step-1-core - Commit : <COMMIT_HASH>)

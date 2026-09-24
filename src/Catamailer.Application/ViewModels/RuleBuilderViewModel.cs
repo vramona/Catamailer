@@ -7,6 +7,8 @@
 //         - 2026-09-11 : Ajout du flattening pour l'affichage hiérarchique UI (J3-S3-T3-ST2 - Phase Verte).
 //         - 2026-09-23 : Ajout de la gestion d'état des actions complexes (J5-S1-T2 - Phase Verte).
 //         - 2026-09-24 : Remplacement de l'action unique par une ObservableCollection d'actions (J5-S3-T1 - Phase Verte).
+//         - 2026-09-24 : Ajout de IExternalResourceProvider (J6-S1-T1 - Phase Rouge).
+//         - 2026-09-24 : Peuplement des listes de dossiers et signatures (J6-S1-T1 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -32,6 +34,7 @@ namespace Catamailer.Application.ViewModels
     {
         private readonly IRuleRepository _ruleRepository;
         private readonly ICategoryRepository _categoryRepository;
+        private readonly IExternalResourceProvider _externalResourceProvider;
 
         /// <summary>
         /// Obtient ou définit le nom descriptif de la règle à sauvegarder.
@@ -59,24 +62,46 @@ namespace Catamailer.Application.ViewModels
         public IEnumerable<CategoryOption> FlatCategories { get; private set; } = Enumerable.Empty<CategoryOption>();
 
         /// <summary>
+        /// Obtient la liste des chemins de dossiers Outlook disponibles.
+        /// </summary>
+        public IEnumerable<string> AvailableFolders { get; private set; } = Enumerable.Empty<string>();
+
+        /// <summary>
+        /// Obtient la liste des signatures HTML disponibles.
+        /// </summary>
+        public IEnumerable<string> AvailableSignatures { get; private set; } = Enumerable.Empty<string>();
+
+        /// <summary>
         /// Initialise une nouvelle instance de <see cref="RuleBuilderViewModel"/>.
         /// </summary>
         /// <param name="ruleRepository">Le dépôt pour sauvegarder les règles.</param>
         /// <param name="categoryRepository">Le dépôt pour récupérer les catégories de référence.</param>
-        public RuleBuilderViewModel(IRuleRepository ruleRepository, ICategoryRepository categoryRepository)
+        /// <param name="externalResourceProvider">Le fournisseur des ressources externes (dossiers, signatures).</param>
+        public RuleBuilderViewModel(
+            IRuleRepository ruleRepository, 
+            ICategoryRepository categoryRepository,
+            IExternalResourceProvider externalResourceProvider)
         {
             _ruleRepository = ruleRepository;
             _categoryRepository = categoryRepository;
+            _externalResourceProvider = externalResourceProvider;
             RootNode = new RuleNode(LogicalOperator.And);
         }
 
         /// <summary>
-        /// Charge les données de référence nécessaires à l'IHM (catégories) et construit l'arborescence visuelle.
+        /// Charge les données de référence nécessaires à l'IHM (catégories et ressources externes) et construit l'arborescence visuelle.
         /// </summary>
         public async Task InitializeAsync()
         {
-            var categories = await _categoryRepository.GetAllAsync();
-            AvailableCategories = categories.ToList();
+            var categoriesTask = _categoryRepository.GetAllAsync();
+            var foldersTask = _externalResourceProvider.GetAvailableFolderPathsAsync();
+            var signaturesTask = _externalResourceProvider.GetAvailableSignaturesAsync();
+
+            await Task.WhenAll(categoriesTask, foldersTask, signaturesTask);
+
+            AvailableCategories = categoriesTask.Result.ToList();
+            AvailableFolders = foldersTask.Result.OrderBy(f => f).ToList();
+            AvailableSignatures = signaturesTask.Result.OrderBy(s => s).ToList();
 
             var flatList = new List<CategoryOption>();
             var rootNodes = AvailableCategories.Where(c => c.Parent == null).OrderBy(c => c.Name);

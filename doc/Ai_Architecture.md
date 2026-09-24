@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-24 14:45
+Généré le : 2026-09-24 15:55
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -232,8 +232,12 @@ Généré le : 2026-09-24 14:45
 - `ObservableCollection<RuleAction> Actions { get; }` : Obtient la liste observable des actions séquentielles à exécuter.
 - `IEnumerable<CategoryNode> AvailableCategories { get; set; }` : Obtient la liste brute des catégories disponibles.
 - `IEnumerable<CategoryOption> FlatCategories { get; set; }` : Obtient la liste aplatie et indentée des catégories prête pour l'affichage UI.
-- `Task InitializeAsync()` : Charge les données de référence nécessaires à l'IHM (catégories) et construit l'arborescence visuelle.
+- `IEnumerable<string> AvailableFolders { get; set; }` : Obtient la liste des chemins de dossiers Outlook disponibles.
+- `IEnumerable<string> AvailableSignatures { get; set; }` : Obtient la liste des signatures HTML disponibles.
+- `Task InitializeAsync()` : Charge les données de référence nécessaires à l'IHM (catégories et ressources externes) et construit l'arborescence visuelle.
   - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `IExternalResourceProvider.GetAvailableFolderPathsAsync()`
+  - *Appelle* ➡️ `IExternalResourceProvider.GetAvailableSignaturesAsync()`
   - *Appelle* ➡️ `CategoryNode.GetFullName()`
   - *Appelle* ➡️ `RuleBuilderViewModel.Traverse()`
 - `void SetOperator(RuleNode targetNode, LogicalOperator newOperator)` : Modifie l'opérateur logique d'un nœud spécifique.
@@ -339,6 +343,11 @@ Généré le : 2026-09-24 14:45
 ### Interface : IDebounceService
 **Fichier** : `src\Catamailer.Domain\IDebounceService.cs`
 **Rôle** : Définit le contrat permettant de gérer la suspension temporaire des traitements d'arrière-plan (Debounce).
+**Membres et Invocations :**
+
+### Interface : IExternalResourceProvider
+**Fichier** : `src\Catamailer.Domain\IExternalResourceProvider.cs`
+**Rôle** : Fournit l'accès aux ressources externes nécessaires à la configuration des règles (ex: dossiers, signatures), de manière agnostique vis-à-vis de l'infrastructure sous-jacente (Outlook).
 **Membres et Invocations :**
 
 ### Interface : IGlobalHotkeyService
@@ -507,6 +516,7 @@ Généré le : 2026-09-24 14:45
 - `void RemoveCategory(string name)`
 - `IEnumerable<string> GetAvailableFolderPaths()`
   - *Appelle* ➡️ `OutlookApplicationWrapper.TraverseFolders()`
+- `IEnumerable<string> GetAvailableSignatures()`
 - `void MoveToFolder(string entryId, string folderPath)`
   - *Appelle* ➡️ `OutlookApplicationWrapper.GetItemFromId()`
   - *Appelle* ➡️ `OutlookApplicationWrapper.ResolveFolderFromPath()`
@@ -1052,7 +1062,7 @@ Généré le : 2026-09-24 14:45
 **Fichier** : `tests\Catamailer.Application.Tests\ViewModels\RuleBuilderViewModelTests.cs`
 **Membres et Invocations :**
 - `void Constructor_ShouldInitializeRootNode()`
-- `Task InitializeAsync_ShouldLoadCategories_FromCategoryRepository()`
+- `Task InitializeAsync_ShouldLoadCategoriesAndExternalResources()`
   - *Appelle* ➡️ `RuleBuilderViewModel.InitializeAsync()`
 - `void AddCriterion_ShouldAddCriterionToTargetNode()`
   - *Appelle* ➡️ `RuleBuilderViewModel.AddCriterion()`
