@@ -84,7 +84,7 @@
 ### Step 2 - Implémentation Infrastructure COM - feature/j5-iso-vba_step-2-infra
 - [x] ✅ **J5-S2-T1** - Implémentation des actions physiques manquantes via `IOutlookApplicationWrapper`. (Validé le 23/09/2026 sur feature/j5-iso-vba_step-2-infra - Commit : d1bd23c717c7900b9ed13e6a8677774a706ccc7e) (Cpx: 3 / 3)
 - [x] ✅ **J5-S2-T2** - Lecture de l'arborescence des dossiers Outlook via COM (`IOutlookApplicationWrapper`). (Validé le 23/09/2026 sur feature/j5-iso-vba_step-2-infra - Commit : 8413201c89739a1f87b4a196629c5c7a74e1303d)
-- [x] ✅ **J5-S2-T3** - Lecture des fichiers physiques de signature HTML (%APPDATA%\Microsoft\Signatures). (Validé le 24/09/2026 sur feature/j5-iso-vba_step-2-infra - Commit : <COMMIT_HASH>) (Cpx: 3 / 3)
+- [x] ✅ **J5-S2-T3** - Lecture des fichiers physiques de signature HTML (%APPDATA%\Microsoft\Signatures). (Validé le 24/09/2026 sur feature/j5-iso-vba_step-2-infra - Commit : 305c8648b243d7c87bf5d6bb00ef483d3ca9fbbd) (Cpx: 3 / 3)
 
 ### Step 3 - Support des actions multiples par règle - feature/j5-iso-vba_step-3-multiple-actions
 - [ ] ⚪ **J5-S3-T1** - Refonte Domain & Infrastructure : Remplacement de l'action unique par `IReadOnlyList<RuleAction>` dans `ExecutionRule` et adaptation du `CatamailerDbContext` (Conversion JSON SQLite).
