@@ -94,7 +94,7 @@
 ### Step 1 - Parsing et Mapping - feature/j6-csv-migrator_step-1-core
 - [x] ✅ **J6-S1-T1** - Câblage UI des référentiels externes Outlook (Dossiers et Signatures) dans le `RuleBuilder`. (Validé le 24/09/2026 sur feature/j6-csv-migrator_step-1-core - Commit : 7795024f30014fbd6f7d6fa66d55d4f88a984179) (Cpx: 5 / 5)
 - [x] ✅ **J6-S1-T2** - Implémentation du `CsvParser` (lecture des blocs, nettoyage des lignes vides, extraction brute). (Validé le 24/09/2026 sur feature/j6-csv-migrator_step-1-core - Commit : 76d1cb15bca64a37b1f6a7cd7aa9ec3e810e7ce8) (Cpx: 5 / 5)
-- [ ] ⚪ **J6-S1-T3** - Implémentation du `RuleMapper` (traduction des critères texte en `MatchOperator`, conversion des dossiers/actions en `RuleAction`, création des `ExecutionRule`).
+- [x] ✅ **J6-S1-T3** - Implémentation du `RuleMapper` (traduction et regroupement des CsvRuleRecord en DictionaryRule). (Validé le 24/09/2026 sur feature/j6-csv-migrator_step-1-core - Commit : <c19002684939618408c6b057094160a6a270d056>) (Cpx: 5 / 5)
 
 ### Step 2 - Persistance et Exécution Console - feature/j6-csv-migrator_step-2-db
 - [ ] ⚪ **J6-S2-T1** - Intégration avec `CatamailerDbContext` pour sauvegarder les règles générées en base de données.
