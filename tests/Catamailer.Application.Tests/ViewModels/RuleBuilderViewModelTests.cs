@@ -11,6 +11,7 @@
 //         - 2026-09-23 : Mise à jour de GetAllAsync dans FakeCategoryRepository pour supporter includeDeleted (J4-S4-T6 - Phase Verte).
 //         - 2026-09-23 : Ajout des tests pour la gestion de l'état des actions complexes (J5-S1-T2 - Phase Rouge).
 //         - 2026-09-24 : Refonte des tests pour supporter la liste d'actions (J5-S3-T1 - Phase Orange).
+//         - 2026-09-24 : Ajout de IExternalResourceProvider et tests de peuplement (J6-S1-T1 - Phase Rouge).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -75,13 +76,27 @@ namespace Catamailer.Application.Tests.ViewModels
             }
         }
 
+        private class FakeExternalResourceProvider : IExternalResourceProvider
+        {
+            public Task<IEnumerable<string>> GetAvailableFolderPathsAsync()
+            {
+                return Task.FromResult<IEnumerable<string>>(new[] { "Boîte de réception", "Archives" });
+            }
+
+            public Task<IEnumerable<string>> GetAvailableSignaturesAsync()
+            {
+                return Task.FromResult<IEnumerable<string>>(new[] { "Signature_Pro", "Signature_Perso" });
+            }
+        }
+
         [Fact]
         public void Constructor_ShouldInitializeRootNode()
         {
             // Arrange & Act
             var repo = new FakeRuleRepository();
             var catRepo = new FakeCategoryRepository();
-            var viewModel = new RuleBuilderViewModel(repo, catRepo);
+            var resourceProvider = new FakeExternalResourceProvider();
+            var viewModel = new RuleBuilderViewModel(repo, catRepo, resourceProvider);
 
             // Assert
             Assert.NotNull(viewModel.RootNode);
@@ -89,22 +104,28 @@ namespace Catamailer.Application.Tests.ViewModels
             Assert.Empty(viewModel.Actions);
             Assert.Empty(viewModel.RuleName);
             Assert.Empty(viewModel.AvailableCategories);
+            Assert.Empty(viewModel.AvailableFolders);
+            Assert.Empty(viewModel.AvailableSignatures);
         }
 
         [Fact]
-        public async Task InitializeAsync_ShouldLoadCategories_FromCategoryRepository()
+        public async Task InitializeAsync_ShouldLoadCategoriesAndExternalResources()
         {
             // Arrange
             var repo = new FakeRuleRepository();
             var catRepo = new FakeCategoryRepository();
-            var viewModel = new RuleBuilderViewModel(repo, catRepo);
+            var resourceProvider = new FakeExternalResourceProvider();
+            var viewModel = new RuleBuilderViewModel(repo, catRepo, resourceProvider);
 
             // Act
             await viewModel.InitializeAsync();
 
             // Assert
             Assert.Equal(2, viewModel.AvailableCategories.Count());
-            Assert.Equal("Test Category 1", viewModel.AvailableCategories.First().Name);
+            Assert.Equal(2, viewModel.AvailableFolders.Count());
+            Assert.Equal(2, viewModel.AvailableSignatures.Count());
+            Assert.Contains("Archives", viewModel.AvailableFolders);
+            Assert.Contains("Signature_Pro", viewModel.AvailableSignatures);
         }
 
         [Fact]
@@ -113,7 +134,8 @@ namespace Catamailer.Application.Tests.ViewModels
             // Arrange
             var repo = new FakeRuleRepository();
             var catRepo = new FakeCategoryRepository();
-            var viewModel = new RuleBuilderViewModel(repo, catRepo);
+            var resourceProvider = new FakeExternalResourceProvider();
+            var viewModel = new RuleBuilderViewModel(repo, catRepo, resourceProvider);
             var criterion = new RuleCriterion(MailField.Subject, MatchOperator.Contains, "test");
             
             // Act
@@ -130,7 +152,8 @@ namespace Catamailer.Application.Tests.ViewModels
             // Arrange
             var repo = new FakeRuleRepository();
             var catRepo = new FakeCategoryRepository();
-            var viewModel = new RuleBuilderViewModel(repo, catRepo);
+            var resourceProvider = new FakeExternalResourceProvider();
+            var viewModel = new RuleBuilderViewModel(repo, catRepo, resourceProvider);
             var criterion = new RuleCriterion(MailField.Subject, MatchOperator.Contains, "test");
             viewModel.AddCriterion(viewModel.RootNode, criterion);
             
@@ -147,7 +170,8 @@ namespace Catamailer.Application.Tests.ViewModels
             // Arrange
             var repo = new FakeRuleRepository();
             var catRepo = new FakeCategoryRepository();
-            var viewModel = new RuleBuilderViewModel(repo, catRepo);
+            var resourceProvider = new FakeExternalResourceProvider();
+            var viewModel = new RuleBuilderViewModel(repo, catRepo, resourceProvider);
             var child = new RuleNode(LogicalOperator.Or);
             
             // Act
@@ -164,7 +188,8 @@ namespace Catamailer.Application.Tests.ViewModels
             // Arrange
             var repo = new FakeRuleRepository();
             var catRepo = new FakeCategoryRepository();
-            var viewModel = new RuleBuilderViewModel(repo, catRepo);
+            var resourceProvider = new FakeExternalResourceProvider();
+            var viewModel = new RuleBuilderViewModel(repo, catRepo, resourceProvider);
             var action1 = new RuleAction(ActionType.MoveToFolder, "Archives");
             var action2 = new RuleAction(ActionType.SetImportance, "Haute");
             viewModel.AddAction(action1);
@@ -184,7 +209,8 @@ namespace Catamailer.Application.Tests.ViewModels
             // Arrange
             var repo = new FakeRuleRepository();
             var catRepo = new FakeCategoryRepository();
-            var viewModel = new RuleBuilderViewModel(repo, catRepo);
+            var resourceProvider = new FakeExternalResourceProvider();
+            var viewModel = new RuleBuilderViewModel(repo, catRepo, resourceProvider);
             var action = new RuleAction(ActionType.MoveToFolder, "Archives");
             
             // Act
@@ -201,7 +227,8 @@ namespace Catamailer.Application.Tests.ViewModels
             // Arrange
             var repo = new FakeRuleRepository();
             var catRepo = new FakeCategoryRepository();
-            var viewModel = new RuleBuilderViewModel(repo, catRepo);
+            var resourceProvider = new FakeExternalResourceProvider();
+            var viewModel = new RuleBuilderViewModel(repo, catRepo, resourceProvider);
             
             // Act
             viewModel.SetOperator(viewModel.RootNode, LogicalOperator.Or);
@@ -216,7 +243,8 @@ namespace Catamailer.Application.Tests.ViewModels
             // Arrange
             var repo = new FakeRuleRepository();
             var catRepo = new FakeCategoryRepository();
-            var viewModel = new RuleBuilderViewModel(repo, catRepo);
+            var resourceProvider = new FakeExternalResourceProvider();
+            var viewModel = new RuleBuilderViewModel(repo, catRepo, resourceProvider);
             var oldCriterion = new RuleCriterion(MailField.Subject, MatchOperator.Contains, "old");
             var newCriterion = new RuleCriterion(MailField.Subject, MatchOperator.Contains, "new");
             viewModel.AddCriterion(viewModel.RootNode, oldCriterion);
@@ -236,7 +264,8 @@ namespace Catamailer.Application.Tests.ViewModels
             // Arrange
             var repo = new FakeRuleRepository();
             var catRepo = new FakeCategoryRepository();
-            var viewModel = new RuleBuilderViewModel(repo, catRepo)
+            var resourceProvider = new FakeExternalResourceProvider();
+            var viewModel = new RuleBuilderViewModel(repo, catRepo, resourceProvider)
             {
                 RuleName = "Test Complexe"
             };
@@ -262,7 +291,8 @@ namespace Catamailer.Application.Tests.ViewModels
             // Arrange
             var repo = new FakeRuleRepository();
             var catRepo = new FakeCategoryRepository();
-            var viewModel = new RuleBuilderViewModel(repo, catRepo)
+            var resourceProvider = new FakeExternalResourceProvider();
+            var viewModel = new RuleBuilderViewModel(repo, catRepo, resourceProvider)
             {
                 RuleName = "Test Execution Rule"
             };

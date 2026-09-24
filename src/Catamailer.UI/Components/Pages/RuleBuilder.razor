@@ -22,6 +22,7 @@
 //         - 2026-09-23 : Support des paramètres d'action complexes et correction du binding DateTime (J5-S1-T2 - Phase Bleue).
 //         - 2026-09-24 : Refonte pour supporter la liste d'actions multiples (J5-S3-T1 - Phase Bleue).
 //         - 2026-09-24 : Correction du parsing Razor sur les enums et lambdas onchange (J5-S3-T1 - Phase Bleue fix).
+//         - 2026-09-24 : Intégration des listes déroulantes pour les dossiers et signatures (J6-S1-T1 - Phase Bleue).
 // </auto-generated>
 // ------------------------------------------------------------------------------ -->
 
@@ -74,6 +75,26 @@
                             <option value="Faible">Faible</option>
                         </select>
                     }
+                    else if (action.Type == ActionType.MoveToFolder)
+                    {
+                        <select class="form-select" value="@action.Parameter" @onchange="@(e => UpdateActionParameter(action, e.Value?.ToString() ?? string.Empty))">
+                            <option value="">-- Sélectionner un dossier --</option>
+                            @foreach (var folder in ViewModel.AvailableFolders)
+                            {
+                                <option value="@folder">@folder</option>
+                            }
+                        </select>
+                    }
+                    else if (action.Type == ActionType.InsertHtmlSignature)
+                    {
+                        <select class="form-select" value="@action.Parameter" @onchange="@(e => UpdateActionParameter(action, e.Value?.ToString() ?? string.Empty))">
+                            <option value="">-- Sélectionner une signature --</option>
+                            @foreach (var signature in ViewModel.AvailableSignatures)
+                            {
+                                <option value="@signature">@signature</option>
+                            }
+                        </select>
+                    }
                     else if (action.Type == ActionType.FlagToday || action.Type == ActionType.MarkAsRead)
                     {
                         <input type="text" class="form-control" value="N/A" disabled />
@@ -84,7 +105,7 @@
                     }
                     else
                     {
-                        <input type="text" class="form-control" value="@action.Parameter" @onchange="@(e => UpdateActionParameter(action, e.Value?.ToString() ?? string.Empty))" placeholder="Dossier, adresses e-mails, etc." />
+                        <input type="text" class="form-control" value="@action.Parameter" @onchange="@(e => UpdateActionParameter(action, e.Value?.ToString() ?? string.Empty))" placeholder="Destinataire, etc." />
                     }
                 </div>
                 <div class="col-auto">
@@ -125,7 +146,8 @@
 
     private void AddNewAction()
     {
-        ViewModel.AddAction(new RuleAction(ActionType.MoveToFolder, string.Empty));
+        string defaultFolder = ViewModel.AvailableFolders.FirstOrDefault() ?? string.Empty;
+        ViewModel.AddAction(new RuleAction(ActionType.MoveToFolder, defaultFolder));
         StateHasChanged();
     }
 
@@ -142,6 +164,14 @@
             else if (newType == ActionType.FlagToday || newType == ActionType.MarkAsRead)
             {
                 newParam = string.Empty;
+            }
+            else if (newType == ActionType.MoveToFolder)
+            {
+                newParam = ViewModel.AvailableFolders.FirstOrDefault() ?? string.Empty;
+            }
+            else if (newType == ActionType.InsertHtmlSignature)
+            {
+                newParam = ViewModel.AvailableSignatures.FirstOrDefault() ?? string.Empty;
             }
 
             var newAction = new RuleAction(newType, newParam);

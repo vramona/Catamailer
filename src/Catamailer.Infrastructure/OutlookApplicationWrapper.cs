@@ -15,6 +15,8 @@
 //         - 2026-09-24 : Ajout du bouchon pour l'arborescence des dossiers (J5-S2-T2 - Phase Rouge).
 //         - 2026-09-24 : Implémentation de GetAvailableFolderPaths récursive à la racine (J5-S2-T2 - Phase Verte).
 //         - 2026-09-24 : Implémentation de la lecture des fichiers de signature HTML (J5-S2-T3 - Phase Verte).
+//         - 2026-09-24 : Implémentation de IExternalResourceProvider (J6-S1-T1 - Phase Rouge).
+//         - 2026-09-24 : Implémentation de GetAvailableSignatures (J6-S1-T1 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -22,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using Catamailer.Domain;
 
 namespace Catamailer.Infrastructure
@@ -233,7 +236,7 @@ namespace Catamailer.Infrastructure
         }
 
         // ====================================================================================
-        // LECTURE DE L'ENVIRONNEMENT ET ARBORESCENCE (J5-S2-T2)
+        // LECTURE DE L'ENVIRONNEMENT ET ARBORESCENCE (J5-S2-T2 / J6-S1-T1)
         // ====================================================================================
 
         /// <inheritdoc />
@@ -242,18 +245,13 @@ namespace Catamailer.Infrastructure
             var folderPaths = new List<string>();
             try
             {
-                // On récupère la boîte de réception (Inbox = 6)
                 dynamic inbox = _application.Session.GetDefaultFolder(6);
-                
-                // On remonte au compte principal (la racine du fichier PST/OST)
                 dynamic rootStore = inbox.Parent;
-                
-                // On lance le parcours récursif à partir des dossiers de la racine
                 TraverseFolders(rootStore.Folders, "", folderPaths);
             }
             catch
             {
-                // En cas d'erreur COM (ex: compte inaccessible), on retourne une liste vide
+                // En cas d'erreur COM
             }
             return folderPaths;
         }
@@ -261,22 +259,54 @@ namespace Catamailer.Infrastructure
         private void TraverseFolders(dynamic foldersCollection, string currentPath, List<string> folderPaths)
         {
             int count = foldersCollection.Count;
-            // On privilégie for (1..count) en Late Binding pour éviter les crashs de l'énumérateur COM
             for (int i = 1; i <= count; i++)
             {
                 dynamic folder = foldersCollection[i];
-                
                 string folderName = folder.Name;
                 string fullPath = string.IsNullOrEmpty(currentPath) ? folderName : $"{currentPath}/{folderName}";
-                
                 folderPaths.Add(fullPath);
 
-                // Appel récursif si le dossier contient des sous-dossiers
                 if (folder.Folders.Count > 0)
                 {
                     TraverseFolders(folder.Folders, fullPath, folderPaths);
                 }
             }
+        }
+
+        /// <inheritdoc />
+        public IEnumerable<string> GetAvailableSignatures()
+        {
+            var signatures = new List<string>();
+            try
+            {
+                string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                string signatureDir = Path.Combine(appDataPath, "Microsoft", "Signatures");
+
+                if (Directory.Exists(signatureDir))
+                {
+                    var files = Directory.GetFiles(signatureDir, "*.htm");
+                    foreach (var file in files)
+                    {
+                        signatures.Add(Path.GetFileNameWithoutExtension(file));
+                    }
+                }
+            }
+            catch
+            {
+                // Ignorer en cas d'erreur d'accès au système de fichiers
+            }
+            return signatures;
+        }
+
+        // Implémentation explicite de l'interface IExternalResourceProvider
+        Task<IEnumerable<string>> IExternalResourceProvider.GetAvailableFolderPathsAsync()
+        {
+            return Task.FromResult(GetAvailableFolderPaths());
+        }
+
+        Task<IEnumerable<string>> IExternalResourceProvider.GetAvailableSignaturesAsync()
+        {
+            return Task.FromResult(GetAvailableSignatures());
         }
 
         // ====================================================================================
@@ -288,7 +318,6 @@ namespace Catamailer.Infrastructure
         {
             var item = GetItemFromId(entryId);
             
-            // On résout le chemin complet du dossier depuis la racine
             dynamic rootStore = _application.Session.GetDefaultFolder(6).Parent;
             dynamic? targetFolder = ResolveFolderFromPath(rootStore.Folders, folderPath);
             
@@ -298,15 +327,11 @@ namespace Catamailer.Infrastructure
             }
             else
             {
-                // Fallback sur la Boîte de réception si le dossier cible est introuvable
                 dynamic fallbackFolder = _application.Session.GetDefaultFolder(6);
                 item.Move(fallbackFolder);
             }
         }
         
-        /// <summary>
-        /// Révout une instance de MAPIFolder à partir de son chemin (ex: "Boîte de réception/Projets/2026")
-        /// </summary>
         private dynamic? ResolveFolderFromPath(dynamic rootFolders, string path)
         {
             var parts = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
@@ -332,7 +357,7 @@ namespace Catamailer.Infrastructure
                     }
                 }
                 
-                if (!found) return null; // Un segment du chemin n'existe pas
+                if (!found) return null;
             }
 
             return currentFolder;
@@ -407,8 +432,6 @@ namespace Catamailer.Infrastructure
 
             string htmlContent = File.ReadAllText(signatureFilePath);
 
-            // Outlook stocke les images d'une signature dans un sous-dossier "{NomSignature}_files".
-            // Il faut convertir les chemins relatifs en chemins absolus pour l'injection.
             string imageFolderRelative = $"{signatureName}_files/";
             string imageFolderRelativeEncoded = $"{signatureName.Replace(" ", "%20")}_files/";
             string imageFolderAbsolute = Path.Combine(signatureDir, $"{signatureName}_files/");
@@ -416,7 +439,6 @@ namespace Catamailer.Infrastructure
             htmlContent = htmlContent.Replace(imageFolderRelative, imageFolderAbsolute);
             htmlContent = htmlContent.Replace(imageFolderRelativeEncoded, imageFolderAbsolute);
 
-            // On récupère le mail seulement si le fichier de signature a bien été trouvé.
             var item = GetItemFromId(entryId);
             item.HTMLBody = item.HTMLBody + "<br/><br/>" + htmlContent;
             item.Save();

@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-24 14:45
+Généré le : 2026-09-24 18:03
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -232,8 +232,12 @@ Généré le : 2026-09-24 14:45
 - `ObservableCollection<RuleAction> Actions { get; }` : Obtient la liste observable des actions séquentielles à exécuter.
 - `IEnumerable<CategoryNode> AvailableCategories { get; set; }` : Obtient la liste brute des catégories disponibles.
 - `IEnumerable<CategoryOption> FlatCategories { get; set; }` : Obtient la liste aplatie et indentée des catégories prête pour l'affichage UI.
-- `Task InitializeAsync()` : Charge les données de référence nécessaires à l'IHM (catégories) et construit l'arborescence visuelle.
+- `IEnumerable<string> AvailableFolders { get; set; }` : Obtient la liste des chemins de dossiers Outlook disponibles.
+- `IEnumerable<string> AvailableSignatures { get; set; }` : Obtient la liste des signatures HTML disponibles.
+- `Task InitializeAsync()` : Charge les données de référence nécessaires à l'IHM (catégories et ressources externes) et construit l'arborescence visuelle.
   - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `IExternalResourceProvider.GetAvailableFolderPathsAsync()`
+  - *Appelle* ➡️ `IExternalResourceProvider.GetAvailableSignaturesAsync()`
   - *Appelle* ➡️ `CategoryNode.GetFullName()`
   - *Appelle* ➡️ `RuleBuilderViewModel.Traverse()`
 - `void SetOperator(RuleNode targetNode, LogicalOperator newOperator)` : Modifie l'opérateur logique d'un nœud spécifique.
@@ -339,6 +343,11 @@ Généré le : 2026-09-24 14:45
 ### Interface : IDebounceService
 **Fichier** : `src\Catamailer.Domain\IDebounceService.cs`
 **Rôle** : Définit le contrat permettant de gérer la suspension temporaire des traitements d'arrière-plan (Debounce).
+**Membres et Invocations :**
+
+### Interface : IExternalResourceProvider
+**Fichier** : `src\Catamailer.Domain\IExternalResourceProvider.cs`
+**Rôle** : Fournit l'accès aux ressources externes nécessaires à la configuration des règles (ex: dossiers, signatures), de manière agnostique vis-à-vis de l'infrastructure sous-jacente (Outlook).
 **Membres et Invocations :**
 
 ### Interface : IGlobalHotkeyService
@@ -507,6 +516,7 @@ Généré le : 2026-09-24 14:45
 - `void RemoveCategory(string name)`
 - `IEnumerable<string> GetAvailableFolderPaths()`
   - *Appelle* ➡️ `OutlookApplicationWrapper.TraverseFolders()`
+- `IEnumerable<string> GetAvailableSignatures()`
 - `void MoveToFolder(string entryId, string folderPath)`
   - *Appelle* ➡️ `OutlookApplicationWrapper.GetItemFromId()`
   - *Appelle* ➡️ `OutlookApplicationWrapper.ResolveFolderFromPath()`
@@ -582,6 +592,36 @@ Généré le : 2026-09-24 14:45
   - *Appelle* ➡️ `Win32GlobalHotkeyService.UnregisterHotKey()`
 
 ## Projet : Catamailer.Migrator
+### Interface : IRuleMapper
+**Fichier** : `src\Catamailer.Migrator\Mapping\IRuleMapper.cs`
+**Rôle** : Définit le contrat pour la transformation des enregistrements CSV bruts en règles de domaine (DictionaryRule).
+**Membres et Invocations :**
+
+### Class : RuleMapper
+**Fichier** : `src\Catamailer.Migrator\Mapping\RuleMapper.cs`
+**Rôle** : Implémentation du mappeur traduisant les enregistrements CSV en DictionaryRule.
+**Membres et Invocations :**
+- `IEnumerable<DictionaryRule> Map(IEnumerable<CsvRuleRecord> records)`
+
+### Class : CsvParser
+**Fichier** : `src\Catamailer.Migrator\Parsing\CsvParser.cs`
+**Rôle** : Implémentation du parseur CSV spécifique au format historique de Catamailer.
+**Membres et Invocations :**
+- `IEnumerable<CsvRuleRecord> ParseLines(IEnumerable<string> lines)`
+
+### Class : CsvRuleRecord
+**Fichier** : `src\Catamailer.Migrator\Parsing\CsvRuleRecord.cs`
+**Rôle** : Représente une ligne brute extraite du fichier CSV de configuration des règles.
+**Membres et Invocations :**
+- `string Field { get; }` : Obtient le champ d'application (SUJET, EXPEDITEUR, DESTINATAIRE).
+- `string CategoryName { get; }` : Obtient le nom de la catégorie associée.
+- `IReadOnlyList<string> Keywords { get; }` : Obtient la liste des mots-clés nettoyés.
+
+### Interface : ICsvParser
+**Fichier** : `src\Catamailer.Migrator\Parsing\ICsvParser.cs`
+**Rôle** : Définit le contrat pour l'extraction brute des règles depuis un format CSV.
+**Membres et Invocations :**
+
 ## Projet : Catamailer.UI
 ### Class : App
 **Fichier** : `src\Catamailer.UI\App.xaml.cs`
@@ -1052,7 +1092,7 @@ Généré le : 2026-09-24 14:45
 **Fichier** : `tests\Catamailer.Application.Tests\ViewModels\RuleBuilderViewModelTests.cs`
 **Membres et Invocations :**
 - `void Constructor_ShouldInitializeRootNode()`
-- `Task InitializeAsync_ShouldLoadCategories_FromCategoryRepository()`
+- `Task InitializeAsync_ShouldLoadCategoriesAndExternalResources()`
   - *Appelle* ➡️ `RuleBuilderViewModel.InitializeAsync()`
 - `void AddCriterion_ShouldAddCriterionToTargetNode()`
   - *Appelle* ➡️ `RuleBuilderViewModel.AddCriterion()`
@@ -1297,6 +1337,29 @@ Généré le : 2026-09-24 14:45
   - *Appelle* ➡️ `Win32GlobalHotkeyService.UnregisterHotkey()`
 - `void UnregisterHotkey_ShouldReturnFalse_WhenHotkeyDoesNotExist()`
   - *Appelle* ➡️ `Win32GlobalHotkeyService.UnregisterHotkey()`
+
+## Projet : Catamailer.Migrator.Tests
+### Class : CsvParserTests
+**Fichier** : `tests\Catamailer.Migrator.Tests\CsvParserTests.cs`
+**Membres et Invocations :**
+- `void ParseLines_ShouldIgnoreCommentsAndEmptyLines()`
+  - *Appelle* ➡️ `CsvParser.ParseLines()`
+- `void ParseLines_ShouldExtractFieldCategoryAndKeywords()`
+  - *Appelle* ➡️ `CsvParser.ParseLines()`
+- `void ParseLines_ShouldTrimSpacesAndIgnoreEmptyKeywords()`
+  - *Appelle* ➡️ `CsvParser.ParseLines()`
+- `void ParseLines_ShouldIgnoreLinesWithLessThanTwoColumns()`
+  - *Appelle* ➡️ `CsvParser.ParseLines()`
+
+### Class : RuleMapperTests
+**Fichier** : `tests\Catamailer.Migrator.Tests\RuleMapperTests.cs`
+**Membres et Invocations :**
+- `void Map_ShouldGroupRecordsBySameCategory_IntoSingleDictionaryRule()`
+  - *Appelle* ➡️ `RuleMapper.Map()`
+- `void Map_ShouldDispatchKeywordsToCorrectFields()`
+  - *Appelle* ➡️ `RuleMapper.Map()`
+- `void Map_ShouldIgnoreRecordsWithUnknownFields()`
+  - *Appelle* ➡️ `RuleMapper.Map()`
 
 ## Projet : Tools.AiDocGenerator.Tests
 ### Class : CatamailerTocBuilderTests

@@ -91,7 +91,14 @@
 - [x] ✅ **J5-S3-T2** - Refonte Application & UI : Adaptation de `RuleBuilderViewModel` et `RuleBuilder.razor` pour permettre l'ajout, la modification et la suppression d'une liste d'actions empilables. (Validé le 24/09/2026 sur feature/j5-iso-vba_step-3-multiple-actions - Commit : 1530f8625c79d7116eb5f72e5f00b045791a8ff1) (Cpx: 5 / 5)
 
 ## Jalon 6 - Outil de Migration CSV (Standalone) - feature/j6-csv-migrator
-- [ ] ⚪ **J6-S1-T1** - Console App isolée : Parser le CSV VBA, nettoyer, mapper les nouvelles actions, et générer le fichier `rules.db` SQLite.
+### Step 1 - Parsing et Mapping - feature/j6-csv-migrator_step-1-core
+- [x] ✅ **J6-S1-T1** - Câblage UI des référentiels externes Outlook (Dossiers et Signatures) dans le `RuleBuilder`. (Validé le 24/09/2026 sur feature/j6-csv-migrator_step-1-core - Commit : 7795024f30014fbd6f7d6fa66d55d4f88a984179) (Cpx: 5 / 5)
+- [x] ✅ **J6-S1-T2** - Implémentation du `CsvParser` (lecture des blocs, nettoyage des lignes vides, extraction brute). (Validé le 24/09/2026 sur feature/j6-csv-migrator_step-1-core - Commit : 76d1cb15bca64a37b1f6a7cd7aa9ec3e810e7ce8) (Cpx: 5 / 5)
+- [x] ✅ **J6-S1-T3** - Implémentation du `RuleMapper` (traduction et regroupement des CsvRuleRecord en DictionaryRule). (Validé le 24/09/2026 sur feature/j6-csv-migrator_step-1-core - Commit : <c19002684939618408c6b057094160a6a270d056>) (Cpx: 5 / 5)
+
+### Step 2 - Persistance et Exécution Console - feature/j6-csv-migrator_step-2-db
+- [ ] ⚪ **J6-S2-T1** - Intégration avec `CatamailerDbContext` pour sauvegarder les règles générées en base de données.
+- [ ] ⚪ **J6-S2-T2** - Câblage final de `Program.cs` avec gestion des arguments (chemin CSV source, chemin DB cible) et retours console.
 
 ## Jalon 7 - Inbox Notes, Agenda & Actions Internes - feature/j7-inbox-notes
 ### Step 1 - Modélisation & Agendas - feature/j7-inbox-notes_step-1-core

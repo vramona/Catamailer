@@ -12,6 +12,7 @@
 //         - 2026-09-23 : Ajout de IDisposable pour libération explicite COM (J4-S4-T7 - Phase Orange).
 //         - 2026-09-23 : Ajout des signatures pour les actions physiques (J5-S2-T1 - Phase Rouge).
 //         - 2026-09-24 : Ajout de la lecture de l'arborescence des dossiers (J5-S2-T2 - Phase Rouge).
+//         - 2026-09-24 : Implémentation de IExternalResourceProvider (J6-S1-T1 - Phase Rouge).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -26,7 +27,7 @@ namespace Catamailer.Infrastructure
     /// <summary>
     /// Interface d'abstraction pour l'application COM Outlook, facilitant les tests unitaires.
     /// </summary>
-    public interface IOutlookApplicationWrapper : IDisposable
+    public interface IOutlookApplicationWrapper : IDisposable, IExternalResourceProvider
     {
         /// <summary>
         /// Événement déclenché nativement par Outlook via NewMailEx.
@@ -36,80 +37,66 @@ namespace Catamailer.Infrastructure
         /// <summary>
         /// Récupère les métadonnées d'un e-mail à partir de son EntryID.
         /// </summary>
-        /// <param name="entryId">L'identifiant unique de l'e-mail.</param>
-        /// <returns>Les métadonnées agnostiques de l'e-mail.</returns>
         MailMetadata GetMailMetadata(string entryId);
 
         /// <summary>
         /// Récupère l'EntryID de l'élément actuellement sélectionné dans l'explorateur actif.
         /// </summary>
-        /// <returns>L'EntryID de l'élément sélectionné, ou null si la sélection est vide ou invalide.</returns>
         string? GetSelectedEntryId();
 
         /// <summary>
         /// Lit l'intégralité de la Master Category List d'Outlook.
         /// </summary>
-        /// <returns>Une énumération contenant le nom et le code couleur (Hexa) de chaque catégorie.</returns>
         IEnumerable<(string Name, string? ColorCode)> GetMasterCategories();
 
         /// <summary>
         /// Vérifie si une catégorie existe dans la Master Category List.
         /// </summary>
-        /// <param name="name">Le nom de la catégorie.</param>
-        /// <returns>Vrai si elle existe, faux sinon.</returns>
         bool CategoryExists(string name);
 
         /// <summary>
         /// Ajoute une catégorie à la Master Category List.
         /// </summary>
-        /// <param name="name">Le nom de la catégorie.</param>
-        /// <param name="colorCode">Le code couleur.</param>
         void AddCategory(string name, string colorCode);
 
         /// <summary>
         /// Met à jour la couleur d'une catégorie existante.
         /// </summary>
-        /// <param name="name">Le nom de la catégorie.</param>
-        /// <param name="newColorCode">Le nouveau code couleur.</param>
         void UpdateCategory(string name, string newColorCode);
         
         /// <summary>
         /// Renomme une catégorie existante dans la Master Category List.
         /// </summary>
-        /// <param name="oldName">Le nom actuel de la catégorie.</param>
-        /// <param name="newName">Le nouveau nom de la catégorie.</param>
         void RenameCategory(string oldName, string newName);
 
         /// <summary>
         /// Supprime une catégorie de la Master Category List.
         /// </summary>
-        /// <param name="name">Le nom de la catégorie.</param>
         void RemoveCategory(string name);
 
         /// <summary>
         /// Remplace une catégorie par une autre sur l'ensemble des éléments de la messagerie en utilisant une recherche avancée (DASL).
         /// </summary>
-        /// <param name="oldCategoryName">Le nom de la catégorie à rechercher et retirer.</param>
-        /// <param name="newCategoryName">Le nom de la catégorie à appliquer.</param>
         void ReplaceCategoryOnAllItems(string oldCategoryName, string newCategoryName);
 
         /// <summary>
         /// Récupère un lot d'EntryIDs d'e-mails à traiter dans l'historique à partir du dernier EntryID connu.
         /// </summary>
-        /// <param name="lastEntryId">Le dernier EntryID traité, ou null si début de l'historique.</param>
-        /// <param name="maxItems">Nombre maximal d'éléments à retourner.</param>
-        /// <returns>Une liste d'EntryIDs d'e-mails.</returns>
         IEnumerable<string> GetNextUnprocessedMailEntryIds(string? lastEntryId, int maxItems);
 
         // ====================================================================================
-        // LECTURE DE L'ENVIRONNEMENT ET ARBORESCENCE (J5-S2-T2)
+        // LECTURE DE L'ENVIRONNEMENT ET ARBORESCENCE (J5-S2-T2 / J6-S1-T1)
         // ====================================================================================
 
         /// <summary>
         /// Récupère l'arborescence complète des chemins de dossiers disponibles sous la Boîte de réception.
         /// </summary>
-        /// <returns>Une liste de chemins de dossiers (ex: "Boîte de réception/Projets/2026").</returns>
         IEnumerable<string> GetAvailableFolderPaths();
+
+        /// <summary>
+        /// Récupère la liste des signatures configurées sur le poste (lecture fichiers .htm).
+        /// </summary>
+        IEnumerable<string> GetAvailableSignatures();
 
         // ====================================================================================
         // ACTIONS PHYSIQUES D'EXÉCUTION (J5-S2-T1)
