@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-23 18:15
+Généré le : 2026-09-24 14:23
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -503,6 +503,25 @@ Généré le : 2026-09-23 18:15
   - *Appelle* ➡️ `OutlookApplicationWrapper.MapHexToOlCategoryColor()`
 - `void RenameCategory(string oldName, string newName)`
 - `void RemoveCategory(string name)`
+- `IEnumerable<string> GetAvailableFolderPaths()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.TraverseFolders()`
+- `void MoveToFolder(string entryId, string folderPath)`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.GetItemFromId()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.ResolveFolderFromPath()`
+- `void MarkAsRead(string entryId)`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.GetItemFromId()`
+- `void FlagForFollowUp(string entryId)`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.GetItemFromId()`
+- `void Forward(string entryId, string recipients)`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.GetItemFromId()`
+- `void SetImportance(string entryId, string importanceLevel)`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.GetItemFromId()`
+- `void AddReminder(string entryId, DateTime reminderTime)`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.GetItemFromId()`
+- `void FlagToday(string entryId)`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.GetItemFromId()`
+- `void InsertHtmlSignature(string entryId, string signatureName)`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.GetItemFromId()`
 - `MailMetadata GetMailMetadata(string entryId)`
 - `string? GetSelectedEntryId()`
 - `void ReplaceCategoryOnAllItems(string oldCategoryName, string newCategoryName)`
@@ -1142,6 +1161,33 @@ Généré le : 2026-09-23 18:15
   - *Appelle* ➡️ `CategorySyncViewModel.InitializeAsync()`
   - *Appelle* ➡️ `CategorySyncViewModel.ApplyResolutionsAsync()`
 - `void Dispose()`
+
+### Class : OutlookActionsIntegrationTests
+**Fichier** : `tests\Catamailer.Infrastructure.IntegrationTests\OutlookActionsIntegrationTests.cs`
+**Rôle** : Classe de tests d'intégration pour les actions physiques COM.
+**Membres et Invocations :**
+- `void GetAvailableFolderPaths_ShouldReturnNonEmptyList()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.GetAvailableFolderPaths()`
+- `void MoveToFolder_ShouldNotThrowNotImplementedException()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.MoveToFolder()`
+- `void MarkAsRead_ShouldNotThrowNotImplementedException()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.MarkAsRead()`
+- `void FlagForFollowUp_ShouldNotThrowNotImplementedException()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.FlagForFollowUp()`
+- `void Forward_ShouldNotThrowNotImplementedException()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.Forward()`
+- `void SetImportance_ShouldNotThrowNotImplementedException()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.SetImportance()`
+- `void AddReminder_ShouldNotThrowNotImplementedException()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.AddReminder()`
+- `void FlagToday_ShouldNotThrowNotImplementedException()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.FlagToday()`
+- `void InsertHtmlSignature_ShouldNotThrowNotImplementedException()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.InsertHtmlSignature()`
+- `void InsertHtmlSignature_ShouldThrowFileNotFoundException_WhenSignatureDoesNotExist()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.InsertHtmlSignature()`
+- `void Dispose()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.Dispose()`
 
 ## Projet : Catamailer.Infrastructure.Tests
 ### Class : CatamailerDbContextTests

@@ -16,12 +16,12 @@
 //         - 2026-09-17 : Ajout de traces Stopwatch pour l'analyse de performance (Diag/Refacto).
 //         - 2026-09-23 : Remplacement de Debug.WriteLine par Console.WriteLine pour diagnostic terminal (J4-S4-T7 - Phase Jaune).
 //         - 2026-09-23 : Gestion de la suppression logique (IsDeleted) pour générer les Deltas appropriés (J4-S4-T6 - Phase Verte).
+//         - 2026-09-24 : Nettoyage des traces de performance pour respecter le silence sur succès (J5-S2-T2 - Phase Orange).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Catamailer.Domain;
@@ -43,9 +43,6 @@ namespace Catamailer.Application.Services
         /// <inheritdoc />
         public async Task<SyncResult> AnalyzeSyncDeltasAsync(string? separator = null)
         {
-            var sw = Stopwatch.StartNew();
-            Console.WriteLine("[CategorySyncService] Début AnalyzeSyncDeltasAsync...");
-
             var result = new SyncResult();
             
             // On charge TOUTES les catégories SQLite, y compris celles supprimées logiquement, 
@@ -59,9 +56,6 @@ namespace Catamailer.Application.Services
                 c => c, 
                 StringComparer.OrdinalIgnoreCase);
 
-            Console.WriteLine($"[CategorySyncService] Récupération DB terminée. {dbCategories.Count()} éléments. ({sw.ElapsedMilliseconds}ms)");
-            var stepSw = Stopwatch.StartNew();
-
             var rawOutlookCategories = _outlookProvider.GetAllCategories().ToList();
             var outlookDict = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
             var implicitTracking = new HashSet<string>(StringComparer.OrdinalIgnoreCase); 
@@ -70,9 +64,6 @@ namespace Catamailer.Application.Services
             {
                 outlookDict[Name] = ColorCode;
             }
-
-            Console.WriteLine($"[CategorySyncService] Récupération Outlook terminée. {rawOutlookCategories.Count} éléments. ({stepSw.ElapsedMilliseconds}ms)");
-            stepSw.Restart();
 
             if (!string.IsNullOrEmpty(cleanSeparator))
             {
@@ -113,9 +104,6 @@ namespace Catamailer.Application.Services
                     }
                 }
             }
-
-            Console.WriteLine($"[CategorySyncService] Calcul des parents virtuels (Bubbling) terminé. ({stepSw.ElapsedMilliseconds}ms)");
-            stepSw.Restart();
 
             foreach (var kvp in outlookDict)
             {
@@ -164,10 +152,6 @@ namespace Catamailer.Application.Services
                     result.AddDelta(CategoryDelta.CreateMissingInOutlook(dbFullName, dbCat.EffectiveColor));
                 }
             }
-
-            Console.WriteLine($"[CategorySyncService] Comparaison croisée terminée. {result.Deltas.Count} deltas générés. ({stepSw.ElapsedMilliseconds}ms)");
-            sw.Stop();
-            Console.WriteLine($"[CategorySyncService] AnalyzeSyncDeltasAsync Global : {sw.ElapsedMilliseconds}ms");
 
             return result;
         }

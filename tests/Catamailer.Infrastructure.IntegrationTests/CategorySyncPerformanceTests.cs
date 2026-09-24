@@ -5,6 +5,7 @@
 //         - 2026-09-23 : Création du test d'intégration de performance (J4-S4-T7 - Phase Orange).
 //         - 2026-09-23 : Ajout du pattern using sur IOutlookApplicationWrapper pour corriger la fuite COM (J4-S4-T7).
 //         - 2026-09-23 : Injection de 250 catégories pour simuler une charge réelle de synchronisation vers Outlook (J4-S4-T7).
+//         - 2026-09-24 : Suppression des traces de diagnostic interne (ITestOutputHelper) pour rendre le succès silencieux (J5-S2-T2 - Phase Orange).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -20,20 +21,16 @@ using Catamailer.Domain;
 using Catamailer.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Catamailer.Infrastructure.IntegrationTests
 {
     public class CategorySyncPerformanceTests : IDisposable
     {
-        private readonly ITestOutputHelper _output;
         private readonly string _dbPath;
         private readonly CatamailerDbContext _context;
 
-        public CategorySyncPerformanceTests(ITestOutputHelper output)
+        public CategorySyncPerformanceTests()
         {
-            _output = output;
-            
             // Création d'une base SQLite temporaire dédiée au test pour ne pas impacter tes données
             _dbPath = Path.Combine(Path.GetTempPath(), $"catamailer_perf_{Guid.NewGuid()}.db");
             var options = new DbContextOptionsBuilder<CatamailerDbContext>()
@@ -48,8 +45,6 @@ namespace Catamailer.Infrastructure.IntegrationTests
         public async Task SyncCategories_ShouldExecute_WithinAcceptableTimeframe()
         {
             // Arrange
-            _output.WriteLine("Génération de 250 catégories factices dans la base SQLite...");
-            
             for (int i = 0; i < 50; i++)
             {
                 var parent = new CategoryNode($"TestParent_{i}", "#111111");
@@ -71,24 +66,18 @@ namespace Catamailer.Infrastructure.IntegrationTests
             var syncService = new CategorySyncService(repository, outlookProvider);
             var viewModel = new CategorySyncViewModel(syncService, repository, outlookProvider);
 
-            _output.WriteLine("Début de l'analyse (InitializeAsync)...");
             var sw = Stopwatch.StartNew();
             
             // Act 1 : Analyse
             await viewModel.InitializeAsync();
-            _output.WriteLine($"Analyse terminée en : {sw.ElapsedMilliseconds} ms");
 
             // On simule que l'utilisateur a tout coché pour pousser les 250 catégories SQLite vers la MCL Outlook
             viewModel.SelectAllMissingInOutlook = true;
 
-            _output.WriteLine("Application des résolutions (ApplyResolutionsAsync)...");
-            sw.Restart();
-            
             // Act 2 : Résolution
             await viewModel.ApplyResolutionsAsync();
             
             sw.Stop();
-            _output.WriteLine($"Résolution terminée en : {sw.ElapsedMilliseconds} ms");
 
             // Assert : On valide que le traitement complet prend moins de 10 secondes (10000 ms)
             // Note: Le temps sera dominé par les appels COM, mais le blocage SQLite a été éliminé.

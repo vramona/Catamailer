@@ -10,11 +10,17 @@
 //         - 2026-09-17 : Ajustement de la palette hexadécimale pour correspondre aux couleurs natives d'Outlook (J4-S4-T3 - Phase Orange).
 //         - 2026-09-23 : Implémentation de IDisposable pour libération COM (J4-S4-T7 - Phase Orange).
 //         - 2026-09-23 : Remplacement des boucles en O(N) par l'indexeur string en O(1) pour éradiquer la saturation RPC (J4-S4-T7 - Phase Orange).
+//         - 2026-09-23 : Ajout des bouchons pour les actions physiques (J5-S2-T1 - Phase Rouge).
+//         - 2026-09-23 : Implémentation des actions physiques via Late Binding COM (J5-S2-T1 - Phase Verte).
+//         - 2026-09-24 : Ajout du bouchon pour l'arborescence des dossiers (J5-S2-T2 - Phase Rouge).
+//         - 2026-09-24 : Implémentation de GetAvailableFolderPaths récursive à la racine (J5-S2-T2 - Phase Verte).
+//         - 2026-09-24 : Implémentation de la lecture des fichiers de signature HTML (J5-S2-T3 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.InteropServices;
 using Catamailer.Domain;
 
@@ -52,6 +58,14 @@ namespace Catamailer.Infrastructure
             _application = instance;
             
             // TODO: L'abonnement natif à l'événement NewMailEx devra être implémenté ici
+        }
+
+        /// <summary>
+        /// Récupère un élément Outlook depuis son EntryID via la session courante.
+        /// </summary>
+        private dynamic GetItemFromId(string entryId)
+        {
+            return _application.Session.GetItemFromID(entryId);
         }
 
         /// <inheritdoc />
@@ -216,6 +230,196 @@ namespace Catamailer.Infrastructure
                  "#C34E98" => 25,
                  _ => 0
              };
+        }
+
+        // ====================================================================================
+        // LECTURE DE L'ENVIRONNEMENT ET ARBORESCENCE (J5-S2-T2)
+        // ====================================================================================
+
+        /// <inheritdoc />
+        public IEnumerable<string> GetAvailableFolderPaths()
+        {
+            var folderPaths = new List<string>();
+            try
+            {
+                // On récupère la boîte de réception (Inbox = 6)
+                dynamic inbox = _application.Session.GetDefaultFolder(6);
+                
+                // On remonte au compte principal (la racine du fichier PST/OST)
+                dynamic rootStore = inbox.Parent;
+                
+                // On lance le parcours récursif à partir des dossiers de la racine
+                TraverseFolders(rootStore.Folders, "", folderPaths);
+            }
+            catch
+            {
+                // En cas d'erreur COM (ex: compte inaccessible), on retourne une liste vide
+            }
+            return folderPaths;
+        }
+
+        private void TraverseFolders(dynamic foldersCollection, string currentPath, List<string> folderPaths)
+        {
+            int count = foldersCollection.Count;
+            // On privilégie for (1..count) en Late Binding pour éviter les crashs de l'énumérateur COM
+            for (int i = 1; i <= count; i++)
+            {
+                dynamic folder = foldersCollection[i];
+                
+                string folderName = folder.Name;
+                string fullPath = string.IsNullOrEmpty(currentPath) ? folderName : $"{currentPath}/{folderName}";
+                
+                folderPaths.Add(fullPath);
+
+                // Appel récursif si le dossier contient des sous-dossiers
+                if (folder.Folders.Count > 0)
+                {
+                    TraverseFolders(folder.Folders, fullPath, folderPaths);
+                }
+            }
+        }
+
+        // ====================================================================================
+        // ACTIONS PHYSIQUES D'EXÉCUTION (J5-S2-T1)
+        // ====================================================================================
+
+        /// <inheritdoc />
+        public void MoveToFolder(string entryId, string folderPath)
+        {
+            var item = GetItemFromId(entryId);
+            
+            // On résout le chemin complet du dossier depuis la racine
+            dynamic rootStore = _application.Session.GetDefaultFolder(6).Parent;
+            dynamic? targetFolder = ResolveFolderFromPath(rootStore.Folders, folderPath);
+            
+            if (targetFolder != null)
+            {
+                item.Move(targetFolder);
+            }
+            else
+            {
+                // Fallback sur la Boîte de réception si le dossier cible est introuvable
+                dynamic fallbackFolder = _application.Session.GetDefaultFolder(6);
+                item.Move(fallbackFolder);
+            }
+        }
+        
+        /// <summary>
+        /// Révout une instance de MAPIFolder à partir de son chemin (ex: "Boîte de réception/Projets/2026")
+        /// </summary>
+        private dynamic? ResolveFolderFromPath(dynamic rootFolders, string path)
+        {
+            var parts = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length == 0) return null;
+
+            dynamic currentCollection = rootFolders;
+            dynamic? currentFolder = null;
+
+            foreach (var part in parts)
+            {
+                bool found = false;
+                int count = currentCollection.Count;
+                
+                for (int i = 1; i <= count; i++)
+                {
+                    dynamic f = currentCollection[i];
+                    if (string.Equals(f.Name, part, StringComparison.OrdinalIgnoreCase))
+                    {
+                        currentFolder = f;
+                        currentCollection = f.Folders;
+                        found = true;
+                        break;
+                    }
+                }
+                
+                if (!found) return null; // Un segment du chemin n'existe pas
+            }
+
+            return currentFolder;
+        }
+
+        /// <inheritdoc />
+        public void MarkAsRead(string entryId)
+        {
+            var item = GetItemFromId(entryId);
+            item.UnRead = false;
+            item.Save();
+        }
+
+        /// <inheritdoc />
+        public void FlagForFollowUp(string entryId)
+        {
+            var item = GetItemFromId(entryId);
+            item.MarkAsTask(1); // olMarkNoDate
+            item.Save();
+        }
+
+        /// <inheritdoc />
+        public void Forward(string entryId, string recipients)
+        {
+            var item = GetItemFromId(entryId);
+            var forwardItem = item.Forward();
+            forwardItem.Recipients.Add(recipients);
+            forwardItem.Send();
+        }
+
+        /// <inheritdoc />
+        public void SetImportance(string entryId, string importanceLevel)
+        {
+            var item = GetItemFromId(entryId);
+            item.Importance = importanceLevel.ToLowerInvariant() switch
+            {
+                "haute" => 2,   // olImportanceHigh
+                "faible" => 0,  // olImportanceLow
+                _ => 1          // olImportanceNormal
+            };
+            item.Save();
+        }
+
+        /// <inheritdoc />
+        public void AddReminder(string entryId, DateTime reminderTime)
+        {
+            var item = GetItemFromId(entryId);
+            item.ReminderSet = true;
+            item.ReminderTime = reminderTime;
+            item.Save();
+        }
+
+        /// <inheritdoc />
+        public void FlagToday(string entryId)
+        {
+            var item = GetItemFromId(entryId);
+            item.MarkAsTask(2); // olMarkToday
+            item.Save();
+        }
+
+        /// <inheritdoc />
+        public void InsertHtmlSignature(string entryId, string signatureName)
+        {
+            string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            string signatureDir = Path.Combine(appDataPath, "Microsoft", "Signatures");
+            string signatureFilePath = Path.Combine(signatureDir, $"{signatureName}.htm");
+
+            if (!File.Exists(signatureFilePath))
+            {
+                throw new FileNotFoundException($"Signature introuvable sur le disque : {signatureFilePath}");
+            }
+
+            string htmlContent = File.ReadAllText(signatureFilePath);
+
+            // Outlook stocke les images d'une signature dans un sous-dossier "{NomSignature}_files".
+            // Il faut convertir les chemins relatifs en chemins absolus pour l'injection.
+            string imageFolderRelative = $"{signatureName}_files/";
+            string imageFolderRelativeEncoded = $"{signatureName.Replace(" ", "%20")}_files/";
+            string imageFolderAbsolute = Path.Combine(signatureDir, $"{signatureName}_files/");
+
+            htmlContent = htmlContent.Replace(imageFolderRelative, imageFolderAbsolute);
+            htmlContent = htmlContent.Replace(imageFolderRelativeEncoded, imageFolderAbsolute);
+
+            // On récupère le mail seulement si le fichier de signature a bien été trouvé.
+            var item = GetItemFromId(entryId);
+            item.HTMLBody = item.HTMLBody + "<br/><br/>" + htmlContent;
+            item.Save();
         }
 
         // ====================================================================================
