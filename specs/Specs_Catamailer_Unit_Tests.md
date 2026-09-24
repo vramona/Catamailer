@@ -180,5 +180,5 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 
 ## Jalon 6 - Outil de Migration CSV (Standalone) - feature/j6-csv-migrator
 ### 🟢 J6-S1 : Parsing et Mapping (Outil de Migration CSV)
-- [x] ✅ `J6-S1-T1 - GetAvailableSignatures_ShouldReturnListWithoutThrowing` (Validé le 24/09/2026 sur feature/j6-csv-migrator_step-1-core - Commit : <COMMIT_HASH>)
-- [x] ✅ `J6-S1-T1 - InitializeAsync_ShouldLoadCategoriesAndExternalResources` (Validé le 24/09/2026 sur feature/j6-csv-migrator_step-1-core - Commit : <COMMIT_HASH>)
+- [x] ✅ `J6-S1-T1 - GetAvailableSignatures_ShouldReturnListWithoutThrowing` (Validé le 24/09/2026 sur feature/j6-csv-migrator_step-1-core - Commit : 7795024f30014fbd6f7d6fa66d55d4f88a984179)
+- [x] ✅ `J6-S1-T1 - InitializeAsync_ShouldLoadCategoriesAndExternalResources` (Validé le 24/09/2026 sur feature/j6-csv-migrator_step-1-core - Commit : 7795024f30014fbd6f7d6fa66d55d4f88a984179)
