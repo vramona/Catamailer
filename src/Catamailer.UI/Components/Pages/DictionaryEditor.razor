@@ -12,6 +12,7 @@
 //         - 2026-09-11 : Ajout du formulaire de création de règle (Phase Bleue).
 //         - 2026-09-11 : Ajout des champs Expéditeur et Destinataire (Phase Orange/Bleue).
 //         - 2026-09-25 : Implémentation du composant Virtualize pour les performances d'affichage (J6-S3-T1 - Phase Bleue).
+//         - 2026-09-25 : Implémentation de l'édition d'une règle existante (J6-S3-T6 - Phase Bleue).
 // </auto-generated>
 // ------------------------------------------------------------------------------ -->
 
@@ -20,7 +21,7 @@
 
 <div class="card shadow-sm border-0 bg-white mb-4">
     <div class="card-header bg-light">
-        <h5 class="mb-0">Ajouter une nouvelle règle</h5>
+        <h5 class="mb-0">@(ViewModel.IsEditing ? "Modifier la règle" : "Ajouter une nouvelle règle")</h5>
     </div>
     <div class="card-body">
         <div class="row g-3">
@@ -52,9 +53,21 @@
                 <input type="text" class="form-control" @bind="ViewModel.RecipientKeywordsInput" @bind:event="oninput" placeholder="ex: team@corp.com" />
             </div>
             <div class="col-12 text-end mt-3">
-                <button class="btn btn-primary px-4" @onclick="CreateRuleAsync" disabled="@(ViewModel.SelectedCategory == null || (string.IsNullOrWhiteSpace(ViewModel.SubjectKeywordsInput) && string.IsNullOrWhiteSpace(ViewModel.SenderKeywordsInput) && string.IsNullOrWhiteSpace(ViewModel.RecipientKeywordsInput)))">
-                    Ajouter la règle
-                </button>
+                @if (ViewModel.IsEditing)
+                {
+                    <button class="btn btn-outline-secondary px-4 me-2" @onclick="ViewModel.CancelEdit">
+                        Annuler
+                    </button>
+                    <button class="btn btn-warning px-4" @onclick="UpdateRuleAsync" disabled="@IsFormInvalid()">
+                        Mettre à jour la règle
+                    </button>
+                }
+                else
+                {
+                    <button class="btn btn-primary px-4" @onclick="CreateRuleAsync" disabled="@IsFormInvalid()">
+                        Ajouter la règle
+                    </button>
+                }
             </div>
         </div>
     </div>
@@ -76,7 +89,7 @@
                 @if (ViewModel.Rules != null && ViewModel.Rules.Any())
                 {
                     <Virtualize Items="@ViewModel.Rules" Context="rule">
-                        <tr>
+                        <tr class="@(ViewModel.EditingRule == rule ? "table-warning" : "")">
                             <td class="ps-4 align-middle fw-medium">
                                 @if (!string.IsNullOrEmpty(rule.TargetCategory.Color))
                                 {
@@ -94,7 +107,10 @@
                                 @(rule.RecipientKeywords.Any() ? string.Join(", ", rule.RecipientKeywords) : "-")
                             </td>
                             <td class="text-end pe-4 align-middle">
-                                <button class="btn btn-sm btn-outline-danger" @onclick="() => ViewModel.DeleteRuleAsync(rule)">
+                                <button class="btn btn-sm btn-outline-secondary me-2" @onclick="() => ViewModel.EditRule(rule)">
+                                    Éditer
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" @onclick="() => ViewModel.DeleteRuleAsync(rule)" disabled="@(ViewModel.IsEditing && ViewModel.EditingRule == rule)">
                                     Supprimer
                                 </button>
                             </td>
@@ -135,5 +151,18 @@
     private async Task CreateRuleAsync()
     {
         await ViewModel.CreateRuleFromFormAsync();
+    }
+
+    private async Task UpdateRuleAsync()
+    {
+        await ViewModel.UpdateRuleFromFormAsync();
+    }
+
+    private bool IsFormInvalid()
+    {
+        return ViewModel.SelectedCategory == null || 
+               (string.IsNullOrWhiteSpace(ViewModel.SubjectKeywordsInput) && 
+                string.IsNullOrWhiteSpace(ViewModel.SenderKeywordsInput) && 
+                string.IsNullOrWhiteSpace(ViewModel.RecipientKeywordsInput));
     }
 }

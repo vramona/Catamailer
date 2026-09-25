@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-25 12:29
+Généré le : 2026-09-25 14:20
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -161,6 +161,8 @@ Généré le : 2026-09-25 12:29
 - `string SubjectKeywordsInput { get; set; }` : Obtient ou définit les mots-clés du sujet saisis dans le formulaire (séparés par des virgules).
 - `string SenderKeywordsInput { get; set; }` : Obtient ou définit les mots-clés de l'expéditeur saisis dans le formulaire (séparés par des virgules).
 - `string RecipientKeywordsInput { get; set; }` : Obtient ou définit les mots-clés du destinataire saisis dans le formulaire (séparés par des virgules).
+- `DictionaryRule? EditingRule { get; set; }` : Obtient la règle actuellement en cours d'édition (si applicable).
+- `bool IsEditing { get; }` : Indique si le formulaire est actuellement en mode édition.
 - `Task InitializeAsync()` : Charge l'ensemble des règles de dictionnaire et des catégories depuis les dépôts.
   - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
   - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
@@ -168,8 +170,15 @@ Généré le : 2026-09-25 12:29
   - *Appelle* ➡️ `IRuleRepository.AddDictionaryRuleAsync()`
 - `Task DeleteRuleAsync(DictionaryRule rule)` : Supprime une règle du dépôt et met à jour la liste en mémoire.
   - *Appelle* ➡️ `IRuleRepository.DeleteDictionaryRuleAsync()`
+- `void EditRule(DictionaryRule rule)` : Charge une règle existante dans le formulaire pour édition.
+- `void CancelEdit()` : Annule l'édition en cours et réinitialise le formulaire.
 - `Task CreateRuleFromFormAsync()` : Crée une nouvelle règle à partir des données saisies dans le formulaire.
   - *Appelle* ➡️ `DictionaryEditorViewModel.AddRuleAsync()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.CancelEdit()`
+- `Task UpdateRuleFromFormAsync()` : Met à jour la règle en cours d'édition avec les données du formulaire.
+  - *Appelle* ➡️ `DictionaryRule.Update()`
+  - *Appelle* ➡️ `IRuleRepository.UpdateDictionaryRuleAsync()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.CancelEdit()`
 
 ### Class : PreferencesViewModel
 **Fichier** : `src\Catamailer.Application\ViewModels\PreferencesViewModel.cs`
@@ -316,6 +325,7 @@ Généré le : 2026-09-25 12:29
 - `IReadOnlyList<string> SubjectKeywords { get; set; }` : Obtient la liste des mots-clés recherchés dans le sujet.
 - `IReadOnlyList<string> SenderKeywords { get; set; }` : Obtient la liste des mots-clés (adresses ou noms) recherchés parmi les expéditeurs.
 - `IReadOnlyList<string> RecipientKeywords { get; set; }` : Obtient la liste des mots-clés (adresses ou noms) recherchés parmi les destinataires.
+- `void Update(CategoryNode targetCategory, IEnumerable<string>? subjectKeywords, IEnumerable<string>? senderKeywords, IEnumerable<string>? recipientKeywords)` : Met à jour l'ensemble des propriétés de la règle.
 
 ### Class : ExecutionRule
 **Fichier** : `src\Catamailer.Domain\ExecutionRule.cs`
@@ -579,6 +589,18 @@ Généré le : 2026-09-25 12:29
   - *Appelle* ➡️ `IOutlookApplicationWrapper.GetSelectedEntryId()`
   - *Appelle* ➡️ `IOutlookApplicationWrapper.GetMailMetadata()`
 
+### Class : RuleRepository
+**Fichier** : `src\Catamailer.Infrastructure\RuleRepository.cs`
+**Rôle** : Implémentation Entity Framework Core du dépôt des règles de classification et d'exécution.
+**Membres et Invocations :**
+- `Task<IEnumerable<DictionaryRule>> GetAllDictionaryRulesAsync()`
+- `Task AddDictionaryRuleAsync(DictionaryRule rule)`
+- `Task UpdateDictionaryRuleAsync(DictionaryRule rule)`
+- `Task DeleteDictionaryRuleAsync(DictionaryRule rule)`
+- `Task<IEnumerable<ExecutionRule>> GetAllExecutionRulesAsync()`
+- `Task AddExecutionRuleAsync(ExecutionRule rule)`
+- `Task DeleteExecutionRuleAsync(ExecutionRule rule)`
+
 ### Class : Win32GlobalHotkeyService
 **Fichier** : `src\Catamailer.Infrastructure\Win32GlobalHotkeyService.cs`
 **Rôle** : Implémentation Win32 du service de raccourcis globaux via P/Invoke (user32.dll et comctl32.dll).
@@ -666,39 +688,6 @@ Généré le : 2026-09-25 12:29
 **Membres et Invocations :**
 - `void EnsureDatabaseCreated(IServiceProvider serviceProvider)` : S'assure que le schéma de la base de données est créé.
 
-### Class : DummyCategoryManagerProvider
-**Fichier** : `src\Catamailer.UI\Dummies\DummyCategoryManagerProvider.cs`
-**Rôle** : Fournisseur factice simulant les retours d'Outlook pour tester l'IHM de synchronisation.
-**Membres et Invocations :**
-- `IEnumerable<(string Name, string? ColorCode)> GetAllCategories()`
-- `void AddCategory(string name, string colorCode)`
-- `void UpdateCategoryColor(string name, string newColorCode)`
-- `void RemoveCategory(string name)`
-
-### Class : DummyCategorySeeder
-**Fichier** : `src\Catamailer.UI\Dummies\DummyCategorySeeder.cs`
-**Rôle** : Injecte un jeu de catégories factices pour le développement. TODO: À supprimer une fois l'import depuis Outlook implémenté.
-**Membres et Invocations :**
-- `void SeedDummyCategories(IServiceProvider serviceProvider)` : Injecte les catégories de test si la base est vide.
-  - *Appelle* ➡️ `CategoryNode.AddChild()`
-
-### Class : DummyRuleRepository
-**Fichier** : `src\Catamailer.UI\Dummies\DummyRuleRepository.cs`
-**Rôle** : Dépôt factice pour fournir des règles en l'absence de base de données.
-**Membres et Invocations :**
-- `Task<IEnumerable<DictionaryRule>> GetAllDictionaryRulesAsync()`
-- `Task AddDictionaryRuleAsync(DictionaryRule rule)`
-- `Task DeleteDictionaryRuleAsync(DictionaryRule rule)`
-- `Task<IEnumerable<ExecutionRule>> GetAllExecutionRulesAsync()`
-- `Task AddExecutionRuleAsync(ExecutionRule rule)`
-- `Task DeleteExecutionRuleAsync(ExecutionRule rule)`
-
-### Class : DummySelectionProvider
-**Fichier** : `src\Catamailer.UI\Dummies\DummySelectionProvider.cs`
-**Rôle** : Fournisseur factice pour valider l'IHM sans dépendre d'Outlook en phase de développement. TODO: À supprimer une fois l'intégration Outlook finalisée.
-**Membres et Invocations :**
-- `MailMetadata? GetSelectedMail()`
-
 ### Class : MainPage
 **Fichier** : `src\Catamailer.UI\MainPage.xaml.cs`
 **Rôle** : Page principale hébergeant exclusivement la vue Blazor.
@@ -710,7 +699,6 @@ Généré le : 2026-09-25 12:29
 **Membres et Invocations :**
 - `MauiApp CreateMauiApp()` : Crée et configure l'instance principale de l'application MAUI. Injecte les dépendances Blazor et initialise le composant de zone de notification (Tray Icon).
   - *Appelle* ➡️ `DatabaseBootstrapper.EnsureDatabaseCreated()`
-  - *Appelle* ➡️ `DummyCategorySeeder.SeedDummyCategories()`
 
 ### Class : App
 **Fichier** : `src\Catamailer.UI\Platforms\Windows\App.xaml.cs`
@@ -726,7 +714,6 @@ Généré le : 2026-09-25 12:29
 - **QuickRuleBuilderModal** : `src\Catamailer.UI\Components\QuickRuleBuilderModal.razor`
 - **Routes** : `src\Catamailer.UI\Components\Routes.razor`
 - **_Imports** : `src\Catamailer.UI\Components\_Imports.razor`
-- **TestQuickActionsPage** (Route: `/test-quick-actions`) : `src\Catamailer.UI\Dummies\TestQuickActionsPage.razor`
 - **MainLayout** : `src\Catamailer.UI\Components\Layout\MainLayout.razor`
 - **CategoryEditor** (Route: `/category-editor`) : `src\Catamailer.UI\Components\Pages\CategoryEditor.razor`
 - **CategorySync** (Route: `/category-sync`) : `src\Catamailer.UI\Components\Pages\CategorySync.razor`
@@ -1081,6 +1068,19 @@ Généré le : 2026-09-25 12:29
 - `Task RulesCollection_ShouldBeCompatibleWithVirtualization()`
   - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
   - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
+- `Task EditRule_ShouldPopulateForm_AndSetIsEditing()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.EditRule()`
+- `void CancelEdit_ShouldClearForm_AndResetIsEditing()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.EditRule()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.CancelEdit()`
+- `Task UpdateRuleFromFormAsync_ShouldCallRepository_AndClearForm_WhenValid()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.EditRule()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.UpdateRuleFromFormAsync()`
+  - *Appelle* ➡️ `IRuleRepository.UpdateDictionaryRuleAsync()`
 
 ### Class : PreferencesViewModelTests
 **Fichier** : `tests\Catamailer.Application.Tests\ViewModels\PreferencesViewModelTests.cs`
@@ -1350,6 +1350,35 @@ Généré le : 2026-09-25 12:29
   - *Appelle* ➡️ `IOutlookApplicationWrapper.GetSelectedEntryId()`
   - *Appelle* ➡️ `IOutlookApplicationWrapper.GetMailMetadata()`
   - *Appelle* ➡️ `OutlookSelectionProvider.GetSelectedMail()`
+
+### Class : RuleRepositoryTests
+**Fichier** : `tests\Catamailer.Infrastructure.Tests\RuleRepositoryTests.cs`
+**Membres et Invocations :**
+- `Task AddAndGetAllDictionaryRulesAsync_ShouldPersistAndRetrieveRules()`
+  - *Appelle* ➡️ `RuleRepositoryTests.GetInMemoryContext()`
+  - *Appelle* ➡️ `RuleRepository.AddDictionaryRuleAsync()`
+  - *Appelle* ➡️ `RuleRepository.GetAllDictionaryRulesAsync()`
+- `Task UpdateDictionaryRuleAsync_ShouldUpdatePersistedRule()`
+  - *Appelle* ➡️ `RuleRepositoryTests.GetInMemoryContext()`
+  - *Appelle* ➡️ `RuleRepository.AddDictionaryRuleAsync()`
+  - *Appelle* ➡️ `DictionaryRule.Update()`
+  - *Appelle* ➡️ `RuleRepository.UpdateDictionaryRuleAsync()`
+  - *Appelle* ➡️ `RuleRepository.GetAllDictionaryRulesAsync()`
+- `Task DeleteDictionaryRuleAsync_ShouldRemoveRule()`
+  - *Appelle* ➡️ `RuleRepositoryTests.GetInMemoryContext()`
+  - *Appelle* ➡️ `RuleRepository.AddDictionaryRuleAsync()`
+  - *Appelle* ➡️ `RuleRepository.DeleteDictionaryRuleAsync()`
+  - *Appelle* ➡️ `RuleRepository.GetAllDictionaryRulesAsync()`
+- `Task AddAndGetAllExecutionRulesAsync_ShouldPersistAndRetrieveRules()`
+  - *Appelle* ➡️ `RuleRepositoryTests.GetInMemoryContext()`
+  - *Appelle* ➡️ `RuleNode.AddCriterion()`
+  - *Appelle* ➡️ `RuleRepository.AddExecutionRuleAsync()`
+  - *Appelle* ➡️ `RuleRepository.GetAllExecutionRulesAsync()`
+- `Task DeleteExecutionRuleAsync_ShouldRemoveRule()`
+  - *Appelle* ➡️ `RuleRepositoryTests.GetInMemoryContext()`
+  - *Appelle* ➡️ `RuleRepository.AddExecutionRuleAsync()`
+  - *Appelle* ➡️ `RuleRepository.DeleteExecutionRuleAsync()`
+  - *Appelle* ➡️ `RuleRepository.GetAllExecutionRulesAsync()`
 
 ### Class : StateAndSettingsRepositoriesTests
 **Fichier** : `tests\Catamailer.Infrastructure.Tests\StateAndSettingsRepositoriesTests.cs`

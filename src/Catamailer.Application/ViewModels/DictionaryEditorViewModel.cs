@@ -6,6 +6,8 @@
 //         - 2026-09-11 : Ajout du formulaire de création et injection de ICategoryRepository (Phase Verte).
 //         - 2026-09-11 : Ajout des champs Expéditeur et Destinataire (Phase Orange/Verte).
 //         - 2026-09-25 : Modification de la signature de Rules en ICollection pour la virtualisation (J6-S3-T1 - Phase Verte).
+//         - 2026-09-25 : Ajout des capacités d'édition de règles existantes (J6-S3-T6 - Phase Rouge).
+//         - 2026-09-25 : Implémentation de UpdateRuleFromFormAsync (J6-S3-T6 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -61,6 +63,16 @@ namespace Catamailer.Application.ViewModels
         public string RecipientKeywordsInput { get; set; } = string.Empty;
 
         /// <summary>
+        /// Obtient la règle actuellement en cours d'édition (si applicable).
+        /// </summary>
+        public DictionaryRule? EditingRule { get; private set; }
+
+        /// <summary>
+        /// Indique si le formulaire est actuellement en mode édition.
+        /// </summary>
+        public bool IsEditing => EditingRule != null;
+
+        /// <summary>
         /// Initialise une nouvelle instance de <see cref="DictionaryEditorViewModel"/>.
         /// </summary>
         /// <param name="ruleRepository">Le dépôt des règles.</param>
@@ -112,6 +124,31 @@ namespace Catamailer.Application.ViewModels
         }
 
         /// <summary>
+        /// Charge une règle existante dans le formulaire pour édition.
+        /// </summary>
+        /// <param name="rule">La règle à éditer.</param>
+        public void EditRule(DictionaryRule rule)
+        {
+            EditingRule = rule;
+            SelectedCategory = _availableCategories.FirstOrDefault(c => c.Name == rule.TargetCategory.Name);
+            SubjectKeywordsInput = string.Join(", ", rule.SubjectKeywords);
+            SenderKeywordsInput = string.Join(", ", rule.SenderKeywords);
+            RecipientKeywordsInput = string.Join(", ", rule.RecipientKeywords);
+        }
+
+        /// <summary>
+        /// Annule l'édition en cours et réinitialise le formulaire.
+        /// </summary>
+        public void CancelEdit()
+        {
+            EditingRule = null;
+            SelectedCategory = null;
+            SubjectKeywordsInput = string.Empty;
+            SenderKeywordsInput = string.Empty;
+            RecipientKeywordsInput = string.Empty;
+        }
+
+        /// <summary>
         /// Crée une nouvelle règle à partir des données saisies dans le formulaire.
         /// </summary>
         public async Task CreateRuleFromFormAsync()
@@ -140,10 +177,39 @@ namespace Catamailer.Application.ViewModels
             
             await AddRuleAsync(newRule);
 
-            SelectedCategory = null;
-            SubjectKeywordsInput = string.Empty;
-            SenderKeywordsInput = string.Empty;
-            RecipientKeywordsInput = string.Empty;
+            CancelEdit();
+        }
+
+        /// <summary>
+        /// Met à jour la règle en cours d'édition avec les données du formulaire.
+        /// </summary>
+        public async Task UpdateRuleFromFormAsync()
+        {
+            if (EditingRule == null || SelectedCategory == null) return;
+
+            var subjectKeywords = SubjectKeywordsInput
+                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(k => k.Trim())
+                .Where(k => !string.IsNullOrEmpty(k))
+                .ToArray();
+
+            var senderKeywords = SenderKeywordsInput
+                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(k => k.Trim())
+                .Where(k => !string.IsNullOrEmpty(k))
+                .ToArray();
+
+            var recipientKeywords = RecipientKeywordsInput
+                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(k => k.Trim())
+                .Where(k => !string.IsNullOrEmpty(k))
+                .ToArray();
+
+            EditingRule.Update(SelectedCategory, subjectKeywords, senderKeywords, recipientKeywords);
+            
+            await _ruleRepository.UpdateDictionaryRuleAsync(EditingRule);
+
+            CancelEdit();
         }
     }
 }

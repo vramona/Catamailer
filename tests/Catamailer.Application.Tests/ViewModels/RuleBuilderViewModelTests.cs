@@ -12,6 +12,7 @@
 //         - 2026-09-23 : Ajout des tests pour la gestion de l'état des actions complexes (J5-S1-T2 - Phase Rouge).
 //         - 2026-09-24 : Refonte des tests pour supporter la liste d'actions (J5-S3-T1 - Phase Orange).
 //         - 2026-09-24 : Ajout de IExternalResourceProvider et tests de peuplement (J6-S1-T1 - Phase Rouge).
+//         - 2026-09-25 : Implémentation de UpdateDictionaryRuleAsync dans le bouchon (J6-S3-T6 - Phase Rouge Correction).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -34,11 +35,25 @@ namespace Catamailer.Application.Tests.ViewModels
             public List<ExecutionRule> ExecutionRules { get; } = new();
 
             public Task<IEnumerable<DictionaryRule>> GetAllDictionaryRulesAsync() => Task.FromResult(DictionaryRules.AsEnumerable());
+            
             public Task AddDictionaryRuleAsync(DictionaryRule rule)
             {
                 DictionaryRules.Add(rule);
                 return Task.CompletedTask;
             }
+
+            public Task UpdateDictionaryRuleAsync(DictionaryRule rule)
+            {
+                // Remplacement simulé pour le bouchon
+                var existing = DictionaryRules.FirstOrDefault(r => r == rule);
+                if (existing != null)
+                {
+                    DictionaryRules.Remove(existing);
+                    DictionaryRules.Add(rule);
+                }
+                return Task.CompletedTask;
+            }
+
             public Task DeleteDictionaryRuleAsync(DictionaryRule rule)
             {
                 DictionaryRules.Remove(rule);

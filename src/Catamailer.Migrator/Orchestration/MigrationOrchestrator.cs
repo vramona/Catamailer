@@ -6,6 +6,7 @@
 //         - 2026-09-25 : Implémentation du cycle Parse, Map, Save (J6-S2-T1 - Phase Verte).
 //         - 2026-09-25 : Correction de l'appel via File.ReadLines et ParseLines (J6-S2-T1 - Phase Verte Correction).
 //         - 2026-09-25 : Remplacement par File.ReadAllLines pour éviter les locks I/O (J6-S2-T1 - Phase Verte Fix Lock).
+//         - 2026-09-25 : Ajout de EnsureCreatedAsync pour initialiser le schéma SQLite (J6-S3-B1 - Phase Verte Fix).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -55,8 +56,11 @@ namespace Catamailer.Migrator.Orchestration
                 throw new FileNotFoundException($"Le fichier spécifié est introuvable : {csvFilePath}");
             }
 
+            // Création du schéma de base de données si celui-ci n'existe pas
+            await _dbContext.Database.EnsureCreatedAsync();
+
             // Utilisation de ReadAllLines pour libérer immédiatement le verrou sur le fichier
-            var lines = File.ReadAllLines(csvFilePath);
+            var lines = await File.ReadAllLinesAsync(csvFilePath);
             var records = _parser.ParseLines(lines);
             var dictionaryRules = _mapper.Map(records);
 

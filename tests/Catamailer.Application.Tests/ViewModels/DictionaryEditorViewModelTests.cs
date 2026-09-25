@@ -5,6 +5,7 @@
 //         - 2026-09-11 : Création initiale et tests CRUD (J3-S3-T3-ST1).
 //         - 2026-09-25 : Ajout du test de compatibilité pour Virtualization (J6-S3-T1 - Phase Rouge).
 //         - 2026-09-25 : Suppression du using UI invalide (J6-S3-T1 - Phase Rouge Correction).
+//         - 2026-09-25 : Ajout des tests pour le mode édition (J6-S3-T6 - Phase Rouge).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -170,8 +171,93 @@ namespace Catamailer.Application.Tests.ViewModels
             await viewModel.InitializeAsync();
 
             // Assert
-            // La virtualisation Blazor nécessite ICollection ou IReadOnlyCollection pour obtenir .Count efficacement
             Assert.IsAssignableFrom<ICollection<DictionaryRule>>(viewModel.Rules);
+        }
+
+        [Fact]
+        public async Task EditRule_ShouldPopulateForm_AndSetIsEditing()
+        {
+            // Arrange
+            var mockRuleRepo = new Mock<IRuleRepository>();
+            var mockCatRepo = new Mock<ICategoryRepository>();
+            
+            var category = new CategoryNode("TestCategory");
+            var rule = new DictionaryRule(category, new[] { "urgent", "test" }, new[] { "boss@corp.com" }, System.Array.Empty<string>());
+            
+            mockCatRepo.Setup(r => r.GetAllAsync(It.IsAny<bool>()))
+                .ReturnsAsync(new List<CategoryNode> { category });
+
+            var viewModel = new DictionaryEditorViewModel(mockRuleRepo.Object, mockCatRepo.Object);
+            await viewModel.InitializeAsync();
+
+            // Act
+            viewModel.EditRule(rule);
+
+            // Assert
+            Assert.True(viewModel.IsEditing);
+            Assert.Same(rule, viewModel.EditingRule);
+            Assert.Same(category, viewModel.SelectedCategory);
+            Assert.Equal("urgent, test", viewModel.SubjectKeywordsInput);
+            Assert.Equal("boss@corp.com", viewModel.SenderKeywordsInput);
+            Assert.Empty(viewModel.RecipientKeywordsInput);
+        }
+
+        [Fact]
+        public void CancelEdit_ShouldClearForm_AndResetIsEditing()
+        {
+            // Arrange
+            var mockRuleRepo = new Mock<IRuleRepository>();
+            var mockCatRepo = new Mock<ICategoryRepository>();
+            var viewModel = new DictionaryEditorViewModel(mockRuleRepo.Object, mockCatRepo.Object);
+            
+            viewModel.EditRule(new DictionaryRule(new CategoryNode("Test")));
+
+            // Act
+            viewModel.CancelEdit();
+
+            // Assert
+            Assert.False(viewModel.IsEditing);
+            Assert.Null(viewModel.EditingRule);
+            Assert.Null(viewModel.SelectedCategory);
+            Assert.Empty(viewModel.SubjectKeywordsInput);
+        }
+
+        [Fact]
+        public async Task UpdateRuleFromFormAsync_ShouldCallRepository_AndClearForm_WhenValid()
+        {
+            // Arrange
+            var mockRuleRepo = new Mock<IRuleRepository>();
+            var mockCatRepo = new Mock<ICategoryRepository>();
+            
+            var oldCategory = new CategoryNode("OldCategory");
+            var newCategory = new CategoryNode("NewCategory");
+            var rule = new DictionaryRule(oldCategory, new[] { "oldKeyword" });
+            
+            mockCatRepo.Setup(r => r.GetAllAsync(It.IsAny<bool>()))
+                .ReturnsAsync(new List<CategoryNode> { oldCategory, newCategory });
+
+            var viewModel = new DictionaryEditorViewModel(mockRuleRepo.Object, mockCatRepo.Object);
+            await viewModel.InitializeAsync();
+            viewModel.EditRule(rule);
+
+            // Act
+            viewModel.SelectedCategory = newCategory;
+            viewModel.SubjectKeywordsInput = "newKeyword1, newKeyword2";
+            
+            await viewModel.UpdateRuleFromFormAsync();
+
+            // Assert
+            mockRuleRepo.Verify(r => r.UpdateDictionaryRuleAsync(It.Is<DictionaryRule>(r => 
+                r.TargetCategory == newCategory &&
+                r.SubjectKeywords.Count == 2 &&
+                r.SubjectKeywords.Contains("newKeyword1") &&
+                r.SubjectKeywords.Contains("newKeyword2")
+            )), Times.Once);
+
+            Assert.False(viewModel.IsEditing);
+            Assert.Null(viewModel.EditingRule);
+            Assert.Null(viewModel.SelectedCategory);
+            Assert.Empty(viewModel.SubjectKeywordsInput);
         }
     }
 }
