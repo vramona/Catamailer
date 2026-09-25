@@ -13,7 +13,7 @@ Arborescence / Fichier                                        Taille      Date d
 │   │   ├── TestsReport                                                   2026-09-07 11:22
 │   │   │   ├── TestResults.md                                92 octets   2026-09-25 11:34
 │   │   │   └── toc.yml                                       59 octets   2026-09-25 11:34
-│   │   └── toc.yml                                           280 octets  2026-09-25 11:34
+│   │   └── toc.yml                                           185 octets  2026-09-25 11:38
 │   └── Ai_Architecture.md                                    87,27 Ko    2026-09-25 11:34
 ├── GEM                                                                   2026-09-07 13:38
 │   └── GEM Catamailer.md                                     8,19 Ko     2026-09-07 13:38
@@ -41,8 +41,8 @@ Arborescence / Fichier                                        Taille      Date d
 ├── specs                                                                 2026-09-24 18:19
 │   ├── Next Prompt.txt                                       777 octets  2026-09-24 14:46
 │   ├── Specs_Catamailer.md                                   8,82 Ko     2026-09-24 14:46
-│   ├── Specs_Catamailer_Unit_Tests.md                        28,92 Ko    2026-09-25 11:34
-│   └── ToDoList.md                                           17,06 Ko    2026-09-25 11:33
+│   ├── Specs_Catamailer_Unit_Tests.md                        28,95 Ko    2026-09-25 11:34
+│   └── ToDoList.md                                           17,08 Ko    2026-09-25 11:34
 ├── src                                                                   2026-09-07 10:58
 │   ├── Catamailer.Application                                            2026-09-15 18:45
 │   │   ├── Services                                                      2026-09-24 14:46
@@ -289,6 +289,6 @@ Arborescence / Fichier                                        Taille      Date d
 │   └── Gemini_Generated_Image_xxc2nmxxc2nmxxc2.png           5,19 Mo     2026-09-15 18:45
 ├── .gitignore                                                8,32 Ko     2026-09-23 17:39
 ├── Catamailer.slnx                                           1,15 Ko     2026-09-24 18:19
-└── FileList.txt                                              0 octets    2026-09-25 11:34
+└── FileList.txt                                              0 octets    2026-09-25 11:38
 
 
