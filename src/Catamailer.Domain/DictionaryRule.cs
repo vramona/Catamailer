@@ -1,6 +1,7 @@
 // Historique :
 // 2026-09-07 : Création de l'entité DictionaryRule (J1-S1-T2).
 // 2026-09-09 : Scission de Keywords en Subject/Sender/Recipient pour classification ciblée (J3-S2-T2-ST1).
+// 2026-09-25 : Ajout du constructeur privé et setters pour binding Entity Framework (J6-S2-T1 - Phase Verte).
 
 using System.Collections.Generic;
 using System.Linq;
@@ -15,22 +16,29 @@ namespace Catamailer.Domain
         /// <summary>
         /// Obtient la catégorie cible qui sera déduite si la règle correspond.
         /// </summary>
-        public CategoryNode TargetCategory { get; }
+        public CategoryNode TargetCategory { get; private set; } = null!;
 
         /// <summary>
         /// Obtient la liste des mots-clés recherchés dans le sujet.
         /// </summary>
-        public IReadOnlyList<string> SubjectKeywords { get; }
+        public IReadOnlyList<string> SubjectKeywords { get; private set; } = new List<string>();
 
         /// <summary>
         /// Obtient la liste des mots-clés (adresses ou noms) recherchés parmi les expéditeurs.
         /// </summary>
-        public IReadOnlyList<string> SenderKeywords { get; }
+        public IReadOnlyList<string> SenderKeywords { get; private set; } = new List<string>();
 
         /// <summary>
         /// Obtient la liste des mots-clés (adresses ou noms) recherchés parmi les destinataires.
         /// </summary>
-        public IReadOnlyList<string> RecipientKeywords { get; }
+        public IReadOnlyList<string> RecipientKeywords { get; private set; } = new List<string>();
+
+        /// <summary>
+        /// Constructeur privé requis pour la matérialisation par Entity Framework Core.
+        /// </summary>
+        private DictionaryRule()
+        {
+        }
 
         /// <summary>
         /// Initialise une nouvelle instance de la classe <see cref="DictionaryRule"/>.

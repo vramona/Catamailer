@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-24 18:03
+Généré le : 2026-09-25 10:22
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -312,10 +312,10 @@ Généré le : 2026-09-24 18:03
 **Fichier** : `src\Catamailer.Domain\DictionaryRule.cs`
 **Rôle** : Représente une règle de l'Étape 1 (Classification) liant des mots-clés spécifiques (Sujet, Expéditeur, Destinataire) à une catégorie déduite.
 **Membres et Invocations :**
-- `CategoryNode TargetCategory { get; }` : Obtient la catégorie cible qui sera déduite si la règle correspond.
-- `IReadOnlyList<string> SubjectKeywords { get; }` : Obtient la liste des mots-clés recherchés dans le sujet.
-- `IReadOnlyList<string> SenderKeywords { get; }` : Obtient la liste des mots-clés (adresses ou noms) recherchés parmi les expéditeurs.
-- `IReadOnlyList<string> RecipientKeywords { get; }` : Obtient la liste des mots-clés (adresses ou noms) recherchés parmi les destinataires.
+- `CategoryNode TargetCategory { get; set; }` : Obtient la catégorie cible qui sera déduite si la règle correspond.
+- `IReadOnlyList<string> SubjectKeywords { get; set; }` : Obtient la liste des mots-clés recherchés dans le sujet.
+- `IReadOnlyList<string> SenderKeywords { get; set; }` : Obtient la liste des mots-clés (adresses ou noms) recherchés parmi les expéditeurs.
+- `IReadOnlyList<string> RecipientKeywords { get; set; }` : Obtient la liste des mots-clés (adresses ou noms) recherchés parmi les destinataires.
 
 ### Class : ExecutionRule
 **Fichier** : `src\Catamailer.Domain\ExecutionRule.cs`
@@ -475,6 +475,7 @@ Généré le : 2026-09-24 18:03
 - `DbSet<CategoryNode> Categories { get; set; }` : Obtient ou définit la collection des nœuds de catégories.
 - `DbSet<SystemState> SystemStates { get; set; }` : Obtient ou définit la collection des états systèmes.
 - `DbSet<AppSetting> AppSettings { get; set; }` : Obtient ou définit la collection des paramètres d'application.
+- `DbSet<DictionaryRule> DictionaryRules { get; set; }` : Obtient ou définit la collection des règles de classification.
 - `DbSet<ExecutionRule> ExecutionRules { get; set; }` : Obtient ou définit la collection des règles d'exécution.
 
 ### Class : CategoryRepository
@@ -602,6 +603,19 @@ Généré le : 2026-09-24 18:03
 **Rôle** : Implémentation du mappeur traduisant les enregistrements CSV en DictionaryRule.
 **Membres et Invocations :**
 - `IEnumerable<DictionaryRule> Map(IEnumerable<CsvRuleRecord> records)`
+
+### Interface : IMigrationOrchestrator
+**Fichier** : `src\Catamailer.Migrator\Orchestration\IMigrationOrchestrator.cs`
+**Rôle** : Définit le contrat pour l'orchestration globale du processus de migration CSV vers la base de données.
+**Membres et Invocations :**
+
+### Class : MigrationOrchestrator
+**Fichier** : `src\Catamailer.Migrator\Orchestration\MigrationOrchestrator.cs`
+**Rôle** : Implémentation par défaut de l'orchestrateur coordonnant le parser, le mapper et la base de données.
+**Membres et Invocations :**
+- `Task MigrateAsync(string csvFilePath)`
+  - *Appelle* ➡️ `ICsvParser.ParseLines()`
+  - *Appelle* ➡️ `IRuleMapper.Map()`
 
 ### Class : CsvParser
 **Fichier** : `src\Catamailer.Migrator\Parsing\CsvParser.cs`
@@ -1244,6 +1258,7 @@ Généré le : 2026-09-24 18:03
   - *Appelle* ➡️ `CategoryNode.MarkAsDeleted()`
 - `void IgnoreQueryFilters_ShouldReturnDeletedCategories()`
   - *Appelle* ➡️ `CategoryNode.MarkAsDeleted()`
+- `void CanSaveAndRetrieve_DictionaryRule()`
 
 ### Class : CategoryRepositoryTests
 **Fichier** : `tests\Catamailer.Infrastructure.Tests\CategoryRepositoryTests.cs`
@@ -1350,6 +1365,12 @@ Généré le : 2026-09-24 18:03
   - *Appelle* ➡️ `CsvParser.ParseLines()`
 - `void ParseLines_ShouldIgnoreLinesWithLessThanTwoColumns()`
   - *Appelle* ➡️ `CsvParser.ParseLines()`
+
+### Class : MigrationOrchestratorTests
+**Fichier** : `tests\Catamailer.Migrator.Tests\Orchestration\MigrationOrchestratorTests.cs`
+**Membres et Invocations :**
+- `Task MigrateAsync_ShouldParseMapAndSaveToDatabase()`
+  - *Appelle* ➡️ `MigrationOrchestrator.MigrateAsync()`
 
 ### Class : RuleMapperTests
 **Fichier** : `tests\Catamailer.Migrator.Tests\RuleMapperTests.cs`
