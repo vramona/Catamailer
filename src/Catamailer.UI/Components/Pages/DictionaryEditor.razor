@@ -1,6 +1,7 @@
 @page "/dictionary-editor"
 @using Catamailer.Application.ViewModels
 @using Catamailer.Domain
+@using Microsoft.AspNetCore.Components.Web.Virtualization
 @inject DictionaryEditorViewModel ViewModel
 
 <!-- ------------------------------------------------------------------------------
@@ -10,6 +11,7 @@
 //         - 2026-09-11 : Création de la page de l'éditeur de dictionnaires (J3-S3-T3-ST1 - Phase Bleue).
 //         - 2026-09-11 : Ajout du formulaire de création de règle (Phase Bleue).
 //         - 2026-09-11 : Ajout des champs Expéditeur et Destinataire (Phase Orange/Bleue).
+//         - 2026-09-25 : Implémentation du composant Virtualize pour les performances d'affichage (J6-S3-T1 - Phase Bleue).
 // </auto-generated>
 // ------------------------------------------------------------------------------ -->
 
@@ -73,8 +75,7 @@
             <tbody>
                 @if (ViewModel.Rules != null && ViewModel.Rules.Any())
                 {
-                    @foreach (var rule in ViewModel.Rules)
-                    {
+                    <Virtualize Items="@ViewModel.Rules" Context="rule">
                         <tr>
                             <td class="ps-4 align-middle fw-medium">
                                 @if (!string.IsNullOrEmpty(rule.TargetCategory.Color))
@@ -98,7 +99,7 @@
                                 </button>
                             </td>
                         </tr>
-                    }
+                    </Virtualize>
                 }
                 else
                 {

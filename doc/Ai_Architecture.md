@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-25 11:34
+Généré le : 2026-09-25 12:29
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -155,7 +155,7 @@ Généré le : 2026-09-25 11:34
 **Fichier** : `src\Catamailer.Application\ViewModels\DictionaryEditorViewModel.cs`
 **Rôle** : ViewModel responsable de la gestion (CRUD) des règles de dictionnaires (Étape 1).
 **Membres et Invocations :**
-- `IEnumerable<DictionaryRule> Rules { get; }` : Obtient la liste observable des règles de dictionnaire.
+- `ICollection<DictionaryRule> Rules { get; }` : Obtient la liste observable des règles de dictionnaire.
 - `IEnumerable<CategoryNode> AvailableCategories { get; }` : Obtient la liste des catégories disponibles pour la création d'une règle.
 - `CategoryNode? SelectedCategory { get; set; }` : Obtient ou définit la catégorie sélectionnée dans le formulaire.
 - `string SubjectKeywordsInput { get; set; }` : Obtient ou définit les mots-clés du sujet saisis dans le formulaire (séparés par des virgules).
@@ -1059,17 +1059,28 @@ Généré le : 2026-09-25 11:34
 **Fichier** : `tests\Catamailer.Application.Tests\ViewModels\DictionaryEditorViewModelTests.cs`
 **Membres et Invocations :**
 - `Task InitializeAsync_ShouldLoadDictionaryRules_FromRepository()`
+  - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
   - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
 - `Task AddRuleAsync_ShouldCallRepository_AndRefreshList()`
   - *Appelle* ➡️ `DictionaryEditorViewModel.AddRuleAsync()`
+  - *Appelle* ➡️ `IRuleRepository.AddDictionaryRuleAsync()`
 - `Task DeleteRuleAsync_ShouldCallRepository_AndRefreshList()`
+  - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
   - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
   - *Appelle* ➡️ `DictionaryEditorViewModel.DeleteRuleAsync()`
+  - *Appelle* ➡️ `IRuleRepository.DeleteDictionaryRuleAsync()`
 - `Task InitializeAsync_ShouldLoadCategories_FromCategoryRepository()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
   - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
 - `Task CreateRuleFromFormAsync_ShouldAddRule_AndClearForm_WhenValid()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
   - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
   - *Appelle* ➡️ `DictionaryEditorViewModel.CreateRuleFromFormAsync()`
+  - *Appelle* ➡️ `IRuleRepository.AddDictionaryRuleAsync()`
+- `Task RulesCollection_ShouldBeCompatibleWithVirtualization()`
+  - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
 
 ### Class : PreferencesViewModelTests
 **Fichier** : `tests\Catamailer.Application.Tests\ViewModels\PreferencesViewModelTests.cs`

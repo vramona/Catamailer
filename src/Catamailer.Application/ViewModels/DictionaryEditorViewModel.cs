@@ -5,6 +5,7 @@
 //         - 2026-09-11 : Création initiale (J3-S3-T3-ST1 - Phase Verte).
 //         - 2026-09-11 : Ajout du formulaire de création et injection de ICategoryRepository (Phase Verte).
 //         - 2026-09-11 : Ajout des champs Expéditeur et Destinataire (Phase Orange/Verte).
+//         - 2026-09-25 : Modification de la signature de Rules en ICollection pour la virtualisation (J6-S3-T1 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -32,7 +33,7 @@ namespace Catamailer.Application.ViewModels
         /// <summary>
         /// Obtient la liste observable des règles de dictionnaire.
         /// </summary>
-        public IEnumerable<DictionaryRule> Rules => _rules;
+        public ICollection<DictionaryRule> Rules => _rules;
 
         /// <summary>
         /// Obtient la liste des catégories disponibles pour la création d'une règle.

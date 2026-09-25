@@ -105,10 +105,11 @@ Markdown
 - [x] ✅ **J6-S2-T2** - Test d'intégration End-to-End avec fichier CSV réel. (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-2-db - Commit : 8be51bbbc959a5e53a91b43974f7d08eda5ad69d) (Cpx: 3 / 3)
 
 ### Step 3 - Ergonomie et Gestion des Règles Massives (UI) - feature/j6-csv-migrator_step-3-ui
-- [ ] ⚪ **J6-S3-T1** - Intégration de la virtualisation (`<Virtualize>`) pour la liste des règles de l'Étape 1.
+- [x] ✅ **J6-S3-T1** - Intégration de la virtualisation (`<Virtualize>`) pour la liste des règles de l'Étape 1. (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : <COMMIT_HASH>) (Cpx: 3 / 3)
 - [ ] ⚪ **J6-S3-T2** - Ajout d'une barre de recherche et filtrage multi-critères (catégorie, champ, mot-clé).
 - [ ] ⚪ **J6-S3-T3** - Implémentation d'un affichage hiérarchique calqué sur l'arborescence des catégories.
 - [ ] ⚪ **J6-S3-T4** - Mécanisme de détection et signalement visuel des conflits/doublons de mots-clés.
+- [ ] ⚪ **J6-S3-T5** - Suppression de tous les Dummies du projet `Catamailer.UI` (Refactoring).
 
 ## Jalon 7 - Inbox Notes, Agenda & Actions Internes - feature/j7-inbox-notes
 ### Step 1 - Modélisation & Agendas - feature/j7-inbox-notes_step-1-core
