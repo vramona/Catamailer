@@ -1,7 +1,9 @@
 // Historique :
 // 2026-09-07 : Création des tests pour CatamailerDbContext (J1-S1-T3).
 // 2026-09-22 : Ajout des tests pour le filtre global IsDeleted (J4-S4-T6).
+// 2026-09-24 : Ajout du test CanSaveAndRetrieve_DictionaryRule (J6-S2-T1 - Phase Rouge).
 
+using System.Collections.Generic;
 using System.Linq;
 using Catamailer.Domain;
 using Microsoft.EntityFrameworkCore;
@@ -114,6 +116,47 @@ namespace Catamailer.Infrastructure.Tests
             // Assert
             Assert.Equal(2, allCategories.Count);
             Assert.Contains(allCategories, c => c.Name == "Deleted");
+        }
+
+        [Fact]
+        public void CanSaveAndRetrieve_DictionaryRule()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<CatamailerDbContext>()
+                .UseSqlite("DataSource=:memory:")
+                .Options;
+
+            using var context = new CatamailerDbContext(options);
+            context.Database.OpenConnection();
+            context.Database.EnsureCreated();
+
+            var category = new CategoryNode("Urba");
+            var rule = new DictionaryRule(
+                category,
+                new List<string> { "Architecture" },
+                new List<string> { "architecte@domaine.fr" },
+                new List<string> { "equipe-urba@domaine.fr" }
+            );
+
+            // Act
+            context.Categories.Add(category);
+            // On utilise Set<DictionaryRule>() car le DbSet n'est pas encore déclaré dans la Phase Rouge
+            context.Set<DictionaryRule>().Add(rule);
+            context.SaveChanges();
+
+            // Assert
+            var retrieved = context.Set<DictionaryRule>()
+                .Include(r => r.TargetCategory)
+                .FirstOrDefault();
+                
+            Assert.NotNull(retrieved);
+            Assert.Equal("Urba", retrieved.TargetCategory.Name);
+            Assert.Single(retrieved.SubjectKeywords);
+            Assert.Equal("Architecture", retrieved.SubjectKeywords[0]);
+            Assert.Single(retrieved.SenderKeywords);
+            Assert.Equal("architecte@domaine.fr", retrieved.SenderKeywords[0]);
+            Assert.Single(retrieved.RecipientKeywords);
+            Assert.Equal("equipe-urba@domaine.fr", retrieved.RecipientKeywords[0]);
         }
     }
 }

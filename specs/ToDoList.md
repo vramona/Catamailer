@@ -97,8 +97,18 @@
 - [x] ✅ **J6-S1-T3** - Implémentation du `RuleMapper` (traduction et regroupement des CsvRuleRecord en DictionaryRule). (Validé le 24/09/2026 sur feature/j6-csv-migrator_step-1-core - Commit : <c19002684939618408c6b057094160a6a270d056>) (Cpx: 5 / 5)
 
 ### Step 2 - Persistance et Exécution Console - feature/j6-csv-migrator_step-2-db
-- [ ] ⚪ **J6-S2-T1** - Intégration avec `CatamailerDbContext` pour sauvegarder les règles générées en base de données.
-- [ ] ⚪ **J6-S2-T2** - Câblage final de `Program.cs` avec gestion des arguments (chemin CSV source, chemin DB cible) et retours console.
+- [x] ✅ **J6-S2-T1** - Intégration de `CatamailerDbContext` (ajout de `DictionaryRule`) et création du `MigrationOrchestrator`. (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-2-db - Commit : 7eaf11b3b70261a45e169c1102f0694f8dab24f4) (Cpx: 3 / 3)
+- [x] ✅ **J6-S2-T2** - Test d'intégration End-to-End avec fichier CSV réel. (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-2-db - Commit : 7b470ec947afe5a3f8f3f56fab29167e9d0126d2) (Cpx: 3 / 3)
+Markdown
+### Step 2 - Persistance et Exécution Console - feature/j6-csv-migrator_step-2-db
+- [x] ✅ **J6-S2-T1** - Intégration de `CatamailerDbContext` (ajout de `DictionaryRule`) et création du `MigrationOrchestrator`. (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-2-db - Commit : 7b470ec947afe5a3f8f3f56fab29167e9d0126d2) (Cpx: 3 / 3)
+- [x] ✅ **J6-S2-T2** - Test d'intégration End-to-End avec fichier CSV réel. (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-2-db - Commit : 8be51bbbc959a5e53a91b43974f7d08eda5ad69d) (Cpx: 3 / 3)
+
+### Step 3 - Ergonomie et Gestion des Règles Massives (UI) - feature/j6-csv-migrator_step-3-ui
+- [ ] ⚪ **J6-S3-T1** - Intégration de la virtualisation (`<Virtualize>`) pour la liste des règles de l'Étape 1.
+- [ ] ⚪ **J6-S3-T2** - Ajout d'une barre de recherche et filtrage multi-critères (catégorie, champ, mot-clé).
+- [ ] ⚪ **J6-S3-T3** - Implémentation d'un affichage hiérarchique calqué sur l'arborescence des catégories.
+- [ ] ⚪ **J6-S3-T4** - Mécanisme de détection et signalement visuel des conflits/doublons de mots-clés.
 
 ## Jalon 7 - Inbox Notes, Agenda & Actions Internes - feature/j7-inbox-notes
 ### Step 1 - Modélisation & Agendas - feature/j7-inbox-notes_step-1-core

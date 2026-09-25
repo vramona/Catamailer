@@ -3,6 +3,7 @@
 // 2026-09-07 : Ajout des entités SystemState et AppSetting (J2-S2-T1).
 // 2026-09-22 : Ajout du filtre de requête global (Global Query Filter) pour IsDeleted sur CategoryNode (J4-S4-T6).
 // 2026-09-24 : Ajout de ExecutionRule et configuration JSON pour IReadOnlyList<RuleAction> (J5-S3-T1 - Phase Verte).
+// 2026-09-25 : Ajout de DictionaryRule, Shadow Properties et configuration JSON (J6-S2-T1 - Phase Verte).
 
 using Catamailer.Domain;
 using Microsoft.EntityFrameworkCore;
@@ -30,6 +31,11 @@ namespace Catamailer.Infrastructure
         /// Obtient ou définit la collection des paramètres d'application.
         /// </summary>
         public DbSet<AppSetting> AppSettings { get; set; } = null!;
+
+        /// <summary>
+        /// Obtient ou définit la collection des règles de classification.
+        /// </summary>
+        public DbSet<DictionaryRule> DictionaryRules { get; set; } = null!;
 
         /// <summary>
         /// Obtient ou définit la collection des règles d'exécution.
@@ -86,6 +92,39 @@ namespace Catamailer.Infrastructure
             modelBuilder.Entity<AppSetting>(entity =>
             {
                 entity.HasKey(e => e.Key);
+            });
+
+            // Configuration de l'entité DictionaryRule
+            modelBuilder.Entity<DictionaryRule>(entity =>
+            {
+                // Utilisation d'une propriété fantôme (Shadow Property) pour la clé primaire
+                entity.Property<int>("Id").ValueGeneratedOnAdd();
+                entity.HasKey("Id");
+
+                // Configuration de la relation avec CategoryNode (Clé étrangère fantôme)
+                entity.HasOne(e => e.TargetCategory)
+                      .WithMany()
+                      .HasForeignKey("TargetCategoryName")
+                      .IsRequired()
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                // Configuration de la liste des mots-clés du sujet en JSON
+                entity.Property(e => e.SubjectKeywords)
+                      .HasConversion(
+                          v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                          v => JsonSerializer.Deserialize<IReadOnlyList<string>>(v, (JsonSerializerOptions?)null)!);
+
+                // Configuration de la liste des mots-clés de l'expéditeur en JSON
+                entity.Property(e => e.SenderKeywords)
+                      .HasConversion(
+                          v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                          v => JsonSerializer.Deserialize<IReadOnlyList<string>>(v, (JsonSerializerOptions?)null)!);
+
+                // Configuration de la liste des mots-clés du destinataire en JSON
+                entity.Property(e => e.RecipientKeywords)
+                      .HasConversion(
+                          v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                          v => JsonSerializer.Deserialize<IReadOnlyList<string>>(v, (JsonSerializerOptions?)null)!);
             });
 
             // Configuration de l'entité ExecutionRule
