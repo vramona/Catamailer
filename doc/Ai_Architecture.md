@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-25 10:22
+Généré le : 2026-09-25 10:36
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -1365,6 +1365,12 @@ Généré le : 2026-09-25 10:22
   - *Appelle* ➡️ `CsvParser.ParseLines()`
 - `void ParseLines_ShouldIgnoreLinesWithLessThanTwoColumns()`
   - *Appelle* ➡️ `CsvParser.ParseLines()`
+
+### Class : MigrationOrchestratorE2ETests
+**Fichier** : `tests\Catamailer.Migrator.Tests\Orchestration\MigrationOrchestratorE2ETests.cs`
+**Membres et Invocations :**
+- `Task MigrateAsync_WithRealCsvData_ShouldProduceCorrectDictionaryRules()`
+  - *Appelle* ➡️ `MigrationOrchestrator.MigrateAsync()`
 
 ### Class : MigrationOrchestratorTests
 **Fichier** : `tests\Catamailer.Migrator.Tests\Orchestration\MigrationOrchestratorTests.cs`

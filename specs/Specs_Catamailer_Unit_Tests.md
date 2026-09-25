@@ -193,4 +193,5 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 ### 🟢 J6-S2 : Intégration EF Core et Orchestration
 - [x] ✅ `J6-S2-T1 - CanSaveAndRetrieve_DictionaryRule` (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-2-db - Commit : 7eaf11b3b70261a45e169c1102f0694f8dab24f4)
 - [x] ✅ `J6-S2-T1 - MigrateAsync_ShouldParseMapAndSaveToDatabase` (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-2-db - Commit : 7eaf11b3b70261a45e169c1102f0694f8dab24f4)
+- [x] ✅ `J6-S2-T2 - MigrateAsync_WithRealCsvData_ShouldProduceCorrectDictionaryRules` (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-2-db - Commit : <COMMIT_HASH>)
 
