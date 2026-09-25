@@ -97,7 +97,7 @@
 - [x] ✅ **J6-S1-T3** - Implémentation du `RuleMapper` (traduction et regroupement des CsvRuleRecord en DictionaryRule). (Validé le 24/09/2026 sur feature/j6-csv-migrator_step-1-core - Commit : <c19002684939618408c6b057094160a6a270d056>) (Cpx: 5 / 5)
 
 ### Step 2 - Persistance et Exécution Console - feature/j6-csv-migrator_step-2-db
-- [x] ✅ **J6-S2-T1** - Intégration de `CatamailerDbContext` (ajout de `DictionaryRule`) et création du `MigrationOrchestrator`. (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-2-db - Commit : <COMMIT_HASH>) (Cpx: 3 / 3)
+- [x] ✅ **J6-S2-T1** - Intégration de `CatamailerDbContext` (ajout de `DictionaryRule`) et création du `MigrationOrchestrator`. (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-2-db - Commit : 7eaf11b3b70261a45e169c1102f0694f8dab24f4) (Cpx: 3 / 3)
 - [ ] ⚪ **J6-S2-T2** - Test d'intégration End-to-End avec fichier CSV réel.
 - [ ] ⚪ **J6-S2-T3** - Câblage final de `Program.cs` avec gestion des arguments (chemin CSV source, chemin DB cible) et retours console.
 
