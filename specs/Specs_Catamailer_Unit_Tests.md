@@ -198,8 +198,8 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 
 ### 🟢 J6-S3 : Ergonomie et Gestion des Règles Massives (UI)
 - [x] ✅ `J6-S3-T1 - RulesCollection_ShouldBeCompatibleWithVirtualization` (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : 84cc4b1358baa3d3826537f7cf39e2be5e4f68d7)
-- [x] ✅ `J6-S3-T2 - FilteredRules_ShouldReturnAllRules_WhenSearchTextIsEmpty` (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : <COMMIT_HASH>)
-- [x] ✅ `J6-S3-T2 - FilteredRules_ShouldFilterByCategoryOrKeywords_IgnoringCase` (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : <COMMIT_HASH>)
+- [x] ✅ `J6-S3-T2 - FilteredRules_ShouldReturnAllRules_WhenSearchTextIsEmpty` (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : 62e065a08ba35748241999ab1a5f0db1ef51143f)
+- [x] ✅ `J6-S3-T2 - FilteredRules_ShouldFilterByCategoryOrKeywords_IgnoringCase` (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : 62e065a08ba35748241999ab1a5f0db1ef51143f)
 - [x] ✅ `J6-S3-T6 - UpdateDictionaryRuleAsync_ShouldUpdatePersistedRule` (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : ba80e3abba76600ce93a2f3750379fca013bf62e)
 - [x] ✅ `J6-S3-T6 - EditRule_ShouldPopulateForm_AndSetIsEditing` (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : ba80e3abba76600ce93a2f3750379fca013bf62e)
 - [x] ✅ `J6-S3-T6 - CancelEdit_ShouldClearForm_AndResetIsEditing` (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : ba80e3abba76600ce93a2f3750379fca013bf62e)
