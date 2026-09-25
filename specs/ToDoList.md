@@ -109,8 +109,8 @@ Markdown
 - [ ] ⚪ **J6-S3-T2** - Ajout d'une barre de recherche et filtrage multi-critères (catégorie, champ, mot-clé).
 - [ ] ⚪ **J6-S3-T3** - Implémentation d'un affichage hiérarchique calqué sur l'arborescence des catégories.
 - [ ] ⚪ **J6-S3-T4** - Mécanisme de détection et signalement visuel des conflits/doublons de mots-clés.
-- [x] ✅ **J6-S3-T5** - Suppression de tous les Dummies du projet `Catamailer.UI` (Refactoring). (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : <COMMIT_HASH>) (Cpx: 3 / 3)
-- [x] ✅ **J6-S3-T6** - Édition d'une règle dictionnaire (Ajout UpdateDictionaryRuleAsync et UI). (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : <COMMIT_HASH>) (Cpx: 5 / 6)
+- [x] ✅ **J6-S3-T5** - Suppression de tous les Dummies du projet `Catamailer.UI` (Refactoring). (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : ba80e3abba76600ce93a2f3750379fca013bf62e) (Cpx: 3 / 3)
+- [x] ✅ **J6-S3-T6** - Édition d'une règle dictionnaire (Ajout UpdateDictionaryRuleAsync et UI). (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : ba80e3abba76600ce93a2f3750379fca013bf62e) (Cpx: 5 / 6)
 - [ ] ⚪ **J6-S3-T7** - Revue ergonomique de l'édition (Amélioration UI/UX).
 - [ ] ⚪ **J6-S3-T8** - Initialisation des règles d'exécution VBA en dur dans le Migrator (Hardcoding des règles complexes).
 
