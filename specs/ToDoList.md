@@ -99,7 +99,10 @@
 ### Step 2 - Persistance et Exécution Console - feature/j6-csv-migrator_step-2-db
 - [x] ✅ **J6-S2-T1** - Intégration de `CatamailerDbContext` (ajout de `DictionaryRule`) et création du `MigrationOrchestrator`. (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-2-db - Commit : 7eaf11b3b70261a45e169c1102f0694f8dab24f4) (Cpx: 3 / 3)
 - [x] ✅ **J6-S2-T2** - Test d'intégration End-to-End avec fichier CSV réel. (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-2-db - Commit : 7b470ec947afe5a3f8f3f56fab29167e9d0126d2) (Cpx: 3 / 3)
-- [ ] ⚪ **J6-S2-T3** - Câblage final de `Program.cs` avec gestion des arguments (chemin CSV source, chemin DB cible) et retours console.
+Markdown
+### Step 2 - Persistance et Exécution Console - feature/j6-csv-migrator_step-2-db
+- [x] ✅ **J6-S2-T1** - Intégration de `CatamailerDbContext` (ajout de `DictionaryRule`) et création du `MigrationOrchestrator`. (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-2-db - Commit : 7b470ec947afe5a3f8f3f56fab29167e9d0126d2) (Cpx: 3 / 3)
+- [x] ✅ **J6-S2-T2** - Test d'intégration End-to-End avec fichier CSV réel. (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-2-db - Commit : <COMMIT_HASH>) (Cpx: 3 / 3)
 
 ### Step 3 - Ergonomie et Gestion des Règles Massives (UI) - feature/j6-csv-migrator_step-3-ui
 - [ ] ⚪ **J6-S3-T1** - Intégration de la virtualisation (`<Virtualize>`) pour la liste des règles de l'Étape 1.

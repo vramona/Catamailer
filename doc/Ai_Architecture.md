@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-25 10:36
+Généré le : 2026-09-25 11:34
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -635,6 +635,20 @@ Généré le : 2026-09-25 10:36
 **Fichier** : `src\Catamailer.Migrator\Parsing\ICsvParser.cs`
 **Rôle** : Définit le contrat pour l'extraction brute des règles depuis un format CSV.
 **Membres et Invocations :**
+
+### Class : Program
+**Fichier** : `src\Catamailer.Migrator\Program.cs`
+**Rôle** : Point d'entrée de l'outil de migration en ligne de commande.
+**Membres et Invocations :**
+- `Task<int> Main(string[] args)` : Méthode principale exécutant la migration.
+  - *Appelle* ➡️ `ServiceCollectionExtensions.AddMigratorServices()`
+  - *Appelle* ➡️ `IMigrationOrchestrator.MigrateAsync()`
+
+### Class : ServiceCollectionExtensions
+**Fichier** : `src\Catamailer.Migrator\ServiceCollectionExtensions.cs`
+**Rôle** : Fournit des méthodes d'extension pour configurer l'injection de dépendances du Migrator.
+**Membres et Invocations :**
+- `IServiceCollection AddMigratorServices(IServiceCollection services, string dbFilePath)` : Enregistre l'ensemble des services nécessaires à l'exécution de la migration CSV.
 
 ## Projet : Catamailer.UI
 ### Class : App
@@ -1365,6 +1379,12 @@ Généré le : 2026-09-25 10:36
   - *Appelle* ➡️ `CsvParser.ParseLines()`
 - `void ParseLines_ShouldIgnoreLinesWithLessThanTwoColumns()`
   - *Appelle* ➡️ `CsvParser.ParseLines()`
+
+### Class : DependencyInjectionTests
+**Fichier** : `tests\Catamailer.Migrator.Tests\DependencyInjectionTests.cs`
+**Membres et Invocations :**
+- `void AddMigratorServices_ShouldRegisterAllRequiredDependencies()`
+  - *Appelle* ➡️ `ServiceCollectionExtensions.AddMigratorServices()`
 
 ### Class : MigrationOrchestratorE2ETests
 **Fichier** : `tests\Catamailer.Migrator.Tests\Orchestration\MigrationOrchestratorE2ETests.cs`
