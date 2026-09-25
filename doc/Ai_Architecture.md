@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-25 14:20
+Généré le : 2026-09-25 14:30
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -155,8 +155,10 @@ Généré le : 2026-09-25 14:20
 **Fichier** : `src\Catamailer.Application\ViewModels\DictionaryEditorViewModel.cs`
 **Rôle** : ViewModel responsable de la gestion (CRUD) des règles de dictionnaires (Étape 1).
 **Membres et Invocations :**
-- `ICollection<DictionaryRule> Rules { get; }` : Obtient la liste observable des règles de dictionnaire.
+- `ICollection<DictionaryRule> Rules { get; }` : Obtient la liste observable de toutes les règles de dictionnaire.
 - `IEnumerable<CategoryNode> AvailableCategories { get; }` : Obtient la liste des catégories disponibles pour la création d'une règle.
+- `string SearchText { get; set; }` : Obtient ou définit le texte de recherche pour filtrer les règles.
+- `ICollection<DictionaryRule> FilteredRules { get; }` : Obtient la liste des règles de dictionnaire filtrées par le texte de recherche.
 - `CategoryNode? SelectedCategory { get; set; }` : Obtient ou définit la catégorie sélectionnée dans le formulaire.
 - `string SubjectKeywordsInput { get; set; }` : Obtient ou définit les mots-clés du sujet saisis dans le formulaire (séparés par des virgules).
 - `string SenderKeywordsInput { get; set; }` : Obtient ou définit les mots-clés de l'expéditeur saisis dans le formulaire (séparés par des virgules).
@@ -1081,6 +1083,12 @@ Généré le : 2026-09-25 14:20
   - *Appelle* ➡️ `DictionaryEditorViewModel.EditRule()`
   - *Appelle* ➡️ `DictionaryEditorViewModel.UpdateRuleFromFormAsync()`
   - *Appelle* ➡️ `IRuleRepository.UpdateDictionaryRuleAsync()`
+- `Task FilteredRules_ShouldReturnAllRules_WhenSearchTextIsEmpty()`
+  - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
+- `Task FilteredRules_ShouldFilterByCategoryOrKeywords_IgnoringCase()`
+  - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
 
 ### Class : PreferencesViewModelTests
 **Fichier** : `tests\Catamailer.Application.Tests\ViewModels\PreferencesViewModelTests.cs`

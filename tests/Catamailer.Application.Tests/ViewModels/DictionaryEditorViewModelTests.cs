@@ -6,6 +6,7 @@
 //         - 2026-09-25 : Ajout du test de compatibilité pour Virtualization (J6-S3-T1 - Phase Rouge).
 //         - 2026-09-25 : Suppression du using UI invalide (J6-S3-T1 - Phase Rouge Correction).
 //         - 2026-09-25 : Ajout des tests pour le mode édition (J6-S3-T6 - Phase Rouge).
+//         - 2026-09-25 : Ajout des tests pour la recherche multi-critères (J6-S3-T2 - Phase Rouge).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -258,6 +259,70 @@ namespace Catamailer.Application.Tests.ViewModels
             Assert.Null(viewModel.EditingRule);
             Assert.Null(viewModel.SelectedCategory);
             Assert.Empty(viewModel.SubjectKeywordsInput);
+        }
+
+        [Fact]
+        public async Task FilteredRules_ShouldReturnAllRules_WhenSearchTextIsEmpty()
+        {
+            // Arrange
+            var mockRuleRepo = new Mock<IRuleRepository>();
+            var mockCatRepo = new Mock<ICategoryRepository>();
+            
+            var rules = new List<DictionaryRule>
+            {
+                new DictionaryRule(new CategoryNode("CatA"), new[] { "key1" }),
+                new DictionaryRule(new CategoryNode("CatB"), new[] { "key2" })
+            };
+            
+            mockRuleRepo.Setup(r => r.GetAllDictionaryRulesAsync()).ReturnsAsync(rules);
+            var viewModel = new DictionaryEditorViewModel(mockRuleRepo.Object, mockCatRepo.Object);
+            await viewModel.InitializeAsync();
+
+            // Act
+            viewModel.SearchText = "   ";
+
+            // Assert
+            Assert.Equal(2, viewModel.FilteredRules.Count);
+        }
+
+        [Fact]
+        public async Task FilteredRules_ShouldFilterByCategoryOrKeywords_IgnoringCase()
+        {
+            // Arrange
+            var mockRuleRepo = new Mock<IRuleRepository>();
+            var mockCatRepo = new Mock<ICategoryRepository>();
+            
+            var rules = new List<DictionaryRule>
+            {
+                new DictionaryRule(new CategoryNode("Finance"), new[] { "facture", "devis" }),
+                new DictionaryRule(new CategoryNode("RH"), null, new[] { "boss@corp.com" }),
+                new DictionaryRule(new CategoryNode("IT"), null, null, new[] { "support@corp.com" })
+            };
+            
+            mockRuleRepo.Setup(r => r.GetAllDictionaryRulesAsync()).ReturnsAsync(rules);
+            var viewModel = new DictionaryEditorViewModel(mockRuleRepo.Object, mockCatRepo.Object);
+            await viewModel.InitializeAsync();
+
+            // Act & Assert
+            // Recherche par catégorie (insensible à la casse)
+            viewModel.SearchText = "fIna";
+            Assert.Single(viewModel.FilteredRules);
+            Assert.Equal("Finance", viewModel.FilteredRules.First().TargetCategory.Name);
+
+            // Recherche par mot-clé sujet
+            viewModel.SearchText = "FACT";
+            Assert.Single(viewModel.FilteredRules);
+            Assert.Equal("Finance", viewModel.FilteredRules.First().TargetCategory.Name);
+
+            // Recherche par mot-clé expéditeur
+            viewModel.SearchText = "BOSS";
+            Assert.Single(viewModel.FilteredRules);
+            Assert.Equal("RH", viewModel.FilteredRules.First().TargetCategory.Name);
+
+            // Recherche par mot-clé destinataire
+            viewModel.SearchText = "SUPPORT";
+            Assert.Single(viewModel.FilteredRules);
+            Assert.Equal("IT", viewModel.FilteredRules.First().TargetCategory.Name);
         }
     }
 }

@@ -106,13 +106,15 @@ Markdown
 
 ### Step 3 - Ergonomie et Gestion des Règles Massives (UI) - feature/j6-csv-migrator_step-3-ui
 - [x] ✅ **J6-S3-T1** - Intégration de la virtualisation (`<Virtualize>`) pour la liste des règles de l'Étape 1. (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : 84cc4b1358baa3d3826537f7cf39e2be5e4f68d7) (Cpx: 3 / 3)
-- [ ] ⚪ **J6-S3-T2** - Ajout d'une barre de recherche et filtrage multi-critères (catégorie, champ, mot-clé).
+- [x] ✅ **J6-S3-T2** - Ajout d'une barre de recherche et filtrage multi-critères (catégorie, champ, mot-clé). (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : <COMMIT_HASH>) (Cpx: 5 / 6)
 - [ ] ⚪ **J6-S3-T3** - Implémentation d'un affichage hiérarchique calqué sur l'arborescence des catégories.
 - [ ] ⚪ **J6-S3-T4** - Mécanisme de détection et signalement visuel des conflits/doublons de mots-clés.
 - [x] ✅ **J6-S3-T5** - Suppression de tous les Dummies du projet `Catamailer.UI` (Refactoring). (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : ba80e3abba76600ce93a2f3750379fca013bf62e) (Cpx: 3 / 3)
 - [x] ✅ **J6-S3-T6** - Édition d'une règle dictionnaire (Ajout UpdateDictionaryRuleAsync et UI). (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : ba80e3abba76600ce93a2f3750379fca013bf62e) (Cpx: 5 / 6)
 - [ ] ⚪ **J6-S3-T7** - Revue ergonomique de l'édition (Amélioration UI/UX).
 - [ ] ⚪ **J6-S3-T8** - Initialisation des règles d'exécution VBA en dur dans le Migrator (Hardcoding des règles complexes).
+- [ ] ⚪ **J6-S3-T9** - Tests d'intégration sur les Actions applicables sur les règles complexes.
+- [ ] ⚪ **J6-S3-T10** - Fix Import migrator pour recréer l'arborescence.
 
 ## Jalon 7 - Inbox Notes, Agenda & Actions Internes - feature/j7-inbox-notes
 ### Step 1 - Modélisation & Agendas - feature/j7-inbox-notes_step-1-core

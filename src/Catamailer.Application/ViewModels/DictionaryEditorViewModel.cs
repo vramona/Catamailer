@@ -8,6 +8,7 @@
 //         - 2026-09-25 : Modification de la signature de Rules en ICollection pour la virtualisation (J6-S3-T1 - Phase Verte).
 //         - 2026-09-25 : Ajout des capacités d'édition de règles existantes (J6-S3-T6 - Phase Rouge).
 //         - 2026-09-25 : Implémentation de UpdateRuleFromFormAsync (J6-S3-T6 - Phase Verte).
+//         - 2026-09-25 : Ajout de la recherche multi-critères SearchText et FilteredRules (J6-S3-T2 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -33,7 +34,7 @@ namespace Catamailer.Application.ViewModels
         private readonly ObservableCollection<CategoryNode> _availableCategories = new();
 
         /// <summary>
-        /// Obtient la liste observable des règles de dictionnaire.
+        /// Obtient la liste observable de toutes les règles de dictionnaire.
         /// </summary>
         public ICollection<DictionaryRule> Rules => _rules;
 
@@ -41,6 +42,34 @@ namespace Catamailer.Application.ViewModels
         /// Obtient la liste des catégories disponibles pour la création d'une règle.
         /// </summary>
         public IEnumerable<CategoryNode> AvailableCategories => _availableCategories;
+
+        /// <summary>
+        /// Obtient ou définit le texte de recherche pour filtrer les règles.
+        /// </summary>
+        public string SearchText { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Obtient la liste des règles de dictionnaire filtrées par le texte de recherche.
+        /// </summary>
+        public ICollection<DictionaryRule> FilteredRules
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(SearchText))
+                {
+                    return _rules;
+                }
+
+                var lowerSearch = SearchText.Trim().ToLowerInvariant();
+
+                return _rules.Where(r => 
+                    r.TargetCategory.Name.ToLowerInvariant().Contains(lowerSearch) ||
+                    r.SubjectKeywords.Any(k => k.ToLowerInvariant().Contains(lowerSearch)) ||
+                    r.SenderKeywords.Any(k => k.ToLowerInvariant().Contains(lowerSearch)) ||
+                    r.RecipientKeywords.Any(k => k.ToLowerInvariant().Contains(lowerSearch))
+                ).ToList();
+            }
+        }
 
         /// <summary>
         /// Obtient ou définit la catégorie sélectionnée dans le formulaire.

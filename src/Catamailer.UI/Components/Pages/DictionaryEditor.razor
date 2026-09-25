@@ -13,6 +13,7 @@
 //         - 2026-09-11 : Ajout des champs Expéditeur et Destinataire (Phase Orange/Bleue).
 //         - 2026-09-25 : Implémentation du composant Virtualize pour les performances d'affichage (J6-S3-T1 - Phase Bleue).
 //         - 2026-09-25 : Implémentation de l'édition d'une règle existante (J6-S3-T6 - Phase Bleue).
+//         - 2026-09-25 : Ajout de la barre de recherche et filtrage multi-critères (J6-S3-T2 - Phase Bleue).
 // </auto-generated>
 // ------------------------------------------------------------------------------ -->
 
@@ -74,6 +75,12 @@
 </div>
 
 <div class="card shadow-sm border-0 bg-white mb-4">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Règles configurées</h5>
+        <div class="w-50">
+            <input type="search" class="form-control" placeholder="Rechercher (catégorie, mots-clés)..." @bind="ViewModel.SearchText" @bind:event="oninput" />
+        </div>
+    </div>
     <div class="card-body p-0">
         <table class="table table-hover mb-0">
             <thead class="table-light">
@@ -86,9 +93,9 @@
                 </tr>
             </thead>
             <tbody>
-                @if (ViewModel.Rules != null && ViewModel.Rules.Any())
+                @if (ViewModel.FilteredRules != null && ViewModel.FilteredRules.Any())
                 {
-                    <Virtualize Items="@ViewModel.Rules" Context="rule">
+                    <Virtualize Items="@ViewModel.FilteredRules" Context="rule">
                         <tr class="@(ViewModel.EditingRule == rule ? "table-warning" : "")">
                             <td class="ps-4 align-middle fw-medium">
                                 @if (!string.IsNullOrEmpty(rule.TargetCategory.Color))
@@ -121,7 +128,7 @@
                 {
                     <tr>
                         <td colspan="5" class="text-center py-4 text-muted">
-                            Aucune règle de dictionnaire configurée.
+                            @(string.IsNullOrWhiteSpace(ViewModel.SearchText) ? "Aucune règle de dictionnaire configurée." : "Aucune règle ne correspond à votre recherche.")
                         </td>
                     </tr>
                 }
