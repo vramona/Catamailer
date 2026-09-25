@@ -197,4 +197,4 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 - [x] ✅ `J6-S2-T3 - AddMigratorServices_ShouldRegisterAllRequiredDependencies` (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-2-db - Commit : 8be51bbbc959a5e53a91b43974f7d08eda5ad69d)
 
 ### 🟢 J6-S3 : Ergonomie et Gestion des Règles Massives (UI)
-- [x] ✅ `J6-S3-T1 - RulesCollection_ShouldBeCompatibleWithVirtualization` (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : <COMMIT_HASH>)
+- [x] ✅ `J6-S3-T1 - RulesCollection_ShouldBeCompatibleWithVirtualization` (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : 84cc4b1358baa3d3826537f7cf39e2be5e4f68d7)
