@@ -204,5 +204,5 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 - [x] ✅ `J6-S3-T6 - EditRule_ShouldPopulateForm_AndSetIsEditing` (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : ba80e3abba76600ce93a2f3750379fca013bf62e)
 - [x] ✅ `J6-S3-T6 - CancelEdit_ShouldClearForm_AndResetIsEditing` (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : ba80e3abba76600ce93a2f3750379fca013bf62e)
 - [x] ✅ `J6-S3-T6 - UpdateRuleFromFormAsync_ShouldCallRepository_AndClearForm_WhenValid` (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : ba80e3abba76600ce93a2f3750379fca013bf62e)
-- [x] ✅ `J6-S3-T10 - Map_ShouldReconstructCategoryTree_WhenSeparatorIsPresent` (Validé le 08/10/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : <COMMIT_HASH>)
-- [x] ✅ `J6-S3-T10 - MigrateAsync_WithRealCsvData_ShouldProduceCorrectDictionaryRules` (Validé le 08/10/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : <COMMIT_HASH>)
+- [x] ✅ `J6-S3-T10 - Map_ShouldReconstructCategoryTree_WhenSeparatorIsPresent` (Validé le 08/10/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : 34bd62b39b0c315cc343bd5fc59e876d466536ab)
+- [x] ✅ `J6-S3-T10 - MigrateAsync_WithRealCsvData_ShouldProduceCorrectDictionaryRules` (Validé le 08/10/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : 34bd62b39b0c315cc343bd5fc59e876d466536ab)
