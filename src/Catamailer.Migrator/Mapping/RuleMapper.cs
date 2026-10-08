@@ -4,6 +4,9 @@
 //     Historique :
 //         - 2026-09-24 : Création de la classe avec exception pour TDD (J6-S1-T3 - Phase Rouge).
 //         - 2026-09-24 : Implémentation du regroupement et de la ventilation des champs (J6-S1-T3 - Phase Verte).
+//         - 2026-09-25 : Implémentation de la reconstruction de l'arborescence via séparateur (J6-S3-T10 - Phase Verte).
+//         - 2026-09-25 : Refactoring de la reconstruction de l'arbre vers le domaine CategoryNode (J6-S3-T10 - Phase Orange).
+//         - 2026-09-25 : Implémentation du cache de catégories pour éviter les conflits EF Core (J6-S3-T10 - Phase Orange Correction).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -22,18 +25,31 @@ namespace Catamailer.Migrator.Mapping
     /// </summary>
     public class RuleMapper : IRuleMapper
     {
+        private readonly string _separator;
+
+        /// <summary>
+        /// Initialise une nouvelle instance de <see cref="RuleMapper"/>.
+        /// </summary>
+        /// <param name="separator">Le séparateur utilisé pour construire la hiérarchie des catégories (par défaut "-").</param>
+        public RuleMapper(string separator = "-")
+        {
+            _separator = separator ?? throw new ArgumentNullException(nameof(separator));
+        }
+
         /// <inheritdoc />
         public IEnumerable<DictionaryRule> Map(IEnumerable<CsvRuleRecord> records)
         {
             var dictionaryRules = new List<DictionaryRule>();
+            var categoryCache = new Dictionary<string, CategoryNode>(StringComparer.OrdinalIgnoreCase);
 
-            // Regroupement des enregistrements par nom de catégorie
+            // Regroupement des enregistrements par nom de catégorie (FullName)
             var groupedRecords = records.GroupBy(r => r.CategoryName, StringComparer.OrdinalIgnoreCase);
 
             foreach (var group in groupedRecords)
             {
-                var categoryName = group.Key;
-                var categoryNode = new CategoryNode(categoryName); // Création à plat pour la migration
+                var categoryFullName = group.Key;
+                // Appel à la logique centralisée du domaine pour reconstruire la hiérarchie avec le cache
+                var targetCategoryNode = CategoryNode.CreateFromPath(categoryFullName, _separator, categoryCache);
 
                 var subjectKeywords = new List<string>();
                 var senderKeywords = new List<string>();
@@ -61,7 +77,7 @@ namespace Catamailer.Migrator.Mapping
                 if (subjectKeywords.Any() || senderKeywords.Any() || recipientKeywords.Any())
                 {
                     dictionaryRules.Add(new DictionaryRule(
-                        categoryNode,
+                        targetCategoryNode,
                         subjectKeywords.Distinct().ToList(), // Distinct pour éviter les doublons accidentels
                         senderKeywords.Distinct().ToList(),
                         recipientKeywords.Distinct().ToList()

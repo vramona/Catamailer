@@ -7,9 +7,12 @@
 //         - 2026-09-11 : Ajout de Depth et GetFullName pour le rendu hiérarchique (J3-S3-T3-ST2).
 //         - 2026-09-17 : Ajout de la méthode UpdateColor pour résolution de conflit (J4-S4-T4 - Phase Verte).
 //         - 2026-09-22 : Implémentation de la suppression logique IsDeleted (J4-S4-T6 - Phase Verte).
+//         - 2026-09-25 : Ajout de CreateFromPath pour centraliser la reconstruction d'arbre (J6-S3-T10 - Phase Orange).
+//         - 2026-09-25 : Ajout d'un dictionnaire de cache à CreateFromPath pour garantir l'unicité des références EF Core (J6-S3-T10 - Phase Orange Correction).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -139,6 +142,60 @@ namespace Catamailer.Domain
         public string GetFullName(string separator = "-")
         {
             return string.Join(separator, GetAscendanceChain().Select(c => c.Name));
+        }
+
+        /// <summary>
+        /// Reconstruit l'arbre complet des catégories à partir d'un chemin complet et d'un séparateur,
+        /// en garantissant l'unicité des références des nœuds grâce au cache fourni.
+        /// </summary>
+        /// <param name="path">Le chemin complet de la catégorie (ex: "A-B-C").</param>
+        /// <param name="separator">Le séparateur à utiliser.</param>
+        /// <param name="cache">Un dictionnaire optionnel pour réutiliser les instances existantes et éviter les conflits EF Core.</param>
+        /// <returns>Le nœud feuille représentant la catégorie cible.</returns>
+        public static CategoryNode CreateFromPath(string path, string separator, IDictionary<string, CategoryNode>? cache = null)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return new CategoryNode("Unknown");
+            }
+
+            var parts = path.Split(new[] { separator }, StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length == 0)
+            {
+                return new CategoryNode(path);
+            }
+
+            CategoryNode? currentNode = null;
+            string currentPath = "";
+
+            for (int i = 0; i < parts.Length; i++)
+            {
+                var partName = parts[i].Trim();
+                currentPath = i == 0 ? partName : currentPath + separator + partName;
+
+                if (cache != null && cache.TryGetValue(currentPath, out var existingNode))
+                {
+                    currentNode = existingNode;
+                }
+                else
+                {
+                    var newNode = new CategoryNode(partName);
+                    
+                    if (currentNode != null)
+                    {
+                        currentNode.AddChild(newNode);
+                    }
+                    
+                    currentNode = newNode;
+
+                    if (cache != null)
+                    {
+                        cache[currentPath] = currentNode;
+                    }
+                }
+            }
+
+            return currentNode!;
         }
     }
 }

@@ -114,7 +114,7 @@ Markdown
 - [ ] ⚪ **J6-S3-T7** - Revue ergonomique de l'édition (Amélioration UI/UX).
 - [ ] ⚪ **J6-S3-T8** - Initialisation des règles d'exécution VBA en dur dans le Migrator (Hardcoding des règles complexes).
 - [ ] ⚪ **J6-S3-T9** - Tests d'intégration sur les Actions applicables sur les règles complexes.
-- [ ] ⚪ **J6-S3-T10** - Fix Import migrator pour recréer l'arborescence.
+- [x] ✅ **J6-S3-T10** - Fix Import migrator pour recréer l'arborescence. (Validé le 08/10/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : <COMMIT_HASH>) (Cpx: 5 / 6)
 
 ## Jalon 7 - Inbox Notes, Agenda & Actions Internes - feature/j7-inbox-notes
 ### Step 1 - Modélisation & Agendas - feature/j7-inbox-notes_step-1-core

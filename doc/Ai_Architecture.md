@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-25 14:30
+Généré le : 2026-10-08 18:14
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -318,6 +318,8 @@ Généré le : 2026-09-25 14:30
 - `IEnumerable<CategoryNode> GetAscendanceChain()` : Récupère la chaîne d'ascendance complète depuis la racine jusqu'à ce nœud inclus.
 - `string GetFullName(string separator)` : Génère le nom complet de la catégorie incluant toute son ascendance, séparée par le caractère spécifié.
   - *Appelle* ➡️ `CategoryNode.GetAscendanceChain()`
+- `CategoryNode CreateFromPath(string path, string separator, IDictionary<string, CategoryNode>? cache)` : Reconstruit l'arbre complet des catégories à partir d'un chemin complet et d'un séparateur, en garantissant l'unicité des références des nœuds grâce au cache fourni.
+  - *Appelle* ➡️ `CategoryNode.AddChild()`
 
 ### Class : DictionaryRule
 **Fichier** : `src\Catamailer.Domain\DictionaryRule.cs`
@@ -627,6 +629,7 @@ Généré le : 2026-09-25 14:30
 **Rôle** : Implémentation du mappeur traduisant les enregistrements CSV en DictionaryRule.
 **Membres et Invocations :**
 - `IEnumerable<DictionaryRule> Map(IEnumerable<CsvRuleRecord> records)`
+  - *Appelle* ➡️ `CategoryNode.CreateFromPath()`
 
 ### Interface : IMigrationOrchestrator
 **Fichier** : `src\Catamailer.Migrator\Orchestration\IMigrationOrchestrator.cs`
@@ -1439,6 +1442,7 @@ Généré le : 2026-09-25 14:30
 **Membres et Invocations :**
 - `Task MigrateAsync_WithRealCsvData_ShouldProduceCorrectDictionaryRules()`
   - *Appelle* ➡️ `MigrationOrchestrator.MigrateAsync()`
+  - *Appelle* ➡️ `CategoryNode.GetFullName()`
 
 ### Class : MigrationOrchestratorTests
 **Fichier** : `tests\Catamailer.Migrator.Tests\Orchestration\MigrationOrchestratorTests.cs`
@@ -1454,6 +1458,8 @@ Généré le : 2026-09-25 14:30
 - `void Map_ShouldDispatchKeywordsToCorrectFields()`
   - *Appelle* ➡️ `RuleMapper.Map()`
 - `void Map_ShouldIgnoreRecordsWithUnknownFields()`
+  - *Appelle* ➡️ `RuleMapper.Map()`
+- `void Map_ShouldReconstructCategoryTree_WhenSeparatorIsPresent()`
   - *Appelle* ➡️ `RuleMapper.Map()`
 
 ## Projet : Tools.AiDocGenerator.Tests

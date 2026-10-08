@@ -4,6 +4,7 @@
 //     Historique :
 //         - 2026-09-25 : Création du test d'intégration E2E avec données réelles (J6-S2-T2 - Phase Rouge).
 //         - 2026-09-25 : Correction de l'assertion sur le nombre d'expéditeurs dû au nettoyage des doublons (J6-S2-T2 - Phase Verte).
+//         - 2026-09-25 : Correction du test pour utiliser GetFullName suite au refactoring hiérarchique (J6-S3-T10 - Phase Orange).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -80,12 +81,15 @@ DESTINATAIRE; Comitologie-DAMSI-Staff Elargi; damsi-staff-elargi.cnam@assurance-
                 await orchestrator.MigrateAsync(tempFilePath);
 
                 // Assert
-                var rules = context.DictionaryRules.Include(r => r.TargetCategory).ToList();
+                var rules = context.DictionaryRules
+                    .Include(r => r.TargetCategory)
+                    .ThenInclude(c => c.Parent) // On inclut l'ascendance pour GetFullName
+                    .ToList();
 
                 // L'extrait contient 6 catégories distinctes (les lignes en commentaires sont ignorées)
                 Assert.Equal(6, rules.Count);
 
-                var adminSyndicats = rules.Single(r => r.TargetCategory.Name == "Administratif-Syndicats");
+                var adminSyndicats = rules.Single(r => r.TargetCategory.GetFullName("-") == "Administratif-Syndicats");
                 Assert.Single(adminSyndicats.SubjectKeywords);
                 Assert.Equal("CRT : Compte-rendu", adminSyndicats.SubjectKeywords[0]);
                 
@@ -94,18 +98,18 @@ DESTINATAIRE; Comitologie-DAMSI-Staff Elargi; damsi-staff-elargi.cnam@assurance-
                 Assert.Contains("syndicat@snpdos-cfdt.fr", adminSyndicats.SenderKeywords);
                 Assert.Empty(adminSyndicats.RecipientKeywords);
 
-                var carto = rules.Single(r => r.TargetCategory.Name == "Carto");
+                var carto = rules.Single(r => r.TargetCategory.GetFullName("-") == "Carto");
                 Assert.Equal(3, carto.SubjectKeywords.Count);
                 Assert.Contains("[Cartographie Technique]", carto.SubjectKeywords);
                 Assert.Single(carto.SenderKeywords);
                 Assert.Single(carto.RecipientKeywords);
 
-                var hermine = rules.Single(r => r.TargetCategory.Name == "CCOEN-Café L'Hermine Gourmande");
+                var hermine = rules.Single(r => r.TargetCategory.GetFullName("-") == "CCOEN-Café L'Hermine Gourmande");
                 Assert.Equal(2, hermine.SubjectKeywords.Count);
                 Assert.Contains("Hermine Gourmande", hermine.SubjectKeywords);
                 Assert.Empty(hermine.SenderKeywords);
 
-                var staff = rules.Single(r => r.TargetCategory.Name == "Comitologie-DAMSI-Staff Elargi");
+                var staff = rules.Single(r => r.TargetCategory.GetFullName("-") == "Comitologie-DAMSI-Staff Elargi");
                 Assert.Empty(staff.SubjectKeywords);
                 Assert.Empty(staff.SenderKeywords);
                 Assert.Single(staff.RecipientKeywords);
