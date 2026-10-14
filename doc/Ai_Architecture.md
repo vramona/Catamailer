@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-10-08 18:14
+Généré le : 2026-10-14 10:04
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -151,26 +151,44 @@ Généré le : 2026-10-08 18:14
   - *Appelle* ➡️ `ICategoryRepository.UpdateAsync()`
   - *Appelle* ➡️ `CategoryTreeViewModel.InitializeAsync()`
 
+### Class : DictionaryCategoryItem
+**Fichier** : `src\Catamailer.Application\ViewModels\DictionaryEditorViewModel.cs`
+**Rôle** : Représente un élément de la grille hiérarchique combinant catégorie et règle.
+**Membres et Invocations :**
+- `CategoryNode Category { get; set; }`
+- `DictionaryRule? Rule { get; set; }`
+- `bool IsExpanded { get; set; }`
+
+### Class : FlatCategoryOption
+**Fichier** : `src\Catamailer.Application\ViewModels\DictionaryEditorViewModel.cs`
+**Rôle** : Représente une option de catégorie formatée (indentée) pour les listes déroulantes.
+**Membres et Invocations :**
+- `CategoryNode Category { get; set; }`
+- `string DisplayName { get; set; }`
+
 ### Class : DictionaryEditorViewModel
 **Fichier** : `src\Catamailer.Application\ViewModels\DictionaryEditorViewModel.cs`
 **Rôle** : ViewModel responsable de la gestion (CRUD) des règles de dictionnaires (Étape 1).
 **Membres et Invocations :**
 - `ICollection<DictionaryRule> Rules { get; }` : Obtient la liste observable de toutes les règles de dictionnaire.
 - `IEnumerable<CategoryNode> AvailableCategories { get; }` : Obtient la liste des catégories disponibles pour la création d'une règle.
-- `string SearchText { get; set; }` : Obtient ou définit le texte de recherche pour filtrer les règles.
-- `ICollection<DictionaryRule> FilteredRules { get; }` : Obtient la liste des règles de dictionnaire filtrées par le texte de recherche.
+- `string SearchText { get; set; }` : Obtient ou définit le texte de recherche pour filtrer la grille.
+- `IEnumerable<FlatCategoryOption> FlatCategories { get; }` : Obtient les catégories formatées avec indentation pour la liste déroulante du formulaire.
+- `IEnumerable<DictionaryCategoryItem> VisibleGridItems { get; }` : Obtient la liste des éléments affichés dans la grille en tenant compte de la recherche et des nœuds repliés.
 - `CategoryNode? SelectedCategory { get; set; }` : Obtient ou définit la catégorie sélectionnée dans le formulaire.
 - `string SubjectKeywordsInput { get; set; }` : Obtient ou définit les mots-clés du sujet saisis dans le formulaire (séparés par des virgules).
 - `string SenderKeywordsInput { get; set; }` : Obtient ou définit les mots-clés de l'expéditeur saisis dans le formulaire (séparés par des virgules).
 - `string RecipientKeywordsInput { get; set; }` : Obtient ou définit les mots-clés du destinataire saisis dans le formulaire (séparés par des virgules).
 - `DictionaryRule? EditingRule { get; set; }` : Obtient la règle actuellement en cours d'édition (si applicable).
 - `bool IsEditing { get; }` : Indique si le formulaire est actuellement en mode édition.
-- `Task InitializeAsync()` : Charge l'ensemble des règles de dictionnaire et des catégories depuis les dépôts.
+- `Task InitializeAsync()` : Charge l'ensemble des règles de dictionnaire et des catégories, puis construit la grille.
   - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
   - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
-- `Task AddRuleAsync(DictionaryRule rule)` : Ajoute une nouvelle règle au dépôt et met à jour la liste en mémoire.
+  - *Appelle* ➡️ `DictionaryEditorViewModel.BuildGridItems()`
+- `void ToggleCategory(CategoryNode category)` : Plie ou déplie une catégorie dans la grille hiérarchique.
+- `Task AddRuleAsync(DictionaryRule rule)` : Ajoute une nouvelle règle au dépôt et met à jour la grille en mémoire.
   - *Appelle* ➡️ `IRuleRepository.AddDictionaryRuleAsync()`
-- `Task DeleteRuleAsync(DictionaryRule rule)` : Supprime une règle du dépôt et met à jour la liste en mémoire.
+- `Task DeleteRuleAsync(DictionaryRule rule)` : Supprime une règle du dépôt et met à jour la grille en mémoire.
   - *Appelle* ➡️ `IRuleRepository.DeleteDictionaryRuleAsync()`
 - `void EditRule(DictionaryRule rule)` : Charge une règle existante dans le formulaire pour édition.
 - `void CancelEdit()` : Annule l'édition en cours et réinitialise le formulaire.
@@ -1062,17 +1080,11 @@ Généré le : 2026-10-08 18:14
   - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
   - *Appelle* ➡️ `DictionaryEditorViewModel.DeleteRuleAsync()`
   - *Appelle* ➡️ `IRuleRepository.DeleteDictionaryRuleAsync()`
-- `Task InitializeAsync_ShouldLoadCategories_FromCategoryRepository()`
-  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
-  - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
 - `Task CreateRuleFromFormAsync_ShouldAddRule_AndClearForm_WhenValid()`
   - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
   - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
   - *Appelle* ➡️ `DictionaryEditorViewModel.CreateRuleFromFormAsync()`
   - *Appelle* ➡️ `IRuleRepository.AddDictionaryRuleAsync()`
-- `Task RulesCollection_ShouldBeCompatibleWithVirtualization()`
-  - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
-  - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
 - `Task EditRule_ShouldPopulateForm_AndSetIsEditing()`
   - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
   - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
@@ -1086,10 +1098,23 @@ Généré le : 2026-10-08 18:14
   - *Appelle* ➡️ `DictionaryEditorViewModel.EditRule()`
   - *Appelle* ➡️ `DictionaryEditorViewModel.UpdateRuleFromFormAsync()`
   - *Appelle* ➡️ `IRuleRepository.UpdateDictionaryRuleAsync()`
-- `Task FilteredRules_ShouldReturnAllRules_WhenSearchTextIsEmpty()`
+- `Task InitializeAsync_ShouldPopulateFlatCategories_WithIndentationForDropdown()`
+  - *Appelle* ➡️ `CategoryNode.AddChild()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
+- `Task InitializeAsync_ShouldPopulateVisibleGridItems_WithAllCategories_AndLinkRules()`
+  - *Appelle* ➡️ `CategoryNode.AddChild()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
   - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
   - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
-- `Task FilteredRules_ShouldFilterByCategoryOrKeywords_IgnoringCase()`
+- `Task ToggleCategory_ShouldCollapseParent_AndHideDescendants()`
+  - *Appelle* ➡️ `CategoryNode.AddChild()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.ToggleCategory()`
+- `Task SearchText_ShouldFilterGridItems_AndAutoExpandParents()`
+  - *Appelle* ➡️ `CategoryNode.AddChild()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
   - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
   - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
 

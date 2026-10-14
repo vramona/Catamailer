@@ -8,13 +8,13 @@ Arborescence / Fichier                                        Taille      Date d
 ├── doc                                                                   2026-09-25 11:38
 │   ├── api                                                               2026-09-24 18:19
 │   │   ├── Scripts                                                       2026-09-23 17:39
-│   │   │   ├── Scripts.md                                    3,55 Ko     2026-10-08 18:14
-│   │   │   └── toc.yml                                       49 octets   2026-10-08 18:14
+│   │   │   ├── Scripts.md                                    3,55 Ko     2026-10-14 10:04
+│   │   │   └── toc.yml                                       49 octets   2026-10-14 10:04
 │   │   ├── TestsReport                                                   2026-09-07 11:22
-│   │   │   ├── TestResults.md                                92 octets   2026-10-08 18:14
-│   │   │   └── toc.yml                                       59 octets   2026-10-08 18:14
-│   │   └── toc.yml                                           280 octets  2026-10-08 18:14
-│   └── Ai_Architecture.md                                    91,28 Ko    2026-10-08 18:14
+│   │   │   ├── TestResults.md                                92 octets   2026-10-14 10:04
+│   │   │   └── toc.yml                                       59 octets   2026-10-14 10:04
+│   │   └── toc.yml                                           280 octets  2026-10-14 10:04
+│   └── Ai_Architecture.md                                    92,72 Ko    2026-10-14 10:04
 ├── GEM                                                                   2026-09-07 13:38
 │   └── GEM Catamailer.md                                     8,19 Ko     2026-09-07 13:38
 ├── scripts                                                               2026-09-24 14:46
@@ -41,8 +41,8 @@ Arborescence / Fichier                                        Taille      Date d
 ├── specs                                                                 2026-09-25 11:38
 │   ├── Next Prompt.txt                                       777 octets  2026-09-24 14:46
 │   ├── Specs_Catamailer.md                                   8,82 Ko     2026-09-24 14:46
-│   ├── Specs_Catamailer_Unit_Tests.md                        30,66 Ko    2026-10-08 18:13
-│   └── ToDoList.md                                           18,25 Ko    2026-10-08 18:13
+│   ├── Specs_Catamailer_Unit_Tests.md                        31,41 Ko    2026-10-14 10:03
+│   └── ToDoList.md                                           18,15 Ko    2026-10-14 10:04
 ├── src                                                                   2026-09-07 10:58
 │   ├── Catamailer.Application                                            2026-09-15 18:45
 │   │   ├── Services                                                      2026-09-24 14:46
@@ -54,7 +54,7 @@ Arborescence / Fichier                                        Taille      Date d
 │   │   │   ├── ActivationPromptViewModel.cs                  2,21 Ko     2026-09-15 18:45
 │   │   │   ├── CategorySyncViewModel.cs                      12,64 Ko    2026-09-24 14:46
 │   │   │   ├── CategoryTreeViewModel.cs                      2,59 Ko     2026-09-23 17:39
-│   │   │   ├── DictionaryEditorViewModel.cs                  9,85 Ko     2026-09-25 14:26
+│   │   │   ├── DictionaryEditorViewModel.cs                  15,25 Ko    2026-10-09 16:12
 │   │   │   ├── PreferencesViewModel.cs                       2,25 Ko     2026-09-15 18:45
 │   │   │   ├── QuickCategorizeViewModel.cs                   3,10 Ko     2026-09-15 18:45
 │   │   │   ├── QuickRuleBuilderViewModel.cs                  6,15 Ko     2026-09-15 18:45
@@ -135,16 +135,16 @@ Arborescence / Fichier                                        Taille      Date d
 │   │   │   │   ├── MainLayout.razor                          2,40 Ko     2026-09-23 17:39
 │   │   │   │   └── MainLayout.razor.css                      427 octets  2026-09-15 18:45
 │   │   │   ├── Pages                                                     2026-09-24 18:19
-│   │   │   │   ├── CategoryEditor.razor                      1,58 Ko     2026-09-23 17:39
-│   │   │   │   ├── CategorySync.razor                        14,15 Ko    2026-09-23 17:39
-│   │   │   │   ├── DictionaryEditor.razor                    8,45 Ko     2026-09-25 14:27
-│   │   │   │   ├── Home.razor                                3,78 Ko     2026-09-15 18:45
+│   │   │   │   ├── CategoryEditor.razor                      2,13 Ko     2026-10-09 10:52
+│   │   │   │   ├── CategorySync.razor                        15,49 Ko    2026-10-09 15:47
+│   │   │   │   ├── DictionaryEditor.razor                    14,19 Ko    2026-10-09 16:26
+│   │   │   │   ├── Home.razor                                3,68 Ko     2026-10-09 13:12
 │   │   │   │   ├── NotFound.razor                            128 octets  2026-09-07 10:43
 │   │   │   │   ├── Preferences.razor                         1,85 Ko     2026-09-15 18:45
 │   │   │   │   └── RuleBuilder.razor                         20,79 Ko    2026-09-24 18:19
 │   │   │   ├── ActivationPrompt.razor                        1,62 Ko     2026-09-15 18:45
-│   │   │   ├── CategoryTreeNode.razor                        2,80 Ko     2026-09-23 17:39
-│   │   │   ├── CategoryTreeView.razor                        1,35 Ko     2026-09-23 17:39
+│   │   │   ├── CategoryTreeNode.razor                        3,13 Ko     2026-10-09 16:26
+│   │   │   ├── CategoryTreeView.razor                        1,48 Ko     2026-10-09 16:27
 │   │   │   ├── QuickCategorizeModal.razor                    1,97 Ko     2026-09-15 18:45
 │   │   │   ├── QuickCategorizeModal.razor.css                1008 octets 2026-09-15 18:45
 │   │   │   ├── QuickRuleBuilderModal.razor                   7,08 Ko     2026-09-15 18:45
@@ -229,7 +229,7 @@ Arborescence / Fichier                                        Taille      Date d
 │   │   │   ├── ActivationPromptViewModelTests.cs             3,78 Ko     2026-09-15 18:45
 │   │   │   ├── CategorySyncViewModelTests.cs                 11,08 Ko    2026-09-23 17:39
 │   │   │   ├── CategoryTreeViewModelTests.cs                 2,02 Ko     2026-09-15 18:45
-│   │   │   ├── DictionaryEditorViewModelTests.cs             13,34 Ko    2026-09-25 14:23
+│   │   │   ├── DictionaryEditorViewModelTests.cs             14,12 Ko    2026-10-09 16:09
 │   │   │   ├── PreferencesViewModelTests.cs                  2,94 Ko     2026-09-15 18:45
 │   │   │   ├── QuickCategorizeViewModelTests.cs              2,42 Ko     2026-09-15 18:45
 │   │   │   ├── QuickRuleBuilderViewModelTests.cs             5,94 Ko     2026-09-15 18:45
@@ -269,8 +269,9 @@ Arborescence / Fichier                                        Taille      Date d
 │   │   ├── CsvParserTests.cs                                 3,41 Ko     2026-09-24 18:19
 │   │   ├── DependencyInjectionTests.cs                       1,33 Ko     2026-09-25 11:38
 │   │   └── RuleMapperTests.cs                                4,32 Ko     2026-09-25 14:41
-│   ├── Data                                                              2026-10-08 18:09
-│   │   └── base_test.pst                                     842,83 Mo   2026-10-08 18:09
+│   ├── Data                                                              2026-10-14 09:50
+│   │   ├── base_test.pst                                     842,83 Mo   2026-10-14 09:50
+│   │   └── ~base_test.pst.tmp                                128,00 Ko   2026-10-14 09:50
 │   └── Tools.AiDocGenerator.Tests                                        2026-09-15 18:45
 │       ├── CatamailerTocBuilderTests.cs                      977 octets  2026-09-07 11:00
 │       ├── CSharpAnalyzerTests.cs                            1,79 Ko     2026-09-15 18:45
@@ -286,6 +287,6 @@ Arborescence / Fichier                                        Taille      Date d
 ├── .gitignore                                                8,32 Ko     2026-09-23 17:39
 ├── catamailer.db                                             60,00 Ko    2026-10-08 18:08
 ├── Catamailer.slnx                                           1,15 Ko     2026-09-24 18:19
-└── FileList.txt                                              0 octets    2026-10-08 18:14
+└── FileList.txt                                              0 octets    2026-10-14 10:04
 
 

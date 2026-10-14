@@ -9,6 +9,8 @@
 //         - 2026-09-25 : Ajout des capacités d'édition de règles existantes (J6-S3-T6 - Phase Rouge).
 //         - 2026-09-25 : Implémentation de UpdateRuleFromFormAsync (J6-S3-T6 - Phase Verte).
 //         - 2026-09-25 : Ajout de la recherche multi-critères SearchText et FilteredRules (J6-S3-T2 - Phase Verte).
+//         - 2026-10-09 : Ajout du tri hiérarchique sur FilteredRules (J6-S3-T3 - Phase Verte).
+//         - 2026-10-09 : Refonte avec DictionaryCategoryItem pour grille hiérarchique et accordéons (J6-S3-T4 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -24,6 +26,25 @@ using Catamailer.Domain;
 namespace Catamailer.Application.ViewModels
 {
     /// <summary>
+    /// Représente un élément de la grille hiérarchique combinant catégorie et règle.
+    /// </summary>
+    public class DictionaryCategoryItem
+    {
+        public CategoryNode Category { get; set; } = default!;
+        public DictionaryRule? Rule { get; set; }
+        public bool IsExpanded { get; set; } = true;
+    }
+
+    /// <summary>
+    /// Représente une option de catégorie formatée (indentée) pour les listes déroulantes.
+    /// </summary>
+    public class FlatCategoryOption
+    {
+        public CategoryNode Category { get; set; } = default!;
+        public string DisplayName { get; set; } = string.Empty;
+    }
+
+    /// <summary>
     /// ViewModel responsable de la gestion (CRUD) des règles de dictionnaires (Étape 1).
     /// </summary>
     public class DictionaryEditorViewModel
@@ -32,6 +53,7 @@ namespace Catamailer.Application.ViewModels
         private readonly ICategoryRepository _categoryRepository;
         private readonly ObservableCollection<DictionaryRule> _rules = new();
         private readonly ObservableCollection<CategoryNode> _availableCategories = new();
+        private readonly List<DictionaryCategoryItem> _gridItems = new();
 
         /// <summary>
         /// Obtient la liste observable de toutes les règles de dictionnaire.
@@ -44,30 +66,64 @@ namespace Catamailer.Application.ViewModels
         public IEnumerable<CategoryNode> AvailableCategories => _availableCategories;
 
         /// <summary>
-        /// Obtient ou définit le texte de recherche pour filtrer les règles.
+        /// Obtient ou définit le texte de recherche pour filtrer la grille.
         /// </summary>
         public string SearchText { get; set; } = string.Empty;
 
         /// <summary>
-        /// Obtient la liste des règles de dictionnaire filtrées par le texte de recherche.
+        /// Obtient les catégories formatées avec indentation pour la liste déroulante du formulaire.
         /// </summary>
-        public ICollection<DictionaryRule> FilteredRules
+        public IEnumerable<FlatCategoryOption> FlatCategories
+        {
+            get
+            {
+                foreach (var item in _gridItems)
+                {
+                    string indent = new string('\u00A0', item.Category.Depth * 4);
+                    yield return new FlatCategoryOption 
+                    { 
+                        Category = item.Category, 
+                        DisplayName = indent + item.Category.Name 
+                    };
+                }
+            }
+        }
+
+        /// <summary>
+        /// Obtient la liste des éléments affichés dans la grille en tenant compte de la recherche et des nœuds repliés.
+        /// </summary>
+        public IEnumerable<DictionaryCategoryItem> VisibleGridItems
         {
             get
             {
                 if (string.IsNullOrWhiteSpace(SearchText))
                 {
-                    return _rules;
+                    return _gridItems.Where(IsItemVisibleBasedOnExpansion).ToList();
                 }
+                else
+                {
+                    var lowerSearch = SearchText.Trim().ToLowerInvariant();
+                    var matchingItems = _gridItems.Where(i => MatchesSearch(i, lowerSearch)).ToList();
+                    
+                    var itemsToShow = new HashSet<DictionaryCategoryItem>();
+                    foreach (var match in matchingItems)
+                    {
+                        itemsToShow.Add(match);
+                        var current = match.Category.Parent;
+                        while(current != null)
+                        {
+                            var ancestorItem = _gridItems.FirstOrDefault(i => i.Category.Name == current.Name);
+                            if (ancestorItem != null)
+                            {
+                                ancestorItem.IsExpanded = true;
+                                itemsToShow.Add(ancestorItem);
+                            }
+                            current = current.Parent;
+                        }
+                    }
 
-                var lowerSearch = SearchText.Trim().ToLowerInvariant();
-
-                return _rules.Where(r => 
-                    r.TargetCategory.Name.ToLowerInvariant().Contains(lowerSearch) ||
-                    r.SubjectKeywords.Any(k => k.ToLowerInvariant().Contains(lowerSearch)) ||
-                    r.SenderKeywords.Any(k => k.ToLowerInvariant().Contains(lowerSearch)) ||
-                    r.RecipientKeywords.Any(k => k.ToLowerInvariant().Contains(lowerSearch))
-                ).ToList();
+                    return _gridItems.Where(i => itemsToShow.Contains(i)).ToList();
+                }
             }
         }
 
@@ -113,7 +169,7 @@ namespace Catamailer.Application.ViewModels
         }
 
         /// <summary>
-        /// Charge l'ensemble des règles de dictionnaire et des catégories depuis les dépôts.
+        /// Charge l'ensemble des règles de dictionnaire et des catégories, puis construit la grille.
         /// </summary>
         public async Task InitializeAsync()
         {
@@ -130,26 +186,46 @@ namespace Catamailer.Application.ViewModels
             {
                 _availableCategories.Add(cat);
             }
+
+            BuildGridItems();
         }
 
         /// <summary>
-        /// Ajoute une nouvelle règle au dépôt et met à jour la liste en mémoire.
+        /// Plie ou déplie une catégorie dans la grille hiérarchique.
+        /// </summary>
+        public void ToggleCategory(CategoryNode category)
+        {
+            var item = _gridItems.FirstOrDefault(i => i.Category.Name == category.Name);
+            if (item != null)
+            {
+                item.IsExpanded = !item.IsExpanded;
+            }
+        }
+
+        /// <summary>
+        /// Ajoute une nouvelle règle au dépôt et met à jour la grille en mémoire.
         /// </summary>
         /// <param name="rule">La règle à ajouter.</param>
         public async Task AddRuleAsync(DictionaryRule rule)
         {
             await _ruleRepository.AddDictionaryRuleAsync(rule);
             _rules.Add(rule);
+            
+            var item = _gridItems.FirstOrDefault(i => i.Category.Name == rule.TargetCategory.Name);
+            if (item != null) item.Rule = rule;
         }
 
         /// <summary>
-        /// Supprime une règle du dépôt et met à jour la liste en mémoire.
+        /// Supprime une règle du dépôt et met à jour la grille en mémoire.
         /// </summary>
         /// <param name="rule">La règle à supprimer.</param>
         public async Task DeleteRuleAsync(DictionaryRule rule)
         {
             await _ruleRepository.DeleteDictionaryRuleAsync(rule);
             _rules.Remove(rule);
+            
+            var item = _gridItems.FirstOrDefault(i => i.Category.Name == rule.TargetCategory.Name);
+            if (item != null) item.Rule = null;
         }
 
         /// <summary>
@@ -234,11 +310,69 @@ namespace Catamailer.Application.ViewModels
                 .Where(k => !string.IsNullOrEmpty(k))
                 .ToArray();
 
+            // Supprime le lien visuel de l'ancienne catégorie
+            var oldItem = _gridItems.FirstOrDefault(i => i.Rule == EditingRule);
+            if (oldItem != null) oldItem.Rule = null;
+
             EditingRule.Update(SelectedCategory, subjectKeywords, senderKeywords, recipientKeywords);
             
             await _ruleRepository.UpdateDictionaryRuleAsync(EditingRule);
 
+            // Établit le lien visuel vers la nouvelle catégorie
+            var newItem = _gridItems.FirstOrDefault(i => i.Category.Name == SelectedCategory.Name);
+            if (newItem != null) newItem.Rule = EditingRule;
+
             CancelEdit();
+        }
+
+        private void BuildGridItems()
+        {
+            _gridItems.Clear();
+            var rootCategories = _availableCategories.Where(c => c.Parent == null).OrderBy(c => c.Name);
+            foreach (var root in rootCategories)
+            {
+                TraverseGrid(root);
+            }
+        }
+
+        private void TraverseGrid(CategoryNode node)
+        {
+            var rule = _rules.FirstOrDefault(r => r.TargetCategory.Name == node.Name);
+            _gridItems.Add(new DictionaryCategoryItem
+            {
+                Category = node,
+                Rule = rule,
+                IsExpanded = true
+            });
+
+            foreach (var child in node.Children.OrderBy(c => c.Name))
+            {
+                TraverseGrid(child);
+            }
+        }
+
+        private bool IsItemVisibleBasedOnExpansion(DictionaryCategoryItem item)
+        {
+            var current = item.Category.Parent;
+            while (current != null)
+            {
+                var ancestorItem = _gridItems.FirstOrDefault(i => i.Category.Name == current.Name);
+                if (ancestorItem != null && !ancestorItem.IsExpanded) return false;
+                current = current.Parent;
+            }
+            return true;
+        }
+
+        private bool MatchesSearch(DictionaryCategoryItem item, string lowerSearch)
+        {
+            if (item.Category.Name.ToLowerInvariant().Contains(lowerSearch)) return true;
+            if (item.Rule != null)
+            {
+                if (item.Rule.SubjectKeywords.Any(k => k.ToLowerInvariant().Contains(lowerSearch))) return true;
+                if (item.Rule.SenderKeywords.Any(k => k.ToLowerInvariant().Contains(lowerSearch))) return true;
+                if (item.Rule.RecipientKeywords.Any(k => k.ToLowerInvariant().Contains(lowerSearch))) return true;
+            }
+            return false;
         }
     }
 }
