@@ -17,6 +17,7 @@
 //         - 2026-09-24 : Implémentation de la lecture des fichiers de signature HTML (J5-S2-T3 - Phase Verte).
 //         - 2026-09-24 : Implémentation de IExternalResourceProvider (J6-S1-T1 - Phase Rouge).
 //         - 2026-09-24 : Implémentation de GetAvailableSignatures (J6-S1-T1 - Phase Verte).
+//         - 2026-10-19 : Ajout du cache mémoire sur GetAvailableFolderPaths pour supprimer la latence RPC (J6-S3-T7 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -35,6 +36,7 @@ namespace Catamailer.Infrastructure
     public class OutlookApplicationWrapper : IOutlookApplicationWrapper
     {
         private readonly dynamic _application;
+        private List<string>? _cachedFolderPaths;
 
 #pragma warning disable CS0067 // L'événement n'est jamais utilisé
         /// <inheritdoc />
@@ -59,8 +61,6 @@ namespace Catamailer.Infrastructure
             }
 
             _application = instance;
-            
-            // TODO: L'abonnement natif à l'événement NewMailEx devra être implémenté ici
         }
 
         /// <summary>
@@ -77,7 +77,6 @@ namespace Catamailer.Infrastructure
             var categoriesList = new List<(string Name, string? ColorCode)>();
             var categories = _application.Session.Categories;
             
-            // En Late Binding COM, on favorise la boucle for à base 1 plutôt que foreach pour éviter les erreurs d'énumérateur
             int count = categories.Count;
 
             for (int i = 1; i <= count; i++)
@@ -94,7 +93,6 @@ namespace Catamailer.Infrastructure
         {
              try
              {
-                 // Utilisation de l'indexeur direct O(1) au lieu d'une boucle O(N) coûteuse en RPC
                  var category = _application.Session.Categories[name];
                  return category != null;
              }
@@ -202,7 +200,7 @@ namespace Catamailer.Infrastructure
         /// </summary>
         private int MapHexToOlCategoryColor(string? hexColor)
         {
-             if (string.IsNullOrEmpty(hexColor)) return 0; // olCategoryColorNone
+             if (string.IsNullOrEmpty(hexColor)) return 0;
              
              return hexColor.ToUpperInvariant() switch
              {
@@ -242,12 +240,18 @@ namespace Catamailer.Infrastructure
         /// <inheritdoc />
         public IEnumerable<string> GetAvailableFolderPaths()
         {
+            if (_cachedFolderPaths != null && _cachedFolderPaths.Count > 0)
+            {
+                return _cachedFolderPaths;
+            }
+
             var folderPaths = new List<string>();
             try
             {
                 dynamic inbox = _application.Session.GetDefaultFolder(6);
                 dynamic rootStore = inbox.Parent;
                 TraverseFolders(rootStore.Folders, "", folderPaths);
+                _cachedFolderPaths = folderPaths;
             }
             catch
             {
@@ -375,7 +379,7 @@ namespace Catamailer.Infrastructure
         public void FlagForFollowUp(string entryId)
         {
             var item = GetItemFromId(entryId);
-            item.MarkAsTask(1); // olMarkNoDate
+            item.MarkAsTask(1);
             item.Save();
         }
 
@@ -394,9 +398,9 @@ namespace Catamailer.Infrastructure
             var item = GetItemFromId(entryId);
             item.Importance = importanceLevel.ToLowerInvariant() switch
             {
-                "haute" => 2,   // olImportanceHigh
-                "faible" => 0,  // olImportanceLow
-                _ => 1          // olImportanceNormal
+                "haute" => 2,
+                "faible" => 0,
+                _ => 1
             };
             item.Save();
         }
@@ -414,7 +418,7 @@ namespace Catamailer.Infrastructure
         public void FlagToday(string entryId)
         {
             var item = GetItemFromId(entryId);
-            item.MarkAsTask(2); // olMarkToday
+            item.MarkAsTask(2);
             item.Save();
         }
 

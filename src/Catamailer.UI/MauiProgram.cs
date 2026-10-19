@@ -19,6 +19,7 @@
 //         - 2026-09-16 : Remplacement du Dummy par l'intégration COM réelle via OutlookApplicationWrapper (J4-S3-T1).
 //         - 2026-09-24 : Injection de IExternalResourceProvider (J6-S1-T1 - Phase Orange).
 //         - 2026-09-25 : Nettoyage final des Dummies et injection de RuleRepository et OutlookSelectionProvider (J6-S3-T5 - Phase Bleue).
+//         - 2026-10-19 : Injection de StatusBarViewModel (J6-S3-T7 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -97,6 +98,7 @@ namespace Catamailer.UI
             builder.Services.AddTransient<PreferencesViewModel>();
             builder.Services.AddTransient<ActivationPromptViewModel>();
             builder.Services.AddTransient<CategorySyncViewModel>();
+            builder.Services.AddTransient<StatusBarViewModel>();
 
             builder.Services.AddMauiBlazorWebView();
 

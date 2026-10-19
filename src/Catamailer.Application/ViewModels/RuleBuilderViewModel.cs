@@ -9,6 +9,7 @@
 //         - 2026-09-24 : Remplacement de l'action unique par une ObservableCollection d'actions (J5-S3-T1 - Phase Verte).
 //         - 2026-09-24 : Ajout de IExternalResourceProvider (J6-S1-T1 - Phase Rouge).
 //         - 2026-09-24 : Peuplement des listes de dossiers et signatures (J6-S1-T1 - Phase Verte).
+//         - 2026-10-19 : Chargement paresseux des dossiers Outlook via EnsureFoldersLoadedAsync pour affichage instantané (J6-S3-T7 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -35,6 +36,7 @@ namespace Catamailer.Application.ViewModels
         private readonly IRuleRepository _ruleRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly IExternalResourceProvider _externalResourceProvider;
+        private bool _foldersLoaded;
 
         /// <summary>
         /// Obtient ou définit le nom descriptif de la règle à sauvegarder.
@@ -62,7 +64,7 @@ namespace Catamailer.Application.ViewModels
         public IEnumerable<CategoryOption> FlatCategories { get; private set; } = Enumerable.Empty<CategoryOption>();
 
         /// <summary>
-        /// Obtient la liste des chemins de dossiers Outlook disponibles.
+        /// Obtient la liste des chemins de dossiers Outlook disponibles (chargée à la demande).
         /// </summary>
         public IEnumerable<string> AvailableFolders { get; private set; } = Enumerable.Empty<string>();
 
@@ -89,18 +91,16 @@ namespace Catamailer.Application.ViewModels
         }
 
         /// <summary>
-        /// Charge les données de référence nécessaires à l'IHM (catégories et ressources externes) et construit l'arborescence visuelle.
+        /// Charge les données de référence rapides nécessaires à l'IHM (catégories et signatures locales) sans bloquer sur l'arborescence COM des dossiers Outlook.
         /// </summary>
         public async Task InitializeAsync()
         {
             var categoriesTask = _categoryRepository.GetAllAsync();
-            var foldersTask = _externalResourceProvider.GetAvailableFolderPathsAsync();
             var signaturesTask = _externalResourceProvider.GetAvailableSignaturesAsync();
 
-            await Task.WhenAll(categoriesTask, foldersTask, signaturesTask);
+            await Task.WhenAll(categoriesTask, signaturesTask);
 
             AvailableCategories = categoriesTask.Result.ToList();
-            AvailableFolders = foldersTask.Result.OrderBy(f => f).ToList();
             AvailableSignatures = signaturesTask.Result.OrderBy(s => s).ToList();
 
             var flatList = new List<CategoryOption>();
@@ -108,8 +108,8 @@ namespace Catamailer.Application.ViewModels
 
             void Traverse(CategoryNode node)
             {
-                var indent = new string('\u00A0', node.Depth * 4); // 4 espaces insécables par niveau de profondeur
-                var fullName = node.GetFullName("-"); // Génération avec tiret sans espaces autour
+                var indent = new string('\u00A0', node.Depth * 4);
+                var fullName = node.GetFullName("-");
                 
                 flatList.Add(new CategoryOption(node, fullName, $"{indent}{node.Name}"));
 
@@ -125,6 +125,21 @@ namespace Catamailer.Application.ViewModels
             }
 
             FlatCategories = flatList;
+        }
+
+        /// <summary>
+        /// Charge de manière paresseuse la liste des dossiers Outlook uniquement lorsqu'une action de déplacement le requiert, et met le résultat en cache.
+        /// </summary>
+        public async Task EnsureFoldersLoadedAsync()
+        {
+            if (_foldersLoaded)
+            {
+                return;
+            }
+
+            var folders = await _externalResourceProvider.GetAvailableFolderPathsAsync();
+            AvailableFolders = folders.OrderBy(f => f).ToList();
+            _foldersLoaded = true;
         }
 
         /// <summary>

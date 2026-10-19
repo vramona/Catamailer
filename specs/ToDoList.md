@@ -108,7 +108,7 @@
 - [ ] ⚪ **J6-S3-T4** - Mécanisme de détection et signalement visuel des conflits/doublons de mots-clés.
 - [x] ✅ **J6-S3-T5** - Suppression de tous les Dummies du projet `Catamailer.UI` (Refactoring). (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : ba80e3abba76600ce93a2f3750379fca013bf62e) (Cpx: 3 / 3)
 - [x] ✅ **J6-S3-T6** - Édition d'une règle dictionnaire (Ajout UpdateDictionaryRuleAsync et UI). (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : ba80e3abba76600ce93a2f3750379fca013bf62e) (Cpx: 5 / 6)
-- [ ] 🏗️ **J6-S3-T7** - Revue ergonomique de l'édition (Refonte Layout Global, StatusBar, Zone d'Actions fixe, Raccourci Échap).
+- [x] ✅ **J6-S3-T7** - Revue ergonomique de l'édition (Layout Global fixe, StatusBar Outlook, Action Bar standardisée, Raccourci Échap, Haute densité et Lazy Loading COM). (Validé le 19/10/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : <COMMIT_HASH>) (Cpx: 8 / 8)
 - [ ] ⚪ **J6-S3-T8** - Initialisation des règles d'exécution VBA en dur dans le Migrator (Hardcoding des règles complexes).
 - [ ] ⚪ **J6-S3-T9** - Tests d'intégration sur les Actions applicables sur les règles complexes.
 - [x] ✅ **J6-S3-T10** - Fix Import migrator pour recréer l'arborescence. (Validé le 08/10/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : 34bd62b39b0c315cc343bd5fc59e876d466536ab) (Cpx: 5 / 6)

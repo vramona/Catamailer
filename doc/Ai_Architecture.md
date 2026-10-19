@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-10-14 10:04
+Généré le : 2026-10-19 17:45
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -261,14 +261,15 @@ Généré le : 2026-10-14 10:04
 - `ObservableCollection<RuleAction> Actions { get; }` : Obtient la liste observable des actions séquentielles à exécuter.
 - `IEnumerable<CategoryNode> AvailableCategories { get; set; }` : Obtient la liste brute des catégories disponibles.
 - `IEnumerable<CategoryOption> FlatCategories { get; set; }` : Obtient la liste aplatie et indentée des catégories prête pour l'affichage UI.
-- `IEnumerable<string> AvailableFolders { get; set; }` : Obtient la liste des chemins de dossiers Outlook disponibles.
+- `IEnumerable<string> AvailableFolders { get; set; }` : Obtient la liste des chemins de dossiers Outlook disponibles (chargée à la demande).
 - `IEnumerable<string> AvailableSignatures { get; set; }` : Obtient la liste des signatures HTML disponibles.
-- `Task InitializeAsync()` : Charge les données de référence nécessaires à l'IHM (catégories et ressources externes) et construit l'arborescence visuelle.
+- `Task InitializeAsync()` : Charge les données de référence rapides nécessaires à l'IHM (catégories et signatures locales) sans bloquer sur l'arborescence COM des dossiers Outlook.
   - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
-  - *Appelle* ➡️ `IExternalResourceProvider.GetAvailableFolderPathsAsync()`
   - *Appelle* ➡️ `IExternalResourceProvider.GetAvailableSignaturesAsync()`
   - *Appelle* ➡️ `CategoryNode.GetFullName()`
   - *Appelle* ➡️ `RuleBuilderViewModel.Traverse()`
+- `Task EnsureFoldersLoadedAsync()` : Charge de manière paresseuse la liste des dossiers Outlook uniquement lorsqu'une action de déplacement le requiert, et met le résultat en cache.
+  - *Appelle* ➡️ `IExternalResourceProvider.GetAvailableFolderPathsAsync()`
 - `void SetOperator(RuleNode targetNode, LogicalOperator newOperator)` : Modifie l'opérateur logique d'un nœud spécifique.
   - *Appelle* ➡️ `RuleNode.SetOperator()`
 - `void AddCriterion(RuleNode targetNode, RuleCriterion criterion)` : Ajoute un critère à un nœud spécifique.
@@ -298,6 +299,19 @@ Généré le : 2026-10-14 10:04
 - `Task ToggleAutoWriteAsync(bool enabled)` : Active ou désactive l'écriture automatique et met à jour l'état.
   - *Appelle* ➡️ `IShadowModeService.SetAutoWriteEnabledAsync()`
   - *Appelle* ➡️ `ShadowModeDashboardViewModel.InitializeAsync()`
+
+### Class : StatusBarViewModel
+**Fichier** : `src\Catamailer.Application\ViewModels\StatusBarViewModel.cs`
+**Rôle** : ViewModel responsable de l'agrégation et de l'affichage des métriques globales dans la barre de statut inférieure.
+**Membres et Invocations :**
+- `int TotalCategoriesCount { get; set; }` : Obtient le nombre total de catégories actives dans le référentiel.
+- `int TotalDictionaryRulesCount { get; set; }` : Obtient le nombre total de règles de dictionnaires (Étape 1) configurées.
+- `int TotalExecutionRulesCount { get; set; }` : Obtient le nombre total de règles d'exécution (Étape 2) configurées.
+- `bool IsAutoWriteEnabled { get; set; }` : Obtient un indicateur précisant si le classement automatique dans Outlook est actif.
+- `Task InitializeAsync()` : Charge initialement l'ensemble des métriques depuis les dépôts et services.
+  - *Appelle* ➡️ `StatusBarViewModel.LoadMetricsAsync()`
+- `Task RefreshAsync()` : Rafraîchit l'ensemble des métriques de la barre de statut.
+  - *Appelle* ➡️ `StatusBarViewModel.LoadMetricsAsync()`
 
 ### Class : SyncDeltaOption
 **Fichier** : `src\Catamailer.Application\ViewModels\SyncDeltaOption.cs`
@@ -1167,8 +1181,10 @@ Généré le : 2026-10-14 10:04
 **Fichier** : `tests\Catamailer.Application.Tests\ViewModels\RuleBuilderViewModelTests.cs`
 **Membres et Invocations :**
 - `void Constructor_ShouldInitializeRootNode()`
-- `Task InitializeAsync_ShouldLoadCategoriesAndExternalResources()`
+- `Task InitializeAsync_ShouldLoadCategoriesAndSignatures_LeavingFoldersLazy()`
   - *Appelle* ➡️ `RuleBuilderViewModel.InitializeAsync()`
+- `Task EnsureFoldersLoadedAsync_ShouldLoadFoldersOnlyOnce()`
+  - *Appelle* ➡️ `RuleBuilderViewModel.EnsureFoldersLoadedAsync()`
 - `void AddCriterion_ShouldAddCriterionToTargetNode()`
   - *Appelle* ➡️ `RuleBuilderViewModel.AddCriterion()`
 - `void RemoveCriterion_ShouldRemoveCriterionFromTargetNode()`
@@ -1205,6 +1221,24 @@ Généré le : 2026-10-14 10:04
   - *Appelle* ➡️ `ShadowModeDashboardViewModel.InitializeAsync()`
   - *Appelle* ➡️ `ShadowModeDashboardViewModel.ToggleAutoWriteAsync()`
   - *Appelle* ➡️ `IShadowModeService.SetAutoWriteEnabledAsync()`
+
+### Class : StatusBarViewModelTests
+**Fichier** : `tests\Catamailer.Application.Tests\ViewModels\StatusBarViewModelTests.cs`
+**Rôle** : Tests unitaires validant le comportement de .
+**Membres et Invocations :**
+- `Task InitializeAsync_ShouldLoadMetricsFromRepositoriesAndServices()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
+  - *Appelle* ➡️ `IRuleRepository.GetAllExecutionRulesAsync()`
+  - *Appelle* ➡️ `IShadowModeService.IsAutoWriteEnabledAsync()`
+  - *Appelle* ➡️ `StatusBarViewModel.InitializeAsync()`
+- `Task RefreshAsync_ShouldUpdateMetrics()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
+  - *Appelle* ➡️ `IRuleRepository.GetAllExecutionRulesAsync()`
+  - *Appelle* ➡️ `IShadowModeService.IsAutoWriteEnabledAsync()`
+  - *Appelle* ➡️ `StatusBarViewModel.InitializeAsync()`
+  - *Appelle* ➡️ `StatusBarViewModel.RefreshAsync()`
 
 ## Projet : Catamailer.Domain.Tests
 ### Class : CategoryNodeTests
