@@ -76,6 +76,15 @@
 - `[string] $DbName`
 
 ---
+## Script : Invoke-ShadowTestEnvSetup.ps1
+**Chemin relatif** : `scripts\Invoke-ShadowTestEnvSetup.ps1`
+
+### Paramètres
+- `[string] $TestProfile`
+- `[string] $BasePstPath`
+- `[string] $PSScriptRoot`
+
+---
 ## Script : Invoke-TestEnvSetup.ps1
 **Chemin relatif** : `scripts\Invoke-TestEnvSetup.ps1`
 

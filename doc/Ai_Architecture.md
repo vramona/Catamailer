@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-10-20 11:39
+Généré le : 2026-10-20 16:15
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -30,7 +30,9 @@ Généré le : 2026-10-20 11:39
 **Fichier** : `src\Catamailer.Application\ExecutionEngine.cs`
 **Rôle** : Moteur d'exécution de l'Étape 2 : évaluation de l'arbre booléen des conditions.
 **Membres et Invocations :**
-- `bool Evaluate(string subject, string sender, RuleNode node)` : Évalue un nœud de règle composite par rapport aux métadonnées d'un e-mail.
+- `bool Evaluate(string subject, string sender, RuleNode node)` : Évalue un nœud de règle composite par rapport aux métadonnées textuelles d'un e-mail.
+  - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
+- `bool Evaluate(string subject, string sender, IEnumerable<string>? categories, RuleNode node)` : Évalue un nœud de règle composite par rapport aux métadonnées complètes (incluant les catégories) d'un e-mail.
   - *Appelle* ➡️ `ExecutionEngine.EvaluateCriterion()`
   - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
 
@@ -581,6 +583,8 @@ Généré le : 2026-10-20 11:39
   - *Appelle* ➡️ `OutlookApplicationWrapper.GetItemFromId()`
 - `void InsertHtmlSignature(string entryId, string signatureName)`
   - *Appelle* ➡️ `OutlookApplicationWrapper.GetItemFromId()`
+- `void AddCategoryToMail(string entryId, string categoryName)`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.GetItemFromId()`
 - `MailMetadata GetMailMetadata(string entryId)`
 - `string? GetSelectedEntryId()`
 - `void ReplaceCategoryOnAllItems(string oldCategoryName, string newCategoryName)`
@@ -907,6 +911,12 @@ Généré le : 2026-10-20 11:39
   - *Appelle* ➡️ `RuleNode.AddCriterion()`
   - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
 - `void Evaluate_ShouldReturnTrue_WhenOrNodeHasOneValidCriterion()`
+  - *Appelle* ➡️ `RuleNode.AddCriterion()`
+  - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
+- `void Evaluate_ShouldReturnTrue_WhenSubjectMatchesRegexCriterion_IgnoringCase()`
+  - *Appelle* ➡️ `RuleNode.AddCriterion()`
+  - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
+- `void Evaluate_ShouldReturnTrue_WhenCategoryMatchesExactNode_OrNodeAndChildren()`
   - *Appelle* ➡️ `RuleNode.AddCriterion()`
   - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
 
@@ -1355,6 +1365,14 @@ Généré le : 2026-10-20 11:39
   - *Appelle* ➡️ `OutlookApplicationWrapper.InsertHtmlSignature()`
 - `void InsertHtmlSignature_ShouldThrowFileNotFoundException_WhenSignatureDoesNotExist()`
   - *Appelle* ➡️ `OutlookApplicationWrapper.InsertHtmlSignature()`
+- `void AddCategoryToMail_ShouldNotThrowNotImplementedException()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.AddCategoryToMail()`
+- `void ExecuteComplexRuleActions_ShouldDispatchAllLegacyActionTypes_WithoutNotImplementedException()`
+  - *Appelle* ➡️ `RuleNode.AddCriterion()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.AddCategoryToMail()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.SetImportance()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.FlagToday()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.MoveToFolder()`
 - `void Dispose()`
   - *Appelle* ➡️ `OutlookApplicationWrapper.Dispose()`
 
@@ -1587,6 +1605,10 @@ Généré le : 2026-10-20 11:39
   - *Appelle* ➡️ `Invoke-TestEnvTeardown.ps1`
 - **Invoke-PurgeDatabase.ps1** : `scripts\Invoke-PurgeDatabase.ps1`
   - Paramètre : `[string] $DbName`
+- **Invoke-ShadowTestEnvSetup.ps1** : `scripts\Invoke-ShadowTestEnvSetup.ps1`
+  - Paramètre : `[string] $TestProfile`
+  - Paramètre : `[string] $BasePstPath`
+  - Paramètre : `[string] $PSScriptRoot`
 - **Invoke-TestEnvSetup.ps1** : `scripts\Invoke-TestEnvSetup.ps1`
   - Paramètre : `[string] $TestProfile`
   - Paramètre : `[string] $BasePstPath`

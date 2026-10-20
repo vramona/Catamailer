@@ -5,11 +5,16 @@
 //         - 2026-09-23 : Création initiale des tests d'intégration des actions (J5-S2-T1 - Phase Rouge).
 //         - 2026-09-24 : Ajout des tests pour l'arborescence des dossiers (J5-S2-T2 - Phase Rouge).
 //         - 2026-09-24 : Ajout du test d'erreur pour la lecture de signature (J5-S2-T3 - Phase Rouge).
+//         - 2026-10-20 : Ajout des tests d'intégration pour AddCategoryToMail et les actions des règles complexes (J6-S3-T9 - Phase Rouge).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
+#nullable enable
+
 using System;
+using System.Collections.Generic;
 using System.IO;
+using Catamailer.Domain;
 using Xunit;
 
 namespace Catamailer.Infrastructure.IntegrationTests
@@ -94,8 +99,58 @@ namespace Catamailer.Infrastructure.IntegrationTests
         public void InsertHtmlSignature_ShouldThrowFileNotFoundException_WhenSignatureDoesNotExist()
         {
             // Act & Assert
-            // L'appel doit échouer avec FileNotFoundException car le fichier n'existe pas physiquement.
             Assert.Throws<FileNotFoundException>(() => _wrapper.InsertHtmlSignature("dummy_id", "Signature_Inexistante_12345"));
+        }
+
+        [Fact]
+        public void AddCategoryToMail_ShouldNotThrowNotImplementedException()
+        {
+            var exception = Record.Exception(() => _wrapper.AddCategoryToMail("dummy_id", "DAMSI-DA-QUALIF CEDA"));
+            Assert.IsNotType<NotImplementedException>(exception);
+        }
+
+        [Fact]
+        public void ExecuteComplexRuleActions_ShouldDispatchAllLegacyActionTypes_WithoutNotImplementedException()
+        {
+            // Arrange : Règle complexe multi-actions calquée sur TraiterMessageQualifCEDA + Déplacement
+            var rootNode = new RuleNode(LogicalOperator.And);
+            rootNode.AddCriterion(new RuleCriterion(MailField.Subject, MatchOperator.RegexMatch, @"^\[CEDA\] : Actions demandées:"));
+
+            var complexRule = new ExecutionRule(
+                "Qualif CEDA - Actions demandées",
+                rootNode,
+                new List<RuleAction>
+                {
+                    new RuleAction(ActionType.AddCategory, "DAMSI-DA-QUALIF CEDA"),
+                    new RuleAction(ActionType.SetImportance, "Haute"),
+                    new RuleAction(ActionType.FlagToday, string.Empty),
+                    new RuleAction(ActionType.MoveToFolder, "Syndicats")
+                });
+
+            // Act & Assert : Vérifie que chaque ActionType d'une règle complexe est pris en charge par IOutlookApplicationWrapper
+            foreach (var action in complexRule.Actions)
+            {
+                var exception = Record.Exception(() =>
+                {
+                    switch (action.Type)
+                    {
+                        case ActionType.AddCategory:
+                            _wrapper.AddCategoryToMail("dummy_id", action.Parameter);
+                            break;
+                        case ActionType.SetImportance:
+                            _wrapper.SetImportance("dummy_id", action.Parameter);
+                            break;
+                        case ActionType.FlagToday:
+                            _wrapper.FlagToday("dummy_id");
+                            break;
+                        case ActionType.MoveToFolder:
+                            _wrapper.MoveToFolder("dummy_id", action.Parameter);
+                            break;
+                    }
+                });
+
+                Assert.IsNotType<NotImplementedException>(exception);
+            }
         }
 
         public void Dispose()

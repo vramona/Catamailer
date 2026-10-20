@@ -18,12 +18,14 @@
 //         - 2026-09-24 : Implémentation de IExternalResourceProvider (J6-S1-T1 - Phase Rouge).
 //         - 2026-09-24 : Implémentation de GetAvailableSignatures (J6-S1-T1 - Phase Verte).
 //         - 2026-10-19 : Ajout du cache mémoire sur GetAvailableFolderPaths pour supprimer la latence RPC (J6-S3-T7 - Phase Verte).
+//         - 2026-10-20 : Implémentation de AddCategoryToMail avec garde anti-doublon VBA (J6-S3-T9 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Catamailer.Domain;
@@ -314,7 +316,7 @@ namespace Catamailer.Infrastructure
         }
 
         // ====================================================================================
-        // ACTIONS PHYSIQUES D'EXÉCUTION (J5-S2-T1)
+        // ACTIONS PHYSIQUES D'EXÉCUTION (J5-S2-T1 / J6-S3-T9)
         // ====================================================================================
 
         /// <inheritdoc />
@@ -445,6 +447,40 @@ namespace Catamailer.Infrastructure
 
             var item = GetItemFromId(entryId);
             item.HTMLBody = item.HTMLBody + "<br/><br/>" + htmlContent;
+            item.Save();
+        }
+
+        /// <inheritdoc />
+        public void AddCategoryToMail(string entryId, string categoryName)
+        {
+            if (string.IsNullOrWhiteSpace(categoryName))
+            {
+                return;
+            }
+
+            var item = GetItemFromId(entryId);
+            string existingCategories = (string?)item.Categories ?? string.Empty;
+
+            var categoriesList = existingCategories
+                .Replace(";", ",")
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(c => c.Trim())
+                .ToList();
+
+            if (categoriesList.Any(c => string.Equals(c, categoryName.Trim(), StringComparison.OrdinalIgnoreCase)))
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(existingCategories))
+            {
+                item.Categories = categoryName.Trim();
+            }
+            else
+            {
+                item.Categories = $"{existingCategories.Trim()}, {categoryName.Trim()}";
+            }
+
             item.Save();
         }
 
