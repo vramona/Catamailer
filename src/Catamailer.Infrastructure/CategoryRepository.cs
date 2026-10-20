@@ -9,8 +9,11 @@
 //     2026-09-23 : Ajout des bouchons pour AddRangeAsync et UpdateRangeAsync (J4-S4-T7 - Phase Rouge).
 //     2026-09-23 : Implémentation de AddRangeAsync et UpdateRangeAsync pour les performances (J4-S4-T7 - Phase Verte).
 //     2026-09-23 : Mise à jour de GetAllAsync avec le filtre QueryFilter (includeDeleted) (J4-S4-T6 - Phase Verte).
+//     2026-10-20 : Ajout de #nullable enable pour supprimer l'avertissement CS8669 (J6-S3-T8 - Phase Orange).
 // </auto-generated>
 // ------------------------------------------------------------------------------
+
+#nullable enable
 
 using System;
 using System.Collections.Generic;

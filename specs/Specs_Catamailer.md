@@ -31,6 +31,7 @@ L'analyse d'un e-mail suit un flux séquentiel strict.
         *   **Ajouter un rappel** (Date/Heure spécifiques ou relance standardisée).
         *   **Assurer un suivi (Aujourd'hui)** (Drapeau de tâche Outlook).
         *   **Insérer une signature HTML** lors d'un transfert ou d'une réponse.
+        *   **Ajouter une catégorie** (`AddCategory`) suite à l'évaluation d'un arbre de conditions complexes.
 ### 3. Prise de Notes "Inbox", Tâches et Agenda (Module PKM)
 Catamailer intègre un module de productivité croisant les notes, l'agenda et les communications.
 *   **Saisie au kilomètre (Outliner) :** Interface de notes rapides. Chaque ligne tapée génère un bloc indépendant possédant un horodatage de création/modification. Le rendu visuel est polymorphe (texte, case à cocher, etc.).

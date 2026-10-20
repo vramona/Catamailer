@@ -26,6 +26,7 @@
 //         - 2026-09-24 : Intégration des listes déroulantes pour les dossiers et signatures (J6-S1-T1 - Phase Bleue).
 //         - 2026-10-19 : Intégration dans le Layout global, haute densité et Action Bar fixe (J6-S3-T7 - Phase Bleue).
 //         - 2026-10-19 : Appel paresseux EnsureFoldersLoadedAsync à l'ajout d'action (J6-S3-T7 - Phase Bleue Itération 2).
+//         - 2026-10-20 : Ajout du sélecteur de catégorie indenté pour ActionType.AddCategory (J6-S3-T8 - Phase Bleue).
 // </auto-generated>
 // ------------------------------------------------------------------------------ -->
 
@@ -36,6 +37,10 @@
     .builder-ultra-compact .form-select,
     .builder-ultra-compact .form-control,
     .builder-ultra-compact .btn {
+        font-size: 0.75rem;
+    }
+    .select-indented {
+        font-family: Consolas, monospace;
         font-size: 0.75rem;
     }
 </style>
@@ -107,6 +112,16 @@
                                     }
                                 </select>
                             }
+                            else if (action.Type == ActionType.AddCategory)
+                            {
+                                <select class="form-select form-select-sm select-indented py-0" style="height: 24px;" value="@action.Parameter" @onchange="@(e => UpdateActionParameter(action, e.Value?.ToString() ?? string.Empty))">
+                                    <option value="">-- Sélectionner une catégorie --</option>
+                                    @foreach (var cat in ViewModel.FlatCategories)
+                                    {
+                                        <option value="@cat.FullName">@cat.DisplayName</option>
+                                    }
+                                </select>
+                            }
                             else if (action.Type == ActionType.InsertHtmlSignature)
                             {
                                 <select class="form-select form-select-sm py-0" style="height: 24px;" value="@action.Parameter" @onchange="@(e => UpdateActionParameter(action, e.Value?.ToString() ?? string.Empty))">
@@ -172,7 +187,6 @@
 
     private async Task AddNewActionAsync()
     {
-        // On initialise par défaut sur MarkAsRead pour être instantané, et on ne charge les dossiers que si MoveToFolder est choisi
         ViewModel.AddAction(new RuleAction(ActionType.MarkAsRead, string.Empty));
         await Task.CompletedTask;
         StateHasChanged();
@@ -196,6 +210,10 @@
             {
                 await ViewModel.EnsureFoldersLoadedAsync();
                 newParam = ViewModel.AvailableFolders.FirstOrDefault() ?? string.Empty;
+            }
+            else if (newType == ActionType.AddCategory)
+            {
+                newParam = ViewModel.FlatCategories.FirstOrDefault()?.FullName ?? string.Empty;
             }
             else if (newType == ActionType.InsertHtmlSignature)
             {

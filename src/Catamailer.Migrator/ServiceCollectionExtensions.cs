@@ -4,6 +4,7 @@
 //     Historique :
 //         - 2026-09-25 : Création de la classe d'extension bouchonnée (J6-S2-T3 - Phase Rouge).
 //         - 2026-09-25 : Implémentation de l'enregistrement des services (J6-S2-T3 - Phase Verte).
+//         - 2026-10-20 : Enregistrement de ILegacyExecutionRuleSeeder (J6-S3-T8 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -13,6 +14,7 @@ using Catamailer.Infrastructure;
 using Catamailer.Migrator.Mapping;
 using Catamailer.Migrator.Orchestration;
 using Catamailer.Migrator.Parsing;
+using Catamailer.Migrator.Seeding;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -38,6 +40,7 @@ namespace Catamailer.Migrator
             // Enregistrement des composants de la chaîne de migration
             services.AddTransient<ICsvParser, CsvParser>();
             services.AddTransient<IRuleMapper, RuleMapper>();
+            services.AddTransient<ILegacyExecutionRuleSeeder, LegacyExecutionRuleSeeder>();
             services.AddTransient<IMigrationOrchestrator, MigrationOrchestrator>();
 
             return services;

@@ -1,0 +1,889 @@
+Option Explicit
+
+' Declarations des API Windows pour le calcul du temps en millisecondes (32/64 bits)
+#If VBA7 Then
+    Public Declare PtrSafe Function GetTickCount Lib "kernel32" () As Long
+#Else
+    Public Declare Function GetTickCount Lib "kernel32" () As Long
+#End If
+
+Public m_IsRepriseStockEnCours As Boolean
+Public m_DernierChargement As Date
+Public m_DictionnairePrecedent As Object
+Public g_RapportDeltaAttente As String
+
+' Nom du fichier de trace actif pour la session/opération
+Public g_FichierTraceActuel As String
+
+' Dictionnaires Globaux pour le cache de règles
+Public g_DictSubject As Object
+Public g_DictExpediteurs As Object
+Public g_DictDestinataires As Object
+
+' Cache mémoire des adresses SMTP déjà résolues (Gain de vitesse x100)
+Public g_DictAddressCache As Object
+
+Public Const DOSSIER_RACINE As String = "C:\CNAM\Outlook\"
+Public Const CHEMIN_CSV As String = DOSSIER_RACINE + "Configuration_Regles.csv"
+Public Const DOSSIER_TRACES As String = DOSSIER_RACINE + "Traces\"
+
+' =========================================================================
+' PROCEDURE DE RATTRAPAGE DE STOCK (AVEC REINITIALISATION DU TIMER 30 MIN)
+' =========================================================================
+Public Sub RepriseStockMails()
+    Dim objNS As Outlook.NameSpace
+    Dim DossiersCibles(1 To 2) As Outlook.MAPIFolder
+    Dim LibellesDossiers(1 To 2) As String
+    Dim FolderCourant As Outlook.MAPIFolder
+    Dim Item As Object
+    Dim i As Long, j As Long
+    Dim TotalFolder As Long, IndexFolder As Long
+    
+    ' Compteurs globaux et par dossier
+    Dim ElementsInbox As Long, ModifiesInbox As Long
+    Dim ElementsSent As Long, ModifiesSent As Long
+    Dim TotalElementsGlobal As Long, TotalModifiesGlobal As Long
+    
+    ' Chronomètres globaux et par dossier
+    Dim T_DebutGlobal As Long, T_FinGlobal As Long, DureeTotaleSec As Double
+    Dim T_DebutFolder As Long, T_FinFolder As Long
+    Dim DureeInboxSec As Double, DureeSentSec As Double
+    
+    Dim NomFichierStock As String
+    
+    T_DebutGlobal = GetTickCount()
+    m_IsRepriseStockEnCours = True
+    
+    ' ---------------------------------------------------------------------
+    ' 1. REMISE A ZERO DU TIMER ET RAFRAICHISSEMENT FORCE DU DICTIONNAIRE
+    ' ---------------------------------------------------------------------
+    ' Forcer m_DernierChargement a 0 garantit :
+    '  - La relecture immediate du fichier CSV.
+    '  - La remise a zero du timer des 30 minutes (repart a partir de Now).
+    m_DernierChargement = 0
+    Call VerifierEtRafraichirDictionnaires
+    
+    ' 2. Initialisation du fichier de log dédié à cette passe de rattrapage
+    NomFichierStock = Format(Now, "YYYYMMDD") & "_Stock_" & Format(Now, "HHMMSS") & "_logs.txt"
+    g_FichierTraceActuel = NomFichierStock
+    
+    ' Notifications
+    Call EcrireTrace("[" & Format(Now, "YYYY-MM-DD HH:NN:SS") & "] POPUP CONFIRMATION | Lancement du rattrapage de stock", False)
+    Call EcrireTrace("[" & Format(Now, "YYYY-MM-DD HH:NN:SS") & "] REDIRECTION DES TRACES -> Fichier dédié : " & NomFichierStock, False)
+    
+    ' En-tête du fichier dédié
+    Call EcrireTrace("================================================================================", True)
+    Call EcrireTrace("LOGS RATTRAPAGE DE STOCK - DÉBUT : " & Format(Now, "YYYY-MM-DD HH:NN:SS"), True)
+    Call EcrireTrace("================================================================================" & vbCrLf, True)
+    
+    ' Configuration des 2 cibles
+    Set objNS = Application.GetNamespace("MAPI")
+    Set DossiersCibles(1) = objNS.GetDefaultFolder(olFolderInbox)
+    LibellesDossiers(1) = "RECEPTION"
+    
+    Set DossiersCibles(2) = objNS.GetDefaultFolder(olFolderSentMail)
+    LibellesDossiers(2) = "ENVOIS"
+    
+    ' 3. Boucle sur les deux dossiers
+    For i = 1 To 2
+        Set FolderCourant = DossiersCibles(i)
+        TotalFolder = FolderCourant.Items.Count
+        IndexFolder = 0
+        
+        Call EcrireTrace("--- DÉBUT TRAITEMENT DOSSIER : " & LibellesDossiers(i) & " (" & TotalFolder & " éléments) ---", True)
+        T_DebutFolder = GetTickCount()
+        
+        For j = TotalFolder To 1 Step -1
+            IndexFolder = IndexFolder + 1
+            
+            ' =========================================================
+            ' ASTUCE TÂCHE DE FOND : Laisse Outlook respirer tous les 20 mails
+            If IndexFolder Mod 10 = 0 Then VBA.DoEvents
+            ' =========================================================
+
+            Set Item = FolderCourant.Items(j)
+            
+            ' Incrémentation des éléments scrutés
+            If i = 1 Then ElementsInbox = ElementsInbox + 1 Else ElementsSent = ElementsSent + 1
+            TotalElementsGlobal = TotalElementsGlobal + 1
+            
+            ' Traitement avec passage du contexte
+            If AnalyserEtTraiterMail(Item, True, LibellesDossiers(i), IndexFolder, TotalFolder) Then
+                If i = 1 Then ModifiesInbox = ModifiesInbox + 1 Else ModifiesSent = ModifiesSent + 1
+                TotalModifiesGlobal = TotalModifiesGlobal + 1
+            End If
+        Next j
+        
+        ' Calcul du temps dédié au dossier courant
+        T_FinFolder = GetTickCount()
+        If i = 1 Then
+            DureeInboxSec = Round((T_FinFolder - T_DebutFolder) / 1000#, 2)
+            If DureeInboxSec < 0 Then DureeInboxSec = 0
+        Else
+            DureeSentSec = Round((T_FinFolder - T_DebutFolder) / 1000#, 2)
+            If DureeSentSec < 0 Then DureeSentSec = 0
+        End If
+        
+        Call EcrireTrace("--- FIN TRAITEMENT DOSSIER : " & LibellesDossiers(i) & " ---" & vbCrLf, True)
+    Next i
+    
+    ' Calcul de la durée totale globale
+    T_FinGlobal = GetTickCount()
+    DureeTotaleSec = Round((T_FinGlobal - T_DebutGlobal) / 1000#, 2)
+    If DureeTotaleSec < 0 Then DureeTotaleSec = 0
+    
+    ' 4. Bilan complet en fin de log
+    Call EcrireTrace("================================================================================", True)
+    Call EcrireTrace("FIN DU RATTRAPAGE DE STOCK : " & Format(Now, "YYYY-MM-DD HH:NN:SS"), True)
+    Call EcrireTrace("DÉTAIL PAR DOSSIER :", True)
+    Call EcrireTrace("  - Boîte de Réception : " & ElementsInbox & " élément(s) | " & ModifiesInbox & " modifié(s) | Temps : " & Replace(CStr(DureeInboxSec), ",", ".") & " s", True)
+    Call EcrireTrace("  - Éléments Envoyés   : " & ElementsSent & " élément(s) | " & ModifiesSent & " modifié(s) | Temps : " & Replace(CStr(DureeSentSec), ",", ".") & " s", True)
+    Call EcrireTrace("TOTAL GÉNÉRAL : " & TotalElementsGlobal & " élément(s) analysé(s) | " & TotalModifiesGlobal & " modifié(s)", True)
+    Call EcrireTrace("DURÉE TOTALE GLOBALE : " & Replace(CStr(DureeTotaleSec), ",", ".") & " s", True)
+    Call EcrireTrace("================================================================================", True)
+    
+    m_IsRepriseStockEnCours = False
+    g_FichierTraceActuel = ""
+    
+    ' Message récapitulatif
+    MsgBox "Reprise du stock terminée avec succès !" & vbCrLf & vbCrLf & _
+           "• Boîte de réception : " & ModifiesInbox & "/" & ElementsInbox & " mis à jour (" & DureeInboxSec & " s)" & vbCrLf & _
+           "• Éléments envoyés : " & ModifiesSent & "/" & ElementsSent & " mis à jour (" & DureeSentSec & " s)" & vbCrLf & vbCrLf & _
+           "Durée totale : " & DureeTotaleSec & " secondes.", vbInformation, "Stock mis à jour"
+End Sub
+
+' =========================================================================
+' 7. FONCTION UTILITAIRE (Autres)
+' =========================================================================
+
+' =========================================================================
+' VERIFICATION DE CATEGORIE (Comparaison exacte par Split)
+' =========================================================================
+Public Function FiltreMailContientCategorie(ByRef Item As Object, ByVal NomCategorie As String) As Boolean
+    Dim CatList As Variant
+    Dim CatJ As Variant
+    Dim CategoriesExistantes As String
+    
+    On Error Resume Next
+    CategoriesExistantes = Item.Categories
+    On Error GoTo 0
+    
+    If Trim(CategoriesExistantes) = "" Or Trim(NomCategorie) = "" Then
+        FiltreMailContientCategorie = False
+        Exit Function
+    End If
+    
+    ' Normalisation : remplace les point-virgules par des virgules et découpe
+    CatList = Split(Replace(CategoriesExistantes, ";", ","), ",")
+    
+    ' Comparaison stricte élément par élément avec nettoyage des espaces (Trim)
+    For Each CatJ In CatList
+        If LCase(Trim(CStr(CatJ))) = LCase(Trim(NomCategorie)) Then
+            FiltreMailContientCategorie = True
+            Exit Function
+        End If
+    Next CatJ
+    
+    FiltreMailContientCategorie = False
+End Function
+
+Public Function EstDeCetteSemaine(ByRef Item As Object) As Boolean
+    ' Verifie si le mail a ete recu pendant la semaine civile en cours
+    Dim LundiCetteSemaine As Date
+    Dim DateMail As Date
+    On Error Resume Next
+    LundiCetteSemaine = Date - Weekday(Date, vbMonday) + 1
+    DateMail = Int(Item.ReceivedTime)
+    EstDeCetteSemaine = (DateMail >= LundiCetteSemaine And DateMail <= LundiCetteSemaine + 6)
+    On Error GoTo 0
+End Function
+
+Public Sub ExporterCategoriesTrieesVersTexte()
+    Dim objNS As Outlook.NameSpace
+    Dim objCat As Outlook.Category
+    Dim CheminFichier As String
+    Dim FSO As Object
+    Dim FichierTexte As Object
+    Dim ListeCats() As String
+    Dim TotalCats As Long
+    Dim i As Long, j As Long
+    Dim Temp As String
+    
+    ' Accès aux paramètres d'Outlook
+    Set objNS = Application.GetNamespace("MAPI")
+    
+    TotalCats = objNS.Categories.Count
+    If TotalCats = 0 Then
+        MsgBox "Aucune catégorie trouvée dans Outlook.", vbExclamation, "Export annulé"
+        Exit Sub
+    End If
+    
+    ' 1. Stockage des catégories dans un tableau VBA
+    ReDim ListeCats(1 To TotalCats)
+    i = 1
+    For Each objCat In objNS.Categories
+        ListeCats(i) = objCat.Name
+        i = i + 1
+    Next objCat
+    
+    ' 2. Algorithme de tri alphabétique (Insensible à la casse grâce à UCase)
+    For i = 1 To TotalCats - 1
+        For j = i + 1 To TotalCats
+            If UCase(ListeCats(i)) > UCase(ListeCats(j)) Then
+                ' Permutation des éléments
+                Temp = ListeCats(i)
+                ListeCats(i) = ListeCats(j)
+                ListeCats(j) = Temp
+            End If
+        Next j
+    Next i
+    
+    ' 3. Préparation du fichier sur le Bureau
+    CheminFichier = "C:\Users\RAMONA-30174\Downloads\Categories_Outlook.txt"
+    
+    Set FSO = CreateObject("Scripting.FileSystemObject")
+    Set FichierTexte = FSO.CreateTextFile(CheminFichier, True, True)
+    
+    ' Écriture de l'entête
+    FichierTexte.WriteLine "=== LISTE DES CATEGORIES OUTLOOK (TRIEES DE A A Z) ==="
+    FichierTexte.WriteLine "Généré le : " & Now
+    FichierTexte.WriteLine "======================================================"
+    FichierTexte.WriteLine ""
+    
+    ' 4. Écriture des catégories triées
+    For i = 1 To TotalCats
+        FichierTexte.WriteLine "    Dict.Add """ & ListeCats(i) & """, Array()"
+    Next i
+    
+    ' Fermeture et nettoyage
+    FichierTexte.Close
+    Set FichierTexte = Nothing
+    Set FSO = Nothing
+    
+    MsgBox "Export terminé avec succès !" & vbCrLf & _
+           "Le fichier 'Categories_Outlook.txt' a été créé dans le répertoire Téléchargements.", _
+           vbInformation, "Export des Catégories"
+End Sub
+
+' Fonction d'assistance : Va lire le fichier HTML d'une signature Outlook nominative
+' et corrige les chemins des images pour éviter les logos brisés
+Function ObtenirSignatureHTML(ByVal NomSignature As String) As String
+    Dim FSO As Object
+    Dim CheminSig As String
+    Dim FichierSig As Object
+    Dim Contenu As String
+    Dim DossierImages As String
+    
+    ' Chemin standard où Windows stocke vos signatures Outlook
+    CheminSig = Environ("APPDATA") & "\Microsoft\Signatures Trim\" & NomSignature & ".htm"
+    ' Sécurité si le dossier contient un espace
+    CheminSig = Environ("APPDATA") & "\Microsoft\Signatures\" & NomSignature & ".htm"
+    
+    Set FSO = CreateObject("Scripting.FileSystemObject")
+    
+    If FSO.FileExists(CheminSig) Then
+        ' Ouverture du fichier (1 = Lecture, False = Ne pas créer, -1 = Forcer le format Unicode/UTF-16 d'Outlook)
+        Set FichierSig = FSO.OpenTextFile(CheminSig, 1, False, -1)
+        Contenu = FichierSig.ReadAll
+        FichierSig.Close
+        
+        ' --- CORRECTION DES IMAGES ---
+        ' Outlook crée un sous-dossier pour les logos. On force le chemin absolu pour que l'envoi fonctionne.
+        DossierImages = NomSignature & "_files/"
+        Contenu = Replace(Contenu, DossierImages, Environ("APPDATA") & "\Microsoft\Signatures\" & DossierImages)
+        
+        ' Sécurité si Outlook a encodé les espaces en "%20" dans le code HTML
+        DossierImages = Replace(NomSignature, " ", "%20") & "_files/"
+        Contenu = Replace(Contenu, DossierImages, Environ("APPDATA") & "\Microsoft\Signatures\" & NomSignature & "_files/")
+        
+        ObtenirSignatureHTML = Contenu
+    Else
+        Debug.Print "?? Signature introuvable sur le disque : " & NomSignature
+        ObtenirSignatureHTML = ""
+    End If
+    
+    Set FSO = Nothing
+End Function
+
+' =========================================================================
+' LECTURE DU FICHIER CSV ET ALIMENTATION DES DICTIONNAIRES DE CACHE
+' =========================================================================
+Public Function ChargerDictionnaireDepuisCSV(ByVal TypeConfig As String, ByRef DictCible As Object, Optional ByVal IsInitialLoad As Boolean = False) As Boolean
+    Dim ObjStream As Object
+    Dim FSO As Object
+    Dim Ligne As String, Categorie As String, TypeLigne As String
+    Dim Tableau() As String
+    Dim MotsCles As Variant
+    Dim i As Long
+    Dim CheminTemp As String
+    Dim TempList As Object
+    
+    Set DictCible = CreateObject("Scripting.Dictionary")
+    DictCible.CompareMode = 1
+    
+    If m_DictionnairePrecedent Is Nothing Then
+        Set m_DictionnairePrecedent = CreateObject("Scripting.Dictionary")
+        m_DictionnairePrecedent.CompareMode = 1
+    End If
+    
+    Set FSO = CreateObject("Scripting.FileSystemObject")
+    If Not FSO.FileExists(CHEMIN_CSV) Then
+        MsgBox "Fichier de configuration introuvable : " & CHEMIN_CSV, vbCritical
+        Set FSO = Nothing
+        Exit Function
+    End If
+    
+    On Error Resume Next
+    CheminTemp = FSO.GetSpecialFolder(2).Path & "\Config_Regles_Temp_" & TypeConfig & ".csv"
+    FSO.CopyFile CHEMIN_CSV, CheminTemp, True
+    On Error GoTo 0
+    
+    If Not FSO.FileExists(CheminTemp) Then CheminTemp = CHEMIN_CSV
+    
+    Set ObjStream = CreateObject("ADODB.Stream")
+    On Error GoTo ErreurFichier
+    
+    With ObjStream
+        .Type = 2
+        .Charset = "utf-8"
+        .Open
+        .LoadFromFile CheminTemp
+        
+        Do Until .EOS
+            Ligne = Trim(.ReadText(-2))
+            
+            If Ligne <> "" And Left(Ligne, 1) <> "#" And Left(Ligne, 1) <> "'" Then
+                Tableau = Split(Ligne, ";")
+                
+                If UBound(Tableau) >= 1 Then
+                    TypeLigne = UCase(Trim(Tableau(0)))
+                    
+                    If TypeLigne = UCase(Trim(TypeConfig)) Then
+                        Categorie = Trim(Tableau(1))
+                        
+                        ' Extraction propre des mots-cles
+                        If UBound(Tableau) >= 2 Then
+                            Set TempList = CreateObject("Scripting.Dictionary")
+                            For i = 2 To UBound(Tableau)
+                                If Trim(Tableau(i)) <> "" Then
+                                    TempList(Trim(Tableau(i))) = True
+                                End If
+                            Next i
+                            
+                            If TempList.Count > 0 Then
+                                MotsCles = TempList.Keys
+                            Else
+                                MotsCles = Array()
+                            End If
+                        Else
+                            MotsCles = Array()
+                        End If
+                        
+                        If Not DictCible.Exists(Categorie) Then DictCible.Add Categorie, MotsCles
+                        
+                        ' Calcul des deltas SEULEMENT si ce n'est pas le chargement initial au démarrage
+                        If Not IsInitialLoad Then
+                            Dim CleUniqueMemoire As String
+                            CleUniqueMemoire = TypeLigne & "||" & Categorie
+                            Dim ChaineTemoinNouvelle As String, ChaineTemoinAncienne As String
+                            ChaineTemoinNouvelle = Join(MotsCles, ",")
+                            
+                            If Not m_DictionnairePrecedent.Exists(CleUniqueMemoire) Then
+                                g_RapportDeltaAttente = g_RapportDeltaAttente & "    +-? [AJOUT] [" & TypeConfig & "] Categorie : " & Categorie & vbCrLf
+                            Else
+                                ChaineTemoinAncienne = m_DictionnairePrecedent(CleUniqueMemoire)
+                                If ChaineTemoinNouvelle <> ChaineTemoinAncienne Then
+                                    g_RapportDeltaAttente = g_RapportDeltaAttente & "    +-? [MODIF] [" & TypeConfig & "] Categorie : " & Categorie & " (Ancien: " & ChaineTemoinAncienne & " -> Nouveau: " & ChaineTemoinNouvelle & ")" & vbCrLf
+                                End If
+                            End If
+                            m_DictionnairePrecedent(CleUniqueMemoire) = ChaineTemoinNouvelle
+                        Else
+                            ' Premier chargement : on alimente la mémoire de référence silencieusement
+                            m_DictionnairePrecedent(TypeLigne & "||" & Categorie) = Join(MotsCles, ",")
+                        End If
+                    End If
+                End If
+            End If
+        Loop
+        .Close
+    End With
+    
+    Set ObjStream = Nothing
+    On Error Resume Next
+    If CheminTemp <> CHEMIN_CSV Then FSO.DeleteFile CheminTemp, True
+    On Error GoTo 0
+    Set FSO = Nothing
+    
+    ChargerDictionnaireDepuisCSV = True
+    Exit Function
+
+ErreurFichier:
+    If Not ObjStream Is Nothing Then ObjStream.Close
+    Set ObjStream = Nothing
+    On Error Resume Next
+    If CheminTemp <> CHEMIN_CSV And Not FSO Is Nothing Then FSO.DeleteFile CheminTemp, True
+    On Error GoTo 0
+    Set FSO = Nothing
+    ChargerDictionnaireDepuisCSV = False
+End Function
+
+' =========================================================================
+' GESTION DU CACHE ET DES 30 MINUTES AVEC TRACABILITE (CORRIGE)
+' =========================================================================
+Public Sub VerifierEtRafraichirDictionnaires()
+    Dim DoReload As Boolean
+    Dim StatusLog As String
+    Dim IsInitialLoad As Boolean
+    
+    ' 1. Verification de l'etat du cache
+    If m_DernierChargement = 0 Then
+        DoReload = True
+        StatusLog = "Initialisation du cache (Démarrage)"
+        IsInitialLoad = True ' Premier chargement : AUCUNE POPUP ne doit s'afficher
+    ElseIf DateDiff("n", m_DernierChargement, Now) > 30 Then
+        DoReload = True
+        StatusLog = "Seuil de 30 min depasse"
+        IsInitialLoad = False
+    End If
+    
+    If DoReload Then
+        g_RapportDeltaAttente = ""
+        
+        ' On passe le drapeau IsInitialLoad aux 3 appels
+        Call ChargerDictionnaireDepuisCSV("SUJET", g_DictSubject, IsInitialLoad)
+        Call ChargerDictionnaireDepuisCSV("EXPEDITEUR", g_DictExpediteurs, IsInitialLoad)
+        Call ChargerDictionnaireDepuisCSV("DESTINATAIRE", g_DictDestinataires, IsInitialLoad)
+        m_DernierChargement = Now
+        
+        ' Au premier démarrage, on neutralise le rapport de delta
+        If Not IsInitialLoad Then
+            If g_RapportDeltaAttente <> "" Then
+                ' Au lieu du Timer API, on appelle la nouvelle procédure VBA pure
+                Call DemanderRepriseStockDifferee
+            End If
+        End If
+    
+        ' Tracabilite dans le journal quotidien
+        If g_RapportDeltaAttente <> "" Then
+            Call EcrireTrace("[" & Format(Now, "YYYY-MM-DD HH:NN:SS") & "] RECHARGEMENT DICTIONNAIRE (" & StatusLog & ") | Statut: ÉCARTS DÉTECTÉS" & vbCrLf & g_RapportDeltaAttente, False)
+        Else
+            Call EcrireTrace("[" & Format(Now, "YYYY-MM-DD HH:NN:SS") & "] RECHARGEMENT DICTIONNAIRE (" & StatusLog & ") | Statut: Aucun écart détecté", False)
+        End If
+    End If
+End Sub
+
+' =========================================================================
+' OUTIL AVANCÉ : VÉRIFICATION DE STRUCTURE, NETTOYAGE ET TRI ALPHABÉTIQUE
+' =========================================================================
+Public Sub NettoyerEtTrierFichierConfiguration()
+    Dim ObjStream As Object
+    Dim FSO As Object
+    Dim Ligne As String, CatName As String
+    Dim HeaderText As String
+    Dim LogCorrections As String
+    
+    Dim DictSujet As Object, DictExpe As Object, DictDesti As Object
+    Set DictSujet = CreateObject("Scripting.Dictionary")
+    Set DictExpe = CreateObject("Scripting.Dictionary")
+    Set DictDesti = CreateObject("Scripting.Dictionary")
+    
+    DictSujet.CompareMode = 1: DictExpe.CompareMode = 1: DictDesti.CompareMode = 1
+    
+    Set FSO = CreateObject("Scripting.FileSystemObject")
+    If Not FSO.FileExists(CHEMIN_CSV) Then
+        MsgBox "Le fichier de configuration est introuvable à l'adresse suivante : " & vbCrLf & CHEMIN_CSV, vbCritical, "Erreur Fichier"
+        Set FSO = Nothing
+        Exit Sub
+    End If
+    Set FSO = Nothing
+    
+    ' =========================================================================
+    ' 1. LECTURE ET ANALYSE SYNTAXIQUE DES LIGNES
+    ' =========================================================================
+    Set ObjStream = CreateObject("ADODB.Stream")
+    With ObjStream
+        .Type = 2          ' adTypeText
+        .Charset = "utf-8"
+        .Open
+        .LoadFromFile CHEMIN_CSV
+        
+        Do Until .EOS
+            Ligne = Trim(.ReadText(-2)) ' adReadLine
+            
+            If Ligne <> "" Then
+                ' Détection souple d'un marqueur de catégorie
+                If InStr(Ligne, "---> Categorie :") > 0 Then
+                    CatName = Trim(Mid(Ligne, InStr(Ligne, ":") + 1))
+                ' Si on est à l'intérieur d'une catégorie
+                ElseIf CatName <> "" Then
+                    Dim TempLigne As String
+                    TempLigne = UCase(Replace(Ligne, " ", "")) ' On retire les espaces pour l'analyse
+                    
+                    If InStr(TempLigne, "SUJET;") > 0 Then
+                        DictSujet(CatName) = Ligne
+                    ElseIf InStr(TempLigne, "EXPEDITEUR;") > 0 Or InStr(TempLigne, "EXPÉDITEUR;") > 0 Then
+                        DictExpe(CatName) = Ligne
+                    ElseIf InStr(TempLigne, "DESTINATAIRE;") > 0 Then
+                        DictDesti(CatName) = Ligne
+                    End If
+                Else
+                    ' Tant qu'aucune catégorie n'a commencé, c'est l'entête global
+                    HeaderText = HeaderText & Ligne & vbCrLf
+                End If
+            End If
+        Loop
+        .Close
+    End With
+    
+    ' =========================================================================
+    ' 2. VÉRIFICATION DE LA COHÉRENCE ET AUTO-REPARATION
+    ' =========================================================================
+    Dim DictUniqueCats As Object
+    Set DictUniqueCats = CreateObject("Scripting.Dictionary")
+    DictUniqueCats.CompareMode = 1
+    
+    Dim Cle As Variant
+    ' On extrait la liste unique de toutes les catégories trouvées en fusionnant les clés
+    For Each Cle In DictSujet.Keys: DictUniqueCats(Cle) = True: Next Cle
+    For Each Cle In DictExpe.Keys: DictUniqueCats(Cle) = True: Next Cle
+    For Each Cle In DictDesti.Keys: DictUniqueCats(Cle) = True: Next Cle
+    
+    ' Sécurité : Si une ligne manque dans un dictionnaire, on la génère
+    For Each Cle In DictUniqueCats.Keys
+        CatName = CStr(Cle)
+        
+        If Not DictSujet.Exists(CatName) Then
+            DictSujet(CatName) = "#SUJET; " & CatName
+            LogCorrections = LogCorrections & "?? " & CatName & " : Ligne SUJET créée." & vbCrLf
+        End If
+        If Not DictExpe.Exists(CatName) Then
+            DictExpe(CatName) = "#EXPEDITEUR; " & CatName
+            LogCorrections = LogCorrections & "?? " & CatName & " : Ligne EXPEDITEUR créée." & vbCrLf
+        End If
+        If Not DictDesti.Exists(CatName) Then
+            DictDesti(CatName) = "#DESTINATAIRE; " & CatName
+            LogCorrections = LogCorrections & "?? " & CatName & " : Ligne DESTINATAIRE créée." & vbCrLf
+        End If
+    Next Cle
+    
+    ' =========================================================================
+    ' 3. TRANSFORMATION EN TABLEAU ET TRI ALPHABÉTIQUE SECURISE
+    ' =========================================================================
+    Dim TblCategories() As String
+    ReDim TblCategories(0 To DictUniqueCats.Count - 1)
+    
+    Dim Index As Long
+    Index = 0
+    For Each Cle In DictUniqueCats.Keys
+        TblCategories(Index) = CStr(Cle)
+        Index = Index + 1
+    Next Cle
+    
+    ' Tri à bulles standard et ultra-robuste sur le tableau
+    Dim i As Long, j As Long
+    Dim TempSwap As String
+    For i = 0 To UBound(TblCategories) - 1
+        For j = i + 1 To UBound(TblCategories)
+            If LCase(TblCategories(i)) > LCase(TblCategories(j)) Then
+                TempSwap = TblCategories(i)
+                TblCategories(i) = TblCategories(j)
+                TblCategories(j) = TempSwap
+            End If
+        Next j
+    Next i
+    
+    ' =========================================================================
+    ' 4. RE-GÉNÉRATION DU FICHIER EN UTF-8
+    ' =========================================================================
+    With ObjStream
+        .Open
+        ' Réécriture de l'entête global
+        .WriteText HeaderText & vbCrLf
+        
+        ' Réécriture ordonnée de chaque bloc depuis le tableau trié
+        For i = 0 To UBound(TblCategories)
+            CatName = TblCategories(i)
+            
+            ' 1. Ligne de titre
+            .WriteText "# ---> Categorie : " & CatName & vbCrLf
+            
+            ' 2. Les 3 lignes de critères
+            .WriteText DictSujet(CatName) & vbCrLf
+            .WriteText DictExpe(CatName) & vbCrLf
+            .WriteText DictDesti(CatName) & vbCrLf
+            
+            ' 3. Ligne vide de séparation entre catégories
+            .WriteText vbCrLf
+        Next i
+        
+        ' Sauvegarde finale (Écrase l'ancien fichier)
+        .SaveToFile CHEMIN_CSV, 2
+        .Close
+    End With
+    
+    Set ObjStream = Nothing
+    Set DictSujet = Nothing: Set DictExpe = Nothing: Set DictDesti = Nothing: Set DictUniqueCats = Nothing
+    
+    ' Bilan à l'utilisateur
+    Dim MessageFinal As String
+    MessageFinal = "Le fichier de configuration a été trié par ordre alphabétique, espacé et restructuré avec succès !"
+    If LogCorrections <> "" Then
+        MessageFinal = MessageFinal & vbCrLf & vbCrLf & "??? Des corrections de structure ont été appliquées :" & vbCrLf & LogCorrections
+    End If
+    
+    MsgBox MessageFinal, vbInformation, "Opération Terminée"
+End Sub
+
+' =========================================================================
+' RESOLUTION SMTP DE L'EXPEDITEUR (CORRIGEE - PROPRIETE MAPI SENDER)
+' =========================================================================
+Public Function ObtenirEmailSmtpExpediteur(ByRef Item As Object) As String
+    Dim FastEmail As String
+    Dim CleCache As String
+    Dim SenderEntry As Outlook.AddressEntry
+    Dim exUser As Outlook.ExchangeUser
+    Dim exDL As Outlook.ExchangeDistributionList
+    
+    On Error Resume Next
+    
+    ' GARDE ANTI-REPORTITEM : Seuls MailItem et MeetingItem ont un expediteur
+    If Not (TypeOf Item Is Outlook.MailItem Or TypeOf Item Is Outlook.MeetingItem) Then
+        ObtenirEmailSmtpExpediteur = ""
+        Exit Function
+    End If
+    
+    If TypeOf Item Is Outlook.MailItem Then
+        ' Si l'adresse contient deja un '@' (mail externe), c'est directement du SMTP
+        If InStr(1, Item.SenderEmailAddress, "@") > 0 Then
+            ObtenirEmailSmtpExpediteur = LCase(Trim(Item.SenderEmailAddress))
+            Exit Function
+        End If
+        
+        ' Verification dans le cache memoire
+        CleCache = "EXPE||" & Item.SenderEmailAddress
+        If Not g_DictAddressCache Is Nothing Then
+            If g_DictAddressCache.Exists(CleCache) Then
+                ObtenirEmailSmtpExpediteur = g_DictAddressCache(CleCache)
+                Exit Function
+            End If
+        Else
+            Set g_DictAddressCache = CreateObject("Scripting.Dictionary")
+            g_DictAddressCache.CompareMode = 1
+        End If
+        
+        ' 1. MAPI direct sur l'expediteur du MailItem (propriete 0x5D01001F)
+        FastEmail = Item.PropertyAccessor.GetProperty("http://schemas.microsoft.com/mapi/proptag/0x5D01001F")
+        
+        ' 2. Secours MAPI sur l'objet Sender (AddressEntry : 0x39FE001F)
+        If FastEmail = "" Then
+            Set SenderEntry = Item.Sender
+            If Not SenderEntry Is Nothing Then
+                FastEmail = SenderEntry.PropertyAccessor.GetProperty("http://schemas.microsoft.com/mapi/proptag/0x39FE001F")
+            End If
+        End If
+        
+        ' 3. Secours via l'annuaire Exchange
+        If FastEmail = "" Then
+            If Not SenderEntry Is Nothing Then
+                Set exUser = SenderEntry.GetExchangeUser()
+                If Not exUser Is Nothing Then
+                    FastEmail = exUser.PrimarySmtpAddress
+                Else
+                    Set exDL = SenderEntry.GetExchangeDistributionList()
+                    If Not exDL Is Nothing Then FastEmail = exDL.PrimarySmtpAddress
+                End If
+            End If
+        End If
+        
+        If FastEmail = "" Then FastEmail = Item.SenderEmailAddress
+        
+    ElseIf TypeOf Item Is Outlook.MeetingItem Then
+        If InStr(1, Item.SenderEmailAddress, "@") > 0 Then
+            FastEmail = Item.SenderEmailAddress
+        Else
+            CleCache = "MEET_EXPE||" & Item.SenderName
+            If Not g_DictAddressCache Is Nothing Then
+                If g_DictAddressCache.Exists(CleCache) Then
+                    ObtenirEmailSmtpExpediteur = g_DictAddressCache(CleCache)
+                    Exit Function
+                End If
+            End If
+            FastEmail = Item.PropertyAccessor.GetProperty("http://schemas.microsoft.com/mapi/proptag/0x5D01001F")
+            If FastEmail = "" Then FastEmail = Item.SenderName
+        End If
+    End If
+    
+    FastEmail = LCase(Trim(FastEmail))
+    If CleCache <> "" And Not g_DictAddressCache Is Nothing Then
+        g_DictAddressCache(CleCache) = FastEmail
+    End If
+    
+    ObtenirEmailSmtpExpediteur = FastEmail
+    On Error GoTo 0
+End Function
+
+' =========================================================================
+' RESOLUTION D'ADRESSE SMTP DESTINATAIRE (VERSION SECURISEE)
+' =========================================================================
+Public Function ObtenirEmailSmtpRecip(ByVal objRecip As Outlook.Recipient) As String
+    Dim FastEmail As String
+    Dim CleCache As String
+    Dim objAE As Outlook.AddressEntry
+    Dim exUser As Outlook.ExchangeUser
+    Dim exDL As Outlook.ExchangeDistributionList
+    Dim aeType As String
+    
+    If objRecip Is Nothing Then Exit Function
+    
+    ' 1. Si l'adresse contient deja un '@' (adresse externe/internet), resultat instantane
+    On Error Resume Next
+    If InStr(1, objRecip.Address, "@") > 0 Then
+        ObtenirEmailSmtpRecip = LCase(Trim(objRecip.Address))
+        Exit Function
+    End If
+    On Error GoTo 0
+    
+    ' 2. Initialisation du dictionnaire de cache si premier passage
+    If g_DictAddressCache Is Nothing Then
+        Set g_DictAddressCache = CreateObject("Scripting.Dictionary")
+        g_DictAddressCache.CompareMode = 1
+    End If
+    
+    CleCache = "RECIP||" & objRecip.Name & "||" & objRecip.Address
+    
+    ' Verification dans le cache memoire
+    If g_DictAddressCache.Exists(CleCache) Then
+        ObtenirEmailSmtpRecip = g_DictAddressCache(CleCache)
+        Exit Function
+    End If
+    
+    ' 3. Resolution via l'objet AddressEntry (Evite le crash sur les agents partis)
+    On Error Resume Next
+    Set objAE = objRecip.AddressEntry
+    If Not objAE Is Nothing Then aeType = objAE.Type
+    On Error GoTo 0
+    
+    If Not objAE Is Nothing Then
+        If aeType = "EX" Then
+            ' C'est un compte Exchange (interne).
+            ' On utilise l'API Exchange (qui renvoie proprement Nothing sans planter si l'agent a quitté l'entreprise)
+            On Error Resume Next
+            Set exUser = objAE.GetExchangeUser()
+            If Not exUser Is Nothing Then
+                FastEmail = exUser.PrimarySmtpAddress
+            Else
+                Set exDL = objAE.GetExchangeDistributionList()
+                If Not exDL Is Nothing Then FastEmail = exDL.PrimarySmtpAddress
+            End If
+            On Error GoTo 0
+        Else
+            ' Pour les autres types (non-EX), le PropertyAccessor est sécurisé
+            On Error Resume Next
+            FastEmail = objAE.PropertyAccessor.GetProperty("http://schemas.microsoft.com/mapi/proptag/0x39FE001F")
+            On Error GoTo 0
+        End If
+    End If
+    
+    ' 4. Repli final si le compte n'existe plus (ex: collaborateur parti, AddressEntry mort)
+    If FastEmail = "" Then
+        On Error Resume Next
+        FastEmail = objRecip.Address
+        ' Si l'adresse n'est pas un email valide (ex: vieux format /O=CNAMTS...), on prend le nom d'affichage
+        If InStr(1, FastEmail, "@") = 0 Then
+            FastEmail = objRecip.Name
+        End If
+        On Error GoTo 0
+    End If
+    
+    ' Finalisation et mise en cache
+    FastEmail = LCase(Trim(FastEmail))
+    g_DictAddressCache(CleCache) = FastEmail
+    ObtenirEmailSmtpRecip = FastEmail
+End Function
+
+' =========================================================================
+' MOTEUR DE TRACES ET LOGS (Routage dynamique et etanche)
+' =========================================================================
+Public Sub EcrireTrace(ByVal Message As String, Optional ByVal EstRattrapageStock As Boolean = False)
+    Dim FSO As Object
+    Dim StreamTrace As Object
+    Dim NomFichierLog As String
+    Dim CheminComplet As String
+    Dim DateDuJour As String
+    
+    On Error Resume Next
+    Set FSO = CreateObject("Scripting.FileSystemObject")
+    
+    ' 1. Verification et creation automatique du dossier C:\CNAM\Outlook\Traces
+    If Not FSO.FolderExists(DOSSIER_TRACES) Then
+        FSO.CreateFolder DOSSIER_TRACES
+    End If
+    
+    ' 2. Aiguillage du fichier cible selon le contexte d'execution
+    DateDuJour = Format(Now, "YYYYMMDD")
+    
+    If EstRattrapageStock Then
+        ' Contexte Rattrapage : Fichier dedie horadate (conserve pendant toute la passe)
+        If g_FichierTraceActuel <> "" Then
+            NomFichierLog = g_FichierTraceActuel
+        Else
+            NomFichierLog = DateDuJour & "_Stock_" & Format(Now, "HHMMSS") & "_logs.txt"
+            g_FichierTraceActuel = NomFichierLog
+        End If
+    Else
+        ' Contexte En Direct (Fil de l'eau) : Fichier quotidien de suivi
+        NomFichierLog = DateDuJour & "_logs.txt"
+    End If
+    
+    CheminComplet = DOSSIER_TRACES & NomFichierLog
+    
+    ' 3. Ecriture en mode Append (8 = ForAppending, True = Creer si inexistant, -1 = UNICODE)
+    ' CORRECTION ERREUR 5 : Le -1 (TristateTrue) permet d'ecrire les symboles (+-?, +-?, emojis) sans planter.
+    Set StreamTrace = FSO.OpenTextFile(CheminComplet, 8, True, -1)
+    StreamTrace.WriteLine Message
+    StreamTrace.Close
+    
+    Set StreamTrace = Nothing
+    Set FSO = Nothing
+    On Error GoTo 0
+End Sub
+
+' =========================================================================
+' PURGE AUTOMATIQUE DES LOGS (Conservation : 30 jours)
+' =========================================================================
+Public Sub PurgerAnciensLogs()
+    Static DernierePurge As Date
+    If DernierePurge <> 0 Then
+        If Abs(DateDiff("n", DernierePurge, Now)) < 30 Then Exit Sub
+    End If
+    
+    On Error GoTo ErrPurge
+    Dim FSO As Object, DossierTraces As Object, Fichier As Object
+    Dim CheminTraces As String
+    CheminTraces = "C:\CNAM\Outlook\Traces\"
+    
+    Set FSO = CreateObject("Scripting.FileSystemObject")
+    If FSO.FolderExists(CheminTraces) Then
+        Set DossierTraces = FSO.GetFolder(CheminTraces)
+        For Each Fichier In DossierTraces.Files
+            If LCase(FSO.GetExtensionName(Fichier.Name)) = "txt" Then
+                If DateDiff("d", Fichier.DateLastModified, Now) > 30 Then
+                    On Error Resume Next
+                    Fichier.Delete Force:=True
+                    If Err.Number <> 0 Then
+                        Call EcrireTrace("[" & Format(Now, "YYYY-MM-DD HH:NN:SS") & "] [ERREUR PURGE] Impossible de supprimer " & Fichier.Name & " : " & Err.Description, False)
+                        Err.Clear
+                    End If
+                    On Error GoTo ErrPurge
+                End If
+            End If
+        Next Fichier
+    End If
+    
+    DernierePurge = Now
+    Exit Sub
+
+ErrPurge:
+    Call EcrireTrace("[" & Format(Now, "YYYY-MM-DD HH:NN:SS") & "] [ERREUR GLOBALE PURGE] : " & Err.Description, False)
+    Resume Next
+End Sub

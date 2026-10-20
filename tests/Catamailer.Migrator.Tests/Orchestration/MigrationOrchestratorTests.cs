@@ -5,6 +5,7 @@
 //         - 2026-09-25 : Création des tests d'intégration de l'orchestrateur (J6-S2-T1 - Phase Rouge).
 //         - 2026-09-25 : Correction du bouchon FakeParser pour l'interface ICsvParser (J6-S2-T1 - Phase Rouge).
 //         - 2026-09-25 : Ajustement du test avec un fichier temporaire réel et appel ParseLines (J6-S2-T1 - Phase Verte Correction).
+//         - 2026-10-20 : Ajout du FakeExecutionRuleSeeder et vérification de la persistance des ExecutionRules (J6-S3-T8 - Phase Rouge).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -19,6 +20,7 @@ using Catamailer.Infrastructure;
 using Catamailer.Migrator.Mapping;
 using Catamailer.Migrator.Orchestration;
 using Catamailer.Migrator.Parsing;
+using Catamailer.Migrator.Seeding;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
@@ -26,12 +28,10 @@ namespace Catamailer.Migrator.Tests.Orchestration
 {
     public class MigrationOrchestratorTests
     {
-        // Bouchon (Stub) simulant l'extraction de données depuis des lignes
         private class FakeParser : ICsvParser
         {
             public IEnumerable<CsvRuleRecord> ParseLines(IEnumerable<string> lines)
             {
-                // Retourne un enregistrement fixe indépendamment du contenu du fichier temporaire
                 return new List<CsvRuleRecord> 
                 { 
                     new CsvRuleRecord("SUJET", "OrchestrationCategory", new[] { "MotCleTest" }) 
@@ -39,7 +39,6 @@ namespace Catamailer.Migrator.Tests.Orchestration
             }
         }
 
-        // Bouchon (Stub) simulant la traduction des enregistrements en règles
         private class FakeMapper : IRuleMapper
         {
             public IEnumerable<DictionaryRule> Map(IEnumerable<CsvRuleRecord> records)
@@ -50,8 +49,19 @@ namespace Catamailer.Migrator.Tests.Orchestration
             }
         }
 
+        private class FakeExecutionRuleSeeder : ILegacyExecutionRuleSeeder
+        {
+            public IEnumerable<ExecutionRule> GetHardcodedExecutionRules()
+            {
+                var rootNode = new RuleNode(LogicalOperator.And);
+                rootNode.AddCriterion(new RuleCriterion(MailField.Category, MatchOperator.ExactNode, "OrchestrationCategory"));
+                var actions = new List<RuleAction> { new RuleAction(ActionType.MoveToFolder, "DossierTest") };
+                return new List<ExecutionRule> { new ExecutionRule("RegleTestVBA", rootNode, actions) };
+            }
+        }
+
         [Fact]
-        public async Task MigrateAsync_ShouldParseMapAndSaveToDatabase()
+        public async Task MigrateAsync_ShouldParseMapSeedAndSaveToDatabase()
         {
             // Arrange
             var options = new DbContextOptionsBuilder<CatamailerDbContext>()
@@ -64,9 +74,9 @@ namespace Catamailer.Migrator.Tests.Orchestration
 
             var parser = new FakeParser();
             var mapper = new FakeMapper();
-            var orchestrator = new MigrationOrchestrator(parser, mapper, context);
+            var seeder = new FakeExecutionRuleSeeder();
+            var orchestrator = new MigrationOrchestrator(parser, mapper, seeder, context);
             
-            // Création d'un fichier temporaire réel pour passer la validation File.Exists
             var tempFilePath = Path.GetTempFileName();
             
             try
@@ -76,14 +86,19 @@ namespace Catamailer.Migrator.Tests.Orchestration
                 // Act
                 await orchestrator.MigrateAsync(tempFilePath);
 
-                // Assert
+                // Assert : Règles Dictionnaires (Étape 1)
                 var savedRules = context.DictionaryRules.Include(r => r.TargetCategory).ToList();
-                
                 Assert.Single(savedRules);
                 var savedRule = savedRules.First();
                 Assert.Equal("OrchestrationCategory", savedRule.TargetCategory.Name);
                 Assert.Single(savedRule.SubjectKeywords);
                 Assert.Equal("MotCleTest", savedRule.SubjectKeywords[0]);
+
+                // Assert : Règles d'Exécution VBA (Étape 2)
+                var savedExecRules = context.ExecutionRules.ToList();
+                Assert.Single(savedExecRules);
+                Assert.Equal("RegleTestVBA", savedExecRules[0].Name);
+                Assert.Equal("DossierTest", savedExecRules[0].Actions[0].Parameter);
             }
             finally
             {

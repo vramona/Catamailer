@@ -211,5 +211,7 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 - [x] ✅ `J6-S3-T7 - InitializeAsync_ShouldLoadMetricsFromRepositoriesAndServices` (Validé le 19/10/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : eeb6177ed60f0d578c680560afe09d48011a3983) (Cpx: 8 / 8)
 - [x] ✅ `J6-S3-T7 - RefreshAsync_ShouldUpdateMetrics` (Validé le 19/10/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : eeb6177ed60f0d578c680560afe09d48011a3983)
 - [x] ✅ `J6-S3-T7 - EnsureFoldersLoadedAsync_ShouldLoadFoldersOnlyOnce` (Validé le 19/10/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : eeb6177ed60f0d578c680560afe09d48011a3983)
+- [x] ✅ `J6-S3-T8 - RuleAction_SupportsAddCategory_FromJalon6` (Validé le 20/10/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : <COMMIT_HASH>) (Cpx: 8 / 8)
+- [x] ✅ `J6-S3-T8 - GetHardcodedExecutionRules_ShouldReturnAll13LegacyVbaRules_WithCorrectCriteriaAndActions` (Validé le 20/10/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : <COMMIT_HASH>)
 - [x] ✅ `J6-S3-T10 - Map_ShouldReconstructCategoryTree_WhenSeparatorIsPresent` (Validé le 08/10/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : 34bd62b39b0c315cc343bd5fc59e876d466536ab)
 - [x] ✅ `J6-S3-T10 - MigrateAsync_WithRealCsvData_ShouldProduceCorrectDictionaryRules` (Validé le 08/10/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : 34bd62b39b0c315cc343bd5fc59e876d466536ab)

@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-10-19 17:45
+Généré le : 2026-10-20 11:39
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -670,11 +670,12 @@ Généré le : 2026-10-19 17:45
 
 ### Class : MigrationOrchestrator
 **Fichier** : `src\Catamailer.Migrator\Orchestration\MigrationOrchestrator.cs`
-**Rôle** : Implémentation par défaut de l'orchestrateur coordonnant le parser, le mapper et la base de données.
+**Rôle** : Implémentation par défaut de l'orchestrateur coordonnant le parser, le mapper, le seeder de règles d'exécution et la base de données.
 **Membres et Invocations :**
 - `Task MigrateAsync(string csvFilePath)`
   - *Appelle* ➡️ `ICsvParser.ParseLines()`
   - *Appelle* ➡️ `IRuleMapper.Map()`
+  - *Appelle* ➡️ `ILegacyExecutionRuleSeeder.GetHardcodedExecutionRules()`
 
 ### Class : CsvParser
 **Fichier** : `src\Catamailer.Migrator\Parsing\CsvParser.cs`
@@ -702,6 +703,20 @@ Généré le : 2026-10-19 17:45
 - `Task<int> Main(string[] args)` : Méthode principale exécutant la migration.
   - *Appelle* ➡️ `ServiceCollectionExtensions.AddMigratorServices()`
   - *Appelle* ➡️ `IMigrationOrchestrator.MigrateAsync()`
+
+### Interface : ILegacyExecutionRuleSeeder
+**Fichier** : `src\Catamailer.Migrator\Seeding\ILegacyExecutionRuleSeeder.cs`
+**Rôle** : Définit le contrat pour le générateur des règles d'exécution complexes issues du code historique VBA (Étape 2).
+**Membres et Invocations :**
+
+### Class : LegacyExecutionRuleSeeder
+**Fichier** : `src\Catamailer.Migrator\Seeding\LegacyExecutionRuleSeeder.cs`
+**Rôle** : Implémentation fournissant les 13 règles d'exécution (Étape 2) reproduisant le comportement des modules VBA d_Types_Messages et c_Répartiteur.
+**Membres et Invocations :**
+- `IEnumerable<ExecutionRule> GetHardcodedExecutionRules()`
+  - *Appelle* ➡️ `LegacyExecutionRuleSeeder.CreateSubjectRegexRule()`
+  - *Appelle* ➡️ `LegacyExecutionRuleSeeder.CreateSenderAndSubjectRule()`
+  - *Appelle* ➡️ `LegacyExecutionRuleSeeder.CreateMoveByCategoryRule()`
 
 ### Class : ServiceCollectionExtensions
 **Fichier** : `src\Catamailer.Migrator\ServiceCollectionExtensions.cs`
@@ -1267,6 +1282,7 @@ Généré le : 2026-10-19 17:45
 - `void DictionaryRule_Creation_ShouldSetProperties()`
 - `void RuleAction_Creation_ShouldSetActionTypeAndParameter()`
 - `void RuleAction_SupportsNewActionTypes_FromJalon5()`
+- `void RuleAction_SupportsAddCategory_FromJalon6()`
 - `void RuleCriterion_Creation_ShouldSetConditionFields()`
 - `void RuleCriterion_WithCategoryField_AndValidOperator_ShouldBeValid()`
 - `void RuleCriterion_WithInvalidCombinations_ShouldThrowArgumentException()`
@@ -1496,17 +1512,24 @@ Généré le : 2026-10-19 17:45
 - `void AddMigratorServices_ShouldRegisterAllRequiredDependencies()`
   - *Appelle* ➡️ `ServiceCollectionExtensions.AddMigratorServices()`
 
+### Class : LegacyExecutionRuleSeederTests
+**Fichier** : `tests\Catamailer.Migrator.Tests\LegacyExecutionRuleSeederTests.cs`
+**Rôle** : Classe de test validant l'initialisation en dur des règles complexes issues du code historique VBA.
+**Membres et Invocations :**
+- `void GetHardcodedExecutionRules_ShouldReturnAll13LegacyVbaRules_WithCorrectCriteriaAndActions()`
+  - *Appelle* ➡️ `LegacyExecutionRuleSeeder.GetHardcodedExecutionRules()`
+
 ### Class : MigrationOrchestratorE2ETests
 **Fichier** : `tests\Catamailer.Migrator.Tests\Orchestration\MigrationOrchestratorE2ETests.cs`
 **Membres et Invocations :**
-- `Task MigrateAsync_WithRealCsvData_ShouldProduceCorrectDictionaryRules()`
+- `Task MigrateAsync_WithRealCsvData_ShouldProduceCorrectDictionaryAndExecutionRules()`
   - *Appelle* ➡️ `MigrationOrchestrator.MigrateAsync()`
   - *Appelle* ➡️ `CategoryNode.GetFullName()`
 
 ### Class : MigrationOrchestratorTests
 **Fichier** : `tests\Catamailer.Migrator.Tests\Orchestration\MigrationOrchestratorTests.cs`
 **Membres et Invocations :**
-- `Task MigrateAsync_ShouldParseMapAndSaveToDatabase()`
+- `Task MigrateAsync_ShouldParseMapSeedAndSaveToDatabase()`
   - *Appelle* ➡️ `MigrationOrchestrator.MigrateAsync()`
 
 ### Class : RuleMapperTests
