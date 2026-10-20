@@ -3,6 +3,7 @@
 //     Date de création : 2026-09-24
 //     Historique :
 //         - 2026-09-24 : Création des tests unitaires du RuleMapper (J6-S1-T3 - Phase Rouge).
+//         - 2026-09-25 : Ajout du test de reconstruction d'arbre (J6-S3-T10 - Phase Rouge).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -91,6 +92,37 @@ namespace Catamailer.Migrator.Tests
             Assert.Single(rule.SubjectKeywords);
             Assert.Empty(rule.SenderKeywords);
             Assert.Empty(rule.RecipientKeywords);
+        }
+
+        [Fact]
+        public void Map_ShouldReconstructCategoryTree_WhenSeparatorIsPresent()
+        {
+            // Arrange
+            var records = new List<CsvRuleRecord>
+            {
+                new CsvRuleRecord("SUJET", "Administratif-RH-Congés", new[] { "vacances" })
+            };
+
+            // Act
+            var result = _mapper.Map(records).ToList();
+
+            // Assert
+            Assert.Single(result);
+            var rule = result.First();
+            
+            // Le nœud cible doit être "Congés" (la feuille)
+            Assert.Equal("Congés", rule.TargetCategory.Name);
+            
+            // Vérification de l'ascendance
+            var parent = rule.TargetCategory.Parent;
+            Assert.NotNull(parent);
+            Assert.Equal("RH", parent!.Name);
+            
+            var grandParent = parent.Parent;
+            Assert.NotNull(grandParent);
+            Assert.Equal("Administratif", grandParent!.Name);
+            
+            Assert.Null(grandParent.Parent); // "Administratif" est la racine
         }
     }
 }

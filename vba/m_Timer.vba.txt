@@ -1,0 +1,16 @@
+Option Explicit
+
+' Au lieu d'utiliser une API complexe, on affiche directement l'UserForm en mode non bloquant
+Public Sub DemanderRepriseStockDifferee()
+    On Error Resume Next
+    
+    ' 1. On injecte le texte explicatif dans le label
+    USF_RepriseStock.lblMessage.Caption = "Des modifications ont été détectées dans votre fichier de configuration." & vbCrLf & vbCrLf & _
+                                          "Souhaitez-vous lancer une reprise de stock pour appliquer ces changements ?"
+    
+    ' 2. On affiche la fenêtre de manière non bloquante (vbModeless)
+    USF_RepriseStock.Show vbModeless
+    
+    On Error GoTo 0
+End Sub
+

@@ -13,6 +13,7 @@
 //         - 2026-09-23 : Ajout des signatures pour les actions physiques (J5-S2-T1 - Phase Rouge).
 //         - 2026-09-24 : Ajout de la lecture de l'arborescence des dossiers (J5-S2-T2 - Phase Rouge).
 //         - 2026-09-24 : Implémentation de IExternalResourceProvider (J6-S1-T1 - Phase Rouge).
+//         - 2026-10-20 : Ajout de AddCategoryToMail pour l'action d'exécution d'Étape 2 (J6-S3-T9 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -99,7 +100,7 @@ namespace Catamailer.Infrastructure
         IEnumerable<string> GetAvailableSignatures();
 
         // ====================================================================================
-        // ACTIONS PHYSIQUES D'EXÉCUTION (J5-S2-T1)
+        // ACTIONS PHYSIQUES D'EXÉCUTION (J5-S2-T1 / J6-S3-T9)
         // ====================================================================================
 
         /// <summary>
@@ -141,5 +142,12 @@ namespace Catamailer.Infrastructure
         /// Insère une signature HTML spécifique.
         /// </summary>
         void InsertHtmlSignature(string entryId, string signatureName);
+
+        /// <summary>
+        /// Ajoute une catégorie spécifique à un e-mail sans doublon et sauvegarde l'élément.
+        /// </summary>
+        /// <param name="entryId">L'identifiant EntryID de l'e-mail cible.</param>
+        /// <param name="categoryName">Le nom de la catégorie à ajouter.</param>
+        void AddCategoryToMail(string entryId, string categoryName);
     }
 }

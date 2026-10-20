@@ -4,6 +4,7 @@
 // 2026-09-22 : Ajout du filtre de requête global (Global Query Filter) pour IsDeleted sur CategoryNode (J4-S4-T6).
 // 2026-09-24 : Ajout de ExecutionRule et configuration JSON pour IReadOnlyList<RuleAction> (J5-S3-T1 - Phase Verte).
 // 2026-09-25 : Ajout de DictionaryRule, Shadow Properties et configuration JSON (J6-S2-T1 - Phase Verte).
+// 2026-10-08 : Passage de la PK de CategoryNode sur une Shadow Property Id pour résoudre les conflits EF Core (J6-S3-T10 - Fix PK).
 
 using Catamailer.Domain;
 using Microsoft.EntityFrameworkCore;
@@ -62,13 +63,14 @@ namespace Catamailer.Infrastructure
             // Configuration de l'entité CategoryNode
             modelBuilder.Entity<CategoryNode>(entity =>
             {
-                // Utilisation du nom comme clé primaire (MDM - Référentiel Absolu)
-                entity.HasKey(e => e.Name);
+                // Utilisation d'une propriété fantôme auto-incrémentée comme clé primaire technique
+                entity.Property<int>("Id").ValueGeneratedOnAdd();
+                entity.HasKey("Id");
                 
-                // Configuration de l'arbre auto-référencé
+                // Configuration de l'arbre auto-référencé avec une clé étrangère fantôme ParentId
                 entity.HasOne(e => e.Parent)
                       .WithMany(e => e.Children)
-                      .HasForeignKey("ParentName")
+                      .HasForeignKey("ParentId")
                       .OnDelete(DeleteBehavior.ClientSetNull);
                       
                 // Indiquer à EF Core d'utiliser le champ privé _children pour la collection
@@ -101,10 +103,10 @@ namespace Catamailer.Infrastructure
                 entity.Property<int>("Id").ValueGeneratedOnAdd();
                 entity.HasKey("Id");
 
-                // Configuration de la relation avec CategoryNode (Clé étrangère fantôme)
+                // Configuration de la relation avec CategoryNode (Clé étrangère fantôme adaptée à la nouvelle PK)
                 entity.HasOne(e => e.TargetCategory)
                       .WithMany()
-                      .HasForeignKey("TargetCategoryName")
+                      .HasForeignKey("TargetCategoryId")
                       .IsRequired()
                       .OnDelete(DeleteBehavior.Cascade);
 

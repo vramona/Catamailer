@@ -1,0 +1,119 @@
+Option Explicit
+
+Public Function AnalyserEtTraiterMail(ByRef Item As Object, _
+                                     Optional ByVal EstRattrapageStock As Boolean = False, _
+                                     Optional ByVal LibelleDossier As String = "", _
+                                     Optional ByVal IndexActuel As Long = 0, _
+                                     Optional ByVal TotalDossier As Long = 0, _
+                                     Optional ByRef OutActionsAppliquees As String = "") As Boolean
+    
+    ' Purge et rechargement (elles gèrent leurs propres timers en interne)
+    Call PurgerAnciensLogs
+    Call VerifierEtRafraichirDictionnaires
+    
+    Dim T_Debut As Long, T_Fin As Long
+    Dim TempsExecutionMs As Long
+    Dim LogBlocMail As String, LogActionsDetail As String, LogActionsIndente As String
+    Dim SujetClean As String, ExpeClean As String, IconeMessage As String
+    Dim Horodatage As String
+    Dim EstModifie As Boolean
+    
+    T_Debut = GetTickCount()
+    Horodatage = Format(Now, "YYYY-MM-DD HH:NN:SS")
+    
+    ' Extraction sécurisée des en-têtes
+    On Error Resume Next
+    SujetClean = Item.Subject
+    If Err.Number <> 0 Then
+        LogActionsDetail = LogActionsDetail & "    [ERREUR LECTURE SUJET] : " & Err.Description & vbCrLf
+        Err.Clear
+    End If
+    
+    If TypeOf Item Is Outlook.MailItem Then
+        ExpeClean = Item.SenderEmailAddress
+        IconeMessage = "RECEPTION MESSAGE"
+    ElseIf TypeOf Item Is Outlook.MeetingItem Then
+        ExpeClean = Item.SenderName
+        IconeMessage = "RECEPTION INVITATION"
+    Else
+        ExpeClean = "Système / NDR"
+        IconeMessage = "RAPPORT DISTRIBUTION"
+    End If
+    On Error GoTo 0
+    
+    ' --- 1. DICTIONNAIRES ---
+    On Error GoTo ErrDico
+    If TraiterCategoriesViaDictionnaireSujet(Item, LogActionsDetail) Then EstModifie = True
+    If TraiterCategoriesViaDictionnaireMailExpediteurs(Item, LogActionsDetail) Then EstModifie = True
+    If TraiterCategoriesViaDictionnaireMailDestinataires(Item, LogActionsDetail) Then EstModifie = True
+    GoTo FinDico
+ErrDico:
+    LogActionsDetail = LogActionsDetail & "    [ERREUR TECHNIQUE DICTIONNAIRES] : " & Err.Description & vbCrLf
+    Resume FinDico
+FinDico:
+
+    ' --- 2. REGLES METIER ---
+    On Error GoTo ErrMetier
+    If TraiterMessageQualifCEDA(Item, LogActionsDetail) Then EstModifie = True
+    If TraiterMessageCRQualifCEDA(Item, LogActionsDetail) Then EstModifie = True
+    If TraiterMessageTransportARevoir(Item, LogActionsDetail) Then EstModifie = True
+    If TraiterMessageTransport(Item, LogActionsDetail) Then EstModifie = True
+    If TraiterMessageDeAvecSujet(Item, "ucanss@ailleursbusiness.com", "Confirmation de votre réservation hôtel", "Transport Hotels", LogActionsDetail) Then EstModifie = True
+    If TraiterMessageDeAvecSujet(Item, "nathalie.ponsard@assurance-maladie.fr", "La Fleuriaye", "CCOEN-La Fleuriaye", LogActionsDetail) Then EstModifie = True
+    GoTo FinMetier
+ErrMetier:
+    LogActionsDetail = LogActionsDetail & "    [ERREUR TECHNIQUE REGLES METIER] : " & Err.Description & vbCrLf
+    Resume FinMetier
+FinMetier:
+
+    ' --- 3. DEPLACEMENTS ---
+    On Error GoTo ErrDeplac
+    If TraiterMessageADeplacerSuivantCategorie(Item, "Administratif-Syndicats", "Syndicats", LogActionsDetail) Then EstModifie = True
+    If TraiterMessageADeplacerSuivantCategorie(Item, "ClearQuest", "ClearQuest CNAM", LogActionsDetail) Then EstModifie = True
+    If TraiterMessageADeplacerSuivantCategorie(Item, "Confluence", "Confluence", LogActionsDetail) Then EstModifie = True
+    If TraiterMessageADeplacerSuivantCategorie(Item, "Urba-Veille", "Veille", LogActionsDetail) Then EstModifie = True
+    If TraiterMessageADeplacerSuivantCategorie(Item, "Comitologie-CNAM-Lettres Réseau", "Lettres Réseau", LogActionsDetail) Then EstModifie = True
+    If TraiterMessageADeplacerSuivantCategorie(Item, "CCOEN-La Fleuriaye", "La Fleuriaye", LogActionsDetail) Then EstModifie = True
+    If TraiterMessageADeplacerSuivantCategorie(Item, "Transport Hotels", "Transport Hotels", LogActionsDetail) Then EstModifie = True
+    GoTo FinDeplac
+ErrDeplac:
+    LogActionsDetail = LogActionsDetail & "    [ERREUR TECHNIQUE DEPLACEMENTS] : " & Err.Description & vbCrLf
+    Resume FinDeplac
+FinDeplac:
+
+    On Error GoTo 0
+    T_Fin = GetTickCount()
+    TempsExecutionMs = T_Fin - T_Debut
+    If TempsExecutionMs < 0 Then TempsExecutionMs = 0
+    
+    If LogActionsDetail = "" Then LogActionsDetail = "    |---> [INFO]: Aucun filtre positif" & vbCrLf
+    
+    ' Extraction pour le rapport final de stock
+    OutActionsAppliquees = ""
+    If EstModifie Or InStr(1, LogActionsDetail, "[ERREUR", vbTextCompare) > 0 Then
+        Dim LignesLog() As String, LigneItem As Variant
+        LignesLog = Split(LogActionsDetail, vbCrLf)
+        For Each LigneItem In LignesLog
+            If InStr(1, CStr(LigneItem), "ACTION:", vbTextCompare) > 0 And InStr(1, CStr(LigneItem), "ACTION IGNOREE:", vbTextCompare) = 0 Then
+                OutActionsAppliquees = OutActionsAppliquees & "        |--> " & Mid(CStr(LigneItem), InStr(1, CStr(LigneItem), "ACTION:", vbTextCompare)) & vbCrLf
+            ElseIf InStr(1, CStr(LigneItem), "[ERREUR", vbTextCompare) > 0 Then
+                OutActionsAppliquees = OutActionsAppliquees & CStr(LigneItem) & vbCrLf
+            End If
+        Next LigneItem
+    End If
+    
+    ' Construction du bloc
+    If EstRattrapageStock Then
+        LogActionsIndente = "    " & Replace(LogActionsDetail, vbCrLf, vbCrLf & "    ")
+        If Right(LogActionsIndente, 4) = "    " Then LogActionsIndente = Left(LogActionsIndente, Len(LogActionsIndente) - 4)
+        LogBlocMail = "    [" & Horodatage & "] [" & LibelleDossier & " " & IndexActuel & "/" & TotalDossier & "] ELEMENT: """ & SujetClean & """ | EXP: """ & ExpeClean & """" & vbCrLf & _
+                      LogActionsIndente & "        |---> TEMPS TRAITEMENT: " & TempsExecutionMs & " ms" & vbCrLf
+    Else
+        LogBlocMail = "[" & Horodatage & "] " & IconeMessage & " | SUJET: """ & SujetClean & """ | EXP: """ & ExpeClean & """" & vbCrLf & _
+                      LogActionsDetail & "    |---> TEMPS TRAITEMENT: " & TempsExecutionMs & " ms" & vbCrLf
+    End If
+    
+    Call EcrireTrace(LogBlocMail, EstRattrapageStock)
+    AnalyserEtTraiterMail = EstModifie
+End Function
+

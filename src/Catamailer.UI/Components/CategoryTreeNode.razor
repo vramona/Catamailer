@@ -5,6 +5,8 @@
 //         - 2026-09-09 : Création du composant unitaire pour gérer l'état d'ouverture (J3-S3-T2 - Phase Orange).
 //         - 2026-09-09 : Refactoring CSS pour alignement au pixel (J3-S3-T2 - Phase Orange v2).
 //         - 2026-09-22 : Ajout du bouton de suppression logique et de l'EventCallback (J4-S4-T6 - Phase Bleue).
+//         - 2026-10-09 : Harmonisation densité ultra-compacte (J6-S3-T4 - Phase Bleue).
+//         - 2026-10-19 : Compression verticale maximale des lignes (J6-S3-T7 - Phase Bleue Itération 2).
 // </auto-generated>
 // ------------------------------------------------------------------------------ -->
 
@@ -14,31 +16,31 @@
     <div class="cata-tree-node-content d-flex align-items-center">
         @if (Node.Children.Any())
         {
-            <button class="btn btn-sm btn-link p-0 text-decoration-none text-dark cata-tree-toggle-spacer" @onclick="Toggle" aria-label="Déplier/Replier">
+            <button class="btn btn-sm btn-link p-0 text-decoration-none text-muted cata-tree-toggle-spacer me-1" style="font-size: 0.65rem; width: 1rem; line-height: 1;" @onclick="Toggle" aria-label="Déplier/Replier">
                 @(isExpanded ? "▼" : "▶")
             </button>
         }
         else
         {
-            <span class="cata-tree-toggle-spacer"></span>
+            <span class="cata-tree-toggle-spacer me-1" style="width: 1rem; display: inline-block;"></span>
         }
 
         @if (!string.IsNullOrEmpty(Node.Color))
         {
-            <span class="badge me-2 shadow-sm" style="background-color: @Node.Color; width: 1.2rem; height: 1.2rem; display: inline-block;">&nbsp;</span>
+            <span class="me-1 flex-shrink-0" style="background-color: @Node.Color; width: 0.65rem; height: 0.65rem; display: inline-block; border-radius: 50%;"></span>
         }
         else if (!string.IsNullOrEmpty(Node.EffectiveColor))
         {
-            <span class="badge me-2 border shadow-sm" style="background-color: @Node.EffectiveColor; width: 1.2rem; height: 1.2rem; display: inline-block;" title="Couleur héritée">&nbsp;</span>
+            <span class="me-1 border flex-shrink-0" style="background-color: @Node.EffectiveColor; width: 0.65rem; height: 0.65rem; display: inline-block; border-radius: 50%; opacity: 0.6;" title="Couleur héritée"></span>
         }
         else
         {
-            <span class="badge me-2 bg-light border text-dark shadow-sm" style="width: 1.2rem; height: 1.2rem; display: inline-block;">&nbsp;</span>
+            <span class="me-1 bg-light border flex-shrink-0" style="width: 0.65rem; height: 0.65rem; display: inline-block; border-radius: 50%;"></span>
         }
         
-        <span class="fs-6 text-dark flex-grow-1">@Node.Name</span>
+        <span class="text-dark flex-grow-1 text-truncate" style="font-size: 0.75rem; line-height: 1.15;">@Node.Name</span>
 
-        <button class="btn btn-sm btn-outline-danger border-0 ms-2" @onclick="DeleteNodeAsync" title="Supprimer la catégorie">
+        <button class="btn btn-outline-danger border-0 ms-1 p-0 px-1" style="font-size: 0.65rem; line-height: 1;" @onclick="DeleteNodeAsync" title="Supprimer la catégorie">
             🗑️
         </button>
     </div>

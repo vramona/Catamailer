@@ -18,6 +18,8 @@
 //         - 2026-09-15 : Injection de ICategorySyncService et CategorySyncViewModel (J4-S2).
 //         - 2026-09-16 : Remplacement du Dummy par l'intégration COM réelle via OutlookApplicationWrapper (J4-S3-T1).
 //         - 2026-09-24 : Injection de IExternalResourceProvider (J6-S1-T1 - Phase Orange).
+//         - 2026-09-25 : Nettoyage final des Dummies et injection de RuleRepository et OutlookSelectionProvider (J6-S3-T5 - Phase Bleue).
+//         - 2026-10-19 : Injection de StatusBarViewModel (J6-S3-T7 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -33,7 +35,6 @@ using Catamailer.Infrastructure;
 using Catamailer.Application;
 using Catamailer.Application.ViewModels;
 using Catamailer.Application.Services;
-using Catamailer.UI.Dummies;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Catamailer.UI
@@ -76,15 +77,13 @@ namespace Catamailer.UI
             builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
             builder.Services.AddScoped<IAppSettingsRepository, AppSettingsRepository>();
             builder.Services.AddScoped<IHistoryStateRepository, HistoryStateRepository>();
+            builder.Services.AddScoped<IRuleRepository, RuleRepository>();
             builder.Services.AddSingleton<IGlobalHotkeyService, Win32GlobalHotkeyService>();
             
-            // Faux fournisseurs pour le test de l'IHM (TODO: À remplacer en production)
-            builder.Services.AddScoped<IRuleRepository, DummyRuleRepository>();
-            builder.Services.AddScoped<ISelectionProvider, DummySelectionProvider>();
-
             // Injection COM Réelle
             builder.Services.AddSingleton<IOutlookApplicationWrapper, OutlookApplicationWrapper>();
             builder.Services.AddScoped<ICategoryManagerProvider, OutlookCategoryManagerProvider>();
+            builder.Services.AddScoped<ISelectionProvider, OutlookSelectionProvider>();
             
             // Injection de l'interface de ressources externes liée à l'instance COM d'Outlook
             builder.Services.AddSingleton<IExternalResourceProvider>(sp => sp.GetRequiredService<IOutlookApplicationWrapper>());
@@ -99,6 +98,7 @@ namespace Catamailer.UI
             builder.Services.AddTransient<PreferencesViewModel>();
             builder.Services.AddTransient<ActivationPromptViewModel>();
             builder.Services.AddTransient<CategorySyncViewModel>();
+            builder.Services.AddTransient<StatusBarViewModel>();
 
             builder.Services.AddMauiBlazorWebView();
 
@@ -111,9 +111,6 @@ namespace Catamailer.UI
 
             // Initialisation de l'infrastructure
             app.Services.EnsureDatabaseCreated();
-            
-            // Amorçage des données factices pour le développement
-            app.Services.SeedDummyCategories();
 
             return app;
         }

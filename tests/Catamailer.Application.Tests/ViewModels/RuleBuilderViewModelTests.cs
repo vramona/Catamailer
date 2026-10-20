@@ -12,6 +12,8 @@
 //         - 2026-09-23 : Ajout des tests pour la gestion de l'état des actions complexes (J5-S1-T2 - Phase Rouge).
 //         - 2026-09-24 : Refonte des tests pour supporter la liste d'actions (J5-S3-T1 - Phase Orange).
 //         - 2026-09-24 : Ajout de IExternalResourceProvider et tests de peuplement (J6-S1-T1 - Phase Rouge).
+//         - 2026-09-25 : Implémentation de UpdateDictionaryRuleAsync dans le bouchon (J6-S3-T6 - Phase Rouge Correction).
+//         - 2026-10-19 : Adaptation pour chargement paresseux des dossiers Outlook via EnsureFoldersLoadedAsync (J6-S3-T7 - Phase Rouge).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -34,11 +36,24 @@ namespace Catamailer.Application.Tests.ViewModels
             public List<ExecutionRule> ExecutionRules { get; } = new();
 
             public Task<IEnumerable<DictionaryRule>> GetAllDictionaryRulesAsync() => Task.FromResult(DictionaryRules.AsEnumerable());
+            
             public Task AddDictionaryRuleAsync(DictionaryRule rule)
             {
                 DictionaryRules.Add(rule);
                 return Task.CompletedTask;
             }
+
+            public Task UpdateDictionaryRuleAsync(DictionaryRule rule)
+            {
+                var existing = DictionaryRules.FirstOrDefault(r => r == rule);
+                if (existing != null)
+                {
+                    DictionaryRules.Remove(existing);
+                    DictionaryRules.Add(rule);
+                }
+                return Task.CompletedTask;
+            }
+
             public Task DeleteDictionaryRuleAsync(DictionaryRule rule)
             {
                 DictionaryRules.Remove(rule);
@@ -78,8 +93,11 @@ namespace Catamailer.Application.Tests.ViewModels
 
         private class FakeExternalResourceProvider : IExternalResourceProvider
         {
+            public int FolderCallsCount { get; private set; }
+
             public Task<IEnumerable<string>> GetAvailableFolderPathsAsync()
             {
+                FolderCallsCount++;
                 return Task.FromResult<IEnumerable<string>>(new[] { "Boîte de réception", "Archives" });
             }
 
@@ -109,7 +127,7 @@ namespace Catamailer.Application.Tests.ViewModels
         }
 
         [Fact]
-        public async Task InitializeAsync_ShouldLoadCategoriesAndExternalResources()
+        public async Task InitializeAsync_ShouldLoadCategoriesAndSignatures_LeavingFoldersLazy()
         {
             // Arrange
             var repo = new FakeRuleRepository();
@@ -122,10 +140,29 @@ namespace Catamailer.Application.Tests.ViewModels
 
             // Assert
             Assert.Equal(2, viewModel.AvailableCategories.Count());
-            Assert.Equal(2, viewModel.AvailableFolders.Count());
             Assert.Equal(2, viewModel.AvailableSignatures.Count());
-            Assert.Contains("Archives", viewModel.AvailableFolders);
             Assert.Contains("Signature_Pro", viewModel.AvailableSignatures);
+            Assert.Empty(viewModel.AvailableFolders);
+            Assert.Equal(0, resourceProvider.FolderCallsCount);
+        }
+
+        [Fact]
+        public async Task EnsureFoldersLoadedAsync_ShouldLoadFoldersOnlyOnce()
+        {
+            // Arrange
+            var repo = new FakeRuleRepository();
+            var catRepo = new FakeCategoryRepository();
+            var resourceProvider = new FakeExternalResourceProvider();
+            var viewModel = new RuleBuilderViewModel(repo, catRepo, resourceProvider);
+
+            // Act
+            await viewModel.EnsureFoldersLoadedAsync();
+            await viewModel.EnsureFoldersLoadedAsync();
+
+            // Assert
+            Assert.Equal(2, viewModel.AvailableFolders.Count());
+            Assert.Contains("Archives", viewModel.AvailableFolders);
+            Assert.Equal(1, resourceProvider.FolderCallsCount);
         }
 
         [Fact]

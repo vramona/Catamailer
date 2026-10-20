@@ -1,0 +1,128 @@
+Option Explicit
+
+Public Function ActionAjouterCategorie(ByRef Item As Object, ByVal NomCategorie As String, ByRef LogActions As String) As Boolean
+    ' 1. SÉCURITÉ ANTI-DOUBLON : Si la catégorie existe déjà, on arrête immédiatement
+    If FiltreMailContientCategorie(Item, NomCategorie) Then
+        ActionAjouterCategorie = False
+        Exit Function
+    End If
+    
+    ' 2. Ajout propre
+    On Error Resume Next
+    Dim CatInitiales As String
+    CatInitiales = Trim(Item.Categories)
+    
+    If CatInitiales = "" Then
+        Item.Categories = NomCategorie
+    Else
+        Item.Categories = CatInitiales & ", " & NomCategorie
+    End If
+    Item.Save
+    
+    ' Tracé de l'action réelle
+    LogActions = LogActions & "        |--> ACTION: Ajout Catégorie '" & NomCategorie & "'" & vbCrLf
+    ActionAjouterCategorie = True
+    On Error GoTo 0
+End Function
+
+Public Function ActionMarquerLu(ByRef Item As Object, ByVal EstLu As Boolean, ByRef LogActions As String) As Boolean
+    On Error Resume Next
+    Item.UnRead = Not EstLu
+    Item.Save
+    If EstLu Then
+        LogActions = LogActions & "    ¦   +-? ACTION: Statut 'Lu' appliqué" & vbCrLf
+    Else
+        LogActions = LogActions & "    ¦   +-? ACTION: Statut 'Non Lu' appliqué" & vbCrLf
+    End If
+    ActionMarquerLu = True
+    On Error GoTo 0
+End Function
+
+Public Function ActionDefinirImportance(ByRef Item As Object, ByVal ImportanceLevel As Long, ByRef LogActions As String) As Boolean
+    On Error Resume Next
+    If TypeOf Item Is Outlook.MailItem Or TypeOf Item Is Outlook.MeetingItem Then
+        ' 1. Vérification : Si l'importance est DEJA au niveau demandé
+        If Item.Importance = ImportanceLevel Then
+            LogActions = LogActions & "    ¦   +-? ACTION IGNOREE: Importance haute déjà positionnée" & vbCrLf
+            ActionDefinirImportance = False
+            Exit Function
+        End If
+        
+        ' 2. Sinon, on applique le changement d'importance
+        Item.Importance = ImportanceLevel
+        Item.Save
+        
+        LogActions = LogActions & "    ¦   +-? ACTION: Importance définie à Haute" & vbCrLf
+        ActionDefinirImportance = True
+    End If
+    On Error GoTo 0
+End Function
+
+Public Function ActionDeplacerDossier(ByRef Item As Object, ByVal NomSousDossier As String, ByRef LogActions As String) As Boolean
+    Dim objNS As Outlook.NameSpace
+    Dim objInbox As Outlook.MAPIFolder
+    Dim objTargetFolder As Outlook.MAPIFolder
+    Dim DossierTemp As Outlook.MAPIFolder
+    
+    Set objNS = Application.GetNamespace("MAPI")
+    Set objInbox = objNS.GetDefaultFolder(olFolderInbox)
+    
+    ' 1. Recherche dans l'Inbox
+    For Each DossierTemp In objInbox.Folders
+        If LCase(Trim(DossierTemp.Name)) = LCase(Trim(NomSousDossier)) Then
+            Set objTargetFolder = DossierTemp
+            Exit For
+        End If
+    Next DossierTemp
+    
+    ' 2. Recherche à la racine
+    If objTargetFolder Is Nothing Then
+        For Each DossierTemp In objInbox.Parent.Folders
+            If LCase(Trim(DossierTemp.Name)) = LCase(Trim(NomSousDossier)) Then
+                Set objTargetFolder = DossierTemp
+                Exit For
+            End If
+        Next DossierTemp
+    End If
+    
+    ' 3. Déplacement
+    If Not objTargetFolder Is Nothing Then
+        On Error Resume Next
+        If Item.Parent.FolderPath <> objTargetFolder.FolderPath Then
+            Item.Move objTargetFolder
+            LogActions = LogActions & "    ¦   +-? ACTION: Déplacement dans le dossier '" & NomSousDossier & "'" & vbCrLf
+        End If
+        ActionDeplacerDossier = True
+        On Error GoTo 0
+    Else
+        ActionDeplacerDossier = False
+    End If
+End Function
+
+Public Function ActionAssurerSuiviAujourdhui(ByRef Item As Object, ByRef LogActions As String) As Boolean
+    ' Transforme le message en tache avec drapeau de suivi et rappel a 30 minutes
+    ' Securite : On n'ecrase pas une tache deja terminee ou deja planifiee
+    
+    On Error Resume Next
+    If TypeOf Item Is Outlook.MailItem Then
+        ' Verification de l'etat actuel du drapeau
+        ' olTaskComplete = 2 (Tache terminee)
+        ' Si le rappel est deja defini (ReminderSet = True) ou que la tache est terminee, on ignore.
+        If Item.TaskCompletedDate <> #1/1/4501# Or Item.IsMarkedAsTask Or Item.ReminderSet = True Then
+             LogActions = LogActions & "    ¦   +-? ACTION IGNOREE: Suivi déjà positionné ou tâche déjà traitée" & vbCrLf
+             ActionAssurerSuiviAujourdhui = False
+             Exit Function
+        End If
+        
+        Item.MarkAsTask olMarkNoDate
+        Item.TaskStartDate = Date
+        Item.TaskDueDate = Date
+        Item.FlagRequest = "Suivi urgent"
+        Item.ReminderSet = True
+        Item.ReminderTime = DateAdd("n", 30, Now)
+        Item.Save
+        LogActions = LogActions & "    ¦   +-? ACTION: Drapeau Suivi Aujourd'hui + Rappel 30 min positionné" & vbCrLf
+        ActionAssurerSuiviAujourdhui = True
+    End If
+    On Error GoTo 0
+End Function

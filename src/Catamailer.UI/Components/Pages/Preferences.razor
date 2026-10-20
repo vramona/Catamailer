@@ -2,6 +2,7 @@
 @using Catamailer.Application.ViewModels
 @using System.Threading.Tasks
 @inject PreferencesViewModel ViewModel
+@inject StatusBarViewModel StatusBarVM
 @inject NavigationManager NavManager
 
 <!-- ------------------------------------------------------------------------------
@@ -9,32 +10,46 @@
 //     Date de création : 2026-09-15
 //     Historique :
 //         - 2026-09-15 : Création de la page des préférences (J3-S3-T4 - Phase Bleue).
+//         - 2026-10-19 : Intégration dans le Layout global, haute densité et Action Bar fixe (J6-S3-T7 - Phase Bleue).
 // </auto-generated>
 // ------------------------------------------------------------------------------ -->
 
-<h1 class="cata-page-title">Préférences Générales</h1>
-<p class="text-muted mb-4">Configuration globale de l'application Catamailer.</p>
+<div class="cata-screen-container">
 
-<div class="card shadow-sm border-0 bg-white mb-4">
-    <div class="card-header bg-light">
-        <h5 class="mb-0">Analyse de l'historique</h5>
+    <!-- EN-TÊTE FIXE -->
+    <div class="cata-screen-header">
+        <h1 class="cata-page-title mb-0">Préférences Générales</h1>
+        <p class="text-muted mb-0" style="font-size: 0.75rem;">Configuration globale de l'application Catamailer.</p>
     </div>
-    <div class="card-body">
-        <div class="mb-3">
-            <label class="form-label fw-medium">Délai de suspension (Debounce) en minutes</label>
-            <input type="number" class="form-control" @bind="ViewModel.DebounceDelayMinutes" min="1" max="1440" />
-            <div class="form-text">Temps de pause de l'analyse en arrière-plan après la modification d'une règle, avant que le moteur ne reprenne son traitement.</div>
+
+    <!-- CORPS DÉFILANT -->
+    <div class="cata-screen-body">
+        <div class="card shadow-sm border bg-white">
+            <div class="card-header bg-light py-2">
+                <h6 class="mb-0" style="font-size: 0.85rem;">Analyse de l'historique</h6>
+            </div>
+            <div class="card-body py-2 px-3">
+                <div class="mb-2" style="max-width: 320px;">
+                    <label class="form-label fw-medium mb-1" style="font-size: 0.75rem;">Délai de suspension (Debounce) en minutes</label>
+                    <input type="number" class="form-control form-control-sm" style="font-size: 0.75rem;" @bind="ViewModel.DebounceDelayMinutes" min="1" max="1440" />
+                </div>
+                <div class="form-text" style="font-size: 0.72rem;">
+                    Temps de pause de l'analyse en arrière-plan après la modification d'une règle, avant que le moteur ne reprenne son traitement.
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
-<div class="d-flex justify-content-between mt-4">
-    <a href="/" class="btn btn-outline-secondary px-4 shadow-sm">
-        ← Retour au Dashboard
-    </a>
-    <button class="btn btn-primary px-4 shadow-sm" @onclick="SavePreferencesAsync">
-        💾 Sauvegarder
-    </button>
+    <!-- ZONE D'ACTIONS STANDARDISÉE FIXE EN BAS -->
+    <div class="cata-action-bar">
+        <button class="btn btn-sm btn-outline-secondary px-3 py-1" style="font-size: 0.75rem;" @onclick='() => NavManager.NavigateTo("/")'>
+            Annuler
+        </button>
+        <button class="btn btn-sm btn-primary px-3 py-1" style="font-size: 0.75rem;" @onclick="SavePreferencesAsync">
+            💾 Sauvegarder
+        </button>
+    </div>
+
 </div>
 
 @code {
@@ -46,6 +61,7 @@
     private async Task SavePreferencesAsync()
     {
         await ViewModel.SaveAsync();
+        await StatusBarVM.RefreshAsync();
         NavManager.NavigateTo("/");
     }
 }

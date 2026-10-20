@@ -1,0 +1,134 @@
+' =========================================================================
+' 5. FONCTION UTILITAIRE (Filtres) -> Renvoient VRAI ou FAUX
+' =========================================================================
+
+' Vérifie si le sujet contient au moins l'un des mots-clés fournis (Logique OU)
+Public Function FiltreSujetContientUnDesMotsCles(ByRef Item As Object, ByVal ListeMotsCles As Variant) As Boolean
+    Dim Mot As Variant
+    
+    For Each Mot In ListeMotsCles
+        If Len(Mot) > 0 Then
+            If InStr(1, Item.Subject, CStr(Mot), vbTextCompare) > 0 Then
+                FiltreSujetContientUnDesMotsCles = True
+                Exit Function
+            End If
+        End If
+    Next Mot
+End Function
+
+' Vérifie si le sujet contient un texte spécifique (Partiel / Exact)
+Public Function FiltreSujetContient(ByRef Item As Object, ByVal TexteRecherche As String) As Boolean
+    FiltreSujetContient = (InStr(1, Item.Subject, TexteRecherche, vbTextCompare) > 0)
+End Function
+
+' Vérifie si le sujet correspond à une Expression Régulière (RegEx)
+Public Function FiltreSujetMatchRegEx(ByRef Item As Object, ByVal PatternRegEx As String) As Boolean
+    Dim RegEx As Object
+    Set RegEx = CreateObject("VBScript.RegExp")
+    RegEx.Pattern = PatternRegEx
+    RegEx.IgnoreCase = True
+    FiltreSujetMatchRegEx = RegEx.Test(Item.Subject)
+End Function
+
+' Vérifie l'expéditeur selon un mode précis ("EXACT", "CONTAINS", "STARTSWITH", "ENDSWITH")
+' Gère les envois classiques et les envois "De la part de" (Listes de diffusion / Boîtes partagées)
+' Vérifie l'expéditeur selon un mode précis ("EXACT", "CONTAINS", "STARTSWITH", "ENDSWITH")
+' Gère parfaitement les listes de diffusion et boîtes partagées internes (Nettoyage format Exchange X.500)
+Public Function FiltreExpediteurVerifie(ByRef Item As Object, ByVal TexteCible As String, ByVal ModeComparaison As String) As Boolean
+    On Error Resume Next
+    TexteCible = LCase(Trim(TexteCible))
+    
+    ' CLAUSE DE GARDE : Un critere vide ne doit JAMAIS valider un filtre
+    If TexteCible = "" Then Exit Function
+    
+    Dim ExpSmtp As String
+    Dim ExpName As String
+    Dim BehalfName As String
+    
+    ' 1. Obtention de l'adresse SMTP reelle de l'expediteur (securisee)
+    ExpSmtp = ObtenirEmailSmtpExpediteur(Item)
+    
+    ' 2. Obtention des noms d'affichage SECURISEE selon le type d'objet
+    If TypeOf Item Is Outlook.MailItem Then
+        ExpName = LCase(Trim(Item.SenderName))
+        BehalfName = LCase(Trim(Item.SentOnBehalfOfName))
+    ElseIf TypeOf Item Is Outlook.MeetingItem Then
+        ExpName = LCase(Trim(Item.SenderName))
+    Else
+        ' ReportItem (rapports de non-remise NDR) ou autres objets sans SenderName
+        ExpName = ""
+        BehalfName = ""
+    End If
+    
+    ' 3. COMPARAISON SECURISEE : On ne compare QUE les valeurs NON VIDES !
+    Select Case UCase(ModeComparaison)
+        Case "EXACT"
+            If ExpSmtp <> "" And ExpSmtp = TexteCible Then FiltreExpediteurVerifie = True: Exit Function
+            If ExpName <> "" And ExpName = TexteCible Then FiltreExpediteurVerifie = True: Exit Function
+            If BehalfName <> "" And BehalfName = TexteCible Then FiltreExpediteurVerifie = True: Exit Function
+            
+        Case "CONTAINS", "CONTENU"
+            If ExpSmtp <> "" And InStr(1, ExpSmtp, TexteCible, vbTextCompare) > 0 Then FiltreExpediteurVerifie = True: Exit Function
+            If ExpName <> "" And InStr(1, ExpName, TexteCible, vbTextCompare) > 0 Then FiltreExpediteurVerifie = True: Exit Function
+            If BehalfName <> "" And InStr(1, BehalfName, TexteCible, vbTextCompare) > 0 Then FiltreExpediteurVerifie = True: Exit Function
+    End Select
+End Function
+
+Public Function FiltreDestinataireVerifie(ByRef Item As Object, ByVal TexteRecherche As String, ByVal ModeComparaison As String) As Boolean
+    On Error Resume Next
+    TexteRecherche = LCase(Trim(TexteRecherche))
+    
+    ' CLAUSE DE GARDE 1 : Un critere vide ne doit JAMAIS valider un filtre
+    If TexteRecherche = "" Then Exit Function
+    
+    ' CLAUSE DE GARDE 2 (ANTI-REPORTITEM) : Seuls les mails et invitations possèdent des destinataires
+    If Not (TypeOf Item Is Outlook.MailItem Or TypeOf Item Is Outlook.MeetingItem) Then
+        FiltreDestinataireVerifie = False
+        Exit Function
+    End If
+    
+    Dim colRecips As Object
+    Dim objRecip As Outlook.Recipient
+    Dim EmailCible As String
+    
+    ' VERIFICATION SECURISEE : Evite l'erreur 438
+    Set colRecips = Item.Recipients
+    If colRecips Is Nothing Then Exit Function
+    
+    For Each objRecip In colRecips
+        EmailCible = ""
+        
+        ' 1. Appel de l'extracteur securise (MAPI + Cache)
+        EmailCible = ObtenirEmailSmtpRecip(objRecip)
+        
+        ' 2. Comparaison selon le mode choisi
+        Select Case UCase(ModeComparaison)
+            Case "EXACT"
+                If EmailCible <> "" And EmailCible = TexteRecherche Then
+                    FiltreDestinataireVerifie = True
+                    Exit Function
+                End If
+                
+            Case "CONTAINS", "CONTENU"
+                If EmailCible <> "" And InStr(1, EmailCible, TexteRecherche, vbTextCompare) > 0 Then
+                    FiltreDestinataireVerifie = True
+                    Exit Function
+                End If
+                
+            Case "STARTSWITH"
+                If EmailCible <> "" And Left(EmailCible, Len(TexteRecherche)) = TexteRecherche Then
+                    FiltreDestinataireVerifie = True
+                    Exit Function
+                End If
+                
+            Case "ENDSWITH"
+                If EmailCible <> "" And Right(EmailCible, Len(TexteRecherche)) = TexteRecherche Then
+                    FiltreDestinataireVerifie = True
+                    Exit Function
+                End If
+        End Select
+    Next objRecip
+    
+    FiltreDestinataireVerifie = False
+    On Error GoTo 0
+End Function

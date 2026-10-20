@@ -3,14 +3,15 @@
 //     Date de création : 2026-09-25
 //     Historique :
 //         - 2026-09-25 : Création des tests de conteneur IoC (J6-S2-T3 - Phase Rouge).
+//         - 2026-10-20 : Ajout de la vérification de ILegacyExecutionRuleSeeder (J6-S3-T8 - Phase Rouge).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
 #nullable enable
 
-using System;
 using Catamailer.Migrator;
 using Catamailer.Migrator.Orchestration;
+using Catamailer.Migrator.Seeding;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -30,10 +31,10 @@ namespace Catamailer.Migrator.Tests
             var provider = services.BuildServiceProvider();
 
             // Assert
+            var seeder = provider.GetService<ILegacyExecutionRuleSeeder>();
             var orchestrator = provider.GetService<IMigrationOrchestrator>();
             
-            // Si le DbContext, le CsvParser, le RuleMapper ou l'orchestrateur manquent,
-            // GetService retournera null ou lèvera une exception selon la façon dont il est résolu.
+            Assert.NotNull(seeder);
             Assert.NotNull(orchestrator);
         }
     }

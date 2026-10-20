@@ -6,12 +6,13 @@
 //         - 2026-09-09 : Délégation du rendu au composant CategoryTreeNode (J3-S3-T2 - Phase Orange).
 //         - 2026-09-09 : Remplacement des classes Bootstrap par cata-tree (J3-S3-T2 - Phase Orange v2).
 //         - 2026-09-22 : Ajout du paramètre OnNodeDeleted pour remonter les événements (J4-S4-T6 - Phase Bleue).
+//         - 2026-10-09 : Harmonisation densité (J6-S3-T4 - Phase Bleue).
 // </auto-generated>
 // ------------------------------------------------------------------------------ -->
 
 @using Catamailer.Domain
 
-<ul class="cata-tree">
+<ul class="cata-tree list-unstyled mb-0" style="padding-left: 1.2rem;">
     @foreach (var node in Nodes)
     {
         <CategoryTreeNode Node="node" OnNodeDeleted="OnNodeDeleted" />

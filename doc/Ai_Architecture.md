@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-09-25 11:34
+Généré le : 2026-10-20 16:15
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -30,7 +30,9 @@ Généré le : 2026-09-25 11:34
 **Fichier** : `src\Catamailer.Application\ExecutionEngine.cs`
 **Rôle** : Moteur d'exécution de l'Étape 2 : évaluation de l'arbre booléen des conditions.
 **Membres et Invocations :**
-- `bool Evaluate(string subject, string sender, RuleNode node)` : Évalue un nœud de règle composite par rapport aux métadonnées d'un e-mail.
+- `bool Evaluate(string subject, string sender, RuleNode node)` : Évalue un nœud de règle composite par rapport aux métadonnées textuelles d'un e-mail.
+  - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
+- `bool Evaluate(string subject, string sender, IEnumerable<string>? categories, RuleNode node)` : Évalue un nœud de règle composite par rapport aux métadonnées complètes (incluant les catégories) d'un e-mail.
   - *Appelle* ➡️ `ExecutionEngine.EvaluateCriterion()`
   - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
 
@@ -151,25 +153,54 @@ Généré le : 2026-09-25 11:34
   - *Appelle* ➡️ `ICategoryRepository.UpdateAsync()`
   - *Appelle* ➡️ `CategoryTreeViewModel.InitializeAsync()`
 
+### Class : DictionaryCategoryItem
+**Fichier** : `src\Catamailer.Application\ViewModels\DictionaryEditorViewModel.cs`
+**Rôle** : Représente un élément de la grille hiérarchique combinant catégorie et règle.
+**Membres et Invocations :**
+- `CategoryNode Category { get; set; }`
+- `DictionaryRule? Rule { get; set; }`
+- `bool IsExpanded { get; set; }`
+
+### Class : FlatCategoryOption
+**Fichier** : `src\Catamailer.Application\ViewModels\DictionaryEditorViewModel.cs`
+**Rôle** : Représente une option de catégorie formatée (indentée) pour les listes déroulantes.
+**Membres et Invocations :**
+- `CategoryNode Category { get; set; }`
+- `string DisplayName { get; set; }`
+
 ### Class : DictionaryEditorViewModel
 **Fichier** : `src\Catamailer.Application\ViewModels\DictionaryEditorViewModel.cs`
 **Rôle** : ViewModel responsable de la gestion (CRUD) des règles de dictionnaires (Étape 1).
 **Membres et Invocations :**
-- `IEnumerable<DictionaryRule> Rules { get; }` : Obtient la liste observable des règles de dictionnaire.
+- `ICollection<DictionaryRule> Rules { get; }` : Obtient la liste observable de toutes les règles de dictionnaire.
 - `IEnumerable<CategoryNode> AvailableCategories { get; }` : Obtient la liste des catégories disponibles pour la création d'une règle.
+- `string SearchText { get; set; }` : Obtient ou définit le texte de recherche pour filtrer la grille.
+- `IEnumerable<FlatCategoryOption> FlatCategories { get; }` : Obtient les catégories formatées avec indentation pour la liste déroulante du formulaire.
+- `IEnumerable<DictionaryCategoryItem> VisibleGridItems { get; }` : Obtient la liste des éléments affichés dans la grille en tenant compte de la recherche et des nœuds repliés.
 - `CategoryNode? SelectedCategory { get; set; }` : Obtient ou définit la catégorie sélectionnée dans le formulaire.
 - `string SubjectKeywordsInput { get; set; }` : Obtient ou définit les mots-clés du sujet saisis dans le formulaire (séparés par des virgules).
 - `string SenderKeywordsInput { get; set; }` : Obtient ou définit les mots-clés de l'expéditeur saisis dans le formulaire (séparés par des virgules).
 - `string RecipientKeywordsInput { get; set; }` : Obtient ou définit les mots-clés du destinataire saisis dans le formulaire (séparés par des virgules).
-- `Task InitializeAsync()` : Charge l'ensemble des règles de dictionnaire et des catégories depuis les dépôts.
+- `DictionaryRule? EditingRule { get; set; }` : Obtient la règle actuellement en cours d'édition (si applicable).
+- `bool IsEditing { get; }` : Indique si le formulaire est actuellement en mode édition.
+- `Task InitializeAsync()` : Charge l'ensemble des règles de dictionnaire et des catégories, puis construit la grille.
   - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
   - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
-- `Task AddRuleAsync(DictionaryRule rule)` : Ajoute une nouvelle règle au dépôt et met à jour la liste en mémoire.
+  - *Appelle* ➡️ `DictionaryEditorViewModel.BuildGridItems()`
+- `void ToggleCategory(CategoryNode category)` : Plie ou déplie une catégorie dans la grille hiérarchique.
+- `Task AddRuleAsync(DictionaryRule rule)` : Ajoute une nouvelle règle au dépôt et met à jour la grille en mémoire.
   - *Appelle* ➡️ `IRuleRepository.AddDictionaryRuleAsync()`
-- `Task DeleteRuleAsync(DictionaryRule rule)` : Supprime une règle du dépôt et met à jour la liste en mémoire.
+- `Task DeleteRuleAsync(DictionaryRule rule)` : Supprime une règle du dépôt et met à jour la grille en mémoire.
   - *Appelle* ➡️ `IRuleRepository.DeleteDictionaryRuleAsync()`
+- `void EditRule(DictionaryRule rule)` : Charge une règle existante dans le formulaire pour édition.
+- `void CancelEdit()` : Annule l'édition en cours et réinitialise le formulaire.
 - `Task CreateRuleFromFormAsync()` : Crée une nouvelle règle à partir des données saisies dans le formulaire.
   - *Appelle* ➡️ `DictionaryEditorViewModel.AddRuleAsync()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.CancelEdit()`
+- `Task UpdateRuleFromFormAsync()` : Met à jour la règle en cours d'édition avec les données du formulaire.
+  - *Appelle* ➡️ `DictionaryRule.Update()`
+  - *Appelle* ➡️ `IRuleRepository.UpdateDictionaryRuleAsync()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.CancelEdit()`
 
 ### Class : PreferencesViewModel
 **Fichier** : `src\Catamailer.Application\ViewModels\PreferencesViewModel.cs`
@@ -232,14 +263,15 @@ Généré le : 2026-09-25 11:34
 - `ObservableCollection<RuleAction> Actions { get; }` : Obtient la liste observable des actions séquentielles à exécuter.
 - `IEnumerable<CategoryNode> AvailableCategories { get; set; }` : Obtient la liste brute des catégories disponibles.
 - `IEnumerable<CategoryOption> FlatCategories { get; set; }` : Obtient la liste aplatie et indentée des catégories prête pour l'affichage UI.
-- `IEnumerable<string> AvailableFolders { get; set; }` : Obtient la liste des chemins de dossiers Outlook disponibles.
+- `IEnumerable<string> AvailableFolders { get; set; }` : Obtient la liste des chemins de dossiers Outlook disponibles (chargée à la demande).
 - `IEnumerable<string> AvailableSignatures { get; set; }` : Obtient la liste des signatures HTML disponibles.
-- `Task InitializeAsync()` : Charge les données de référence nécessaires à l'IHM (catégories et ressources externes) et construit l'arborescence visuelle.
+- `Task InitializeAsync()` : Charge les données de référence rapides nécessaires à l'IHM (catégories et signatures locales) sans bloquer sur l'arborescence COM des dossiers Outlook.
   - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
-  - *Appelle* ➡️ `IExternalResourceProvider.GetAvailableFolderPathsAsync()`
   - *Appelle* ➡️ `IExternalResourceProvider.GetAvailableSignaturesAsync()`
   - *Appelle* ➡️ `CategoryNode.GetFullName()`
   - *Appelle* ➡️ `RuleBuilderViewModel.Traverse()`
+- `Task EnsureFoldersLoadedAsync()` : Charge de manière paresseuse la liste des dossiers Outlook uniquement lorsqu'une action de déplacement le requiert, et met le résultat en cache.
+  - *Appelle* ➡️ `IExternalResourceProvider.GetAvailableFolderPathsAsync()`
 - `void SetOperator(RuleNode targetNode, LogicalOperator newOperator)` : Modifie l'opérateur logique d'un nœud spécifique.
   - *Appelle* ➡️ `RuleNode.SetOperator()`
 - `void AddCriterion(RuleNode targetNode, RuleCriterion criterion)` : Ajoute un critère à un nœud spécifique.
@@ -269,6 +301,19 @@ Généré le : 2026-09-25 11:34
 - `Task ToggleAutoWriteAsync(bool enabled)` : Active ou désactive l'écriture automatique et met à jour l'état.
   - *Appelle* ➡️ `IShadowModeService.SetAutoWriteEnabledAsync()`
   - *Appelle* ➡️ `ShadowModeDashboardViewModel.InitializeAsync()`
+
+### Class : StatusBarViewModel
+**Fichier** : `src\Catamailer.Application\ViewModels\StatusBarViewModel.cs`
+**Rôle** : ViewModel responsable de l'agrégation et de l'affichage des métriques globales dans la barre de statut inférieure.
+**Membres et Invocations :**
+- `int TotalCategoriesCount { get; set; }` : Obtient le nombre total de catégories actives dans le référentiel.
+- `int TotalDictionaryRulesCount { get; set; }` : Obtient le nombre total de règles de dictionnaires (Étape 1) configurées.
+- `int TotalExecutionRulesCount { get; set; }` : Obtient le nombre total de règles d'exécution (Étape 2) configurées.
+- `bool IsAutoWriteEnabled { get; set; }` : Obtient un indicateur précisant si le classement automatique dans Outlook est actif.
+- `Task InitializeAsync()` : Charge initialement l'ensemble des métriques depuis les dépôts et services.
+  - *Appelle* ➡️ `StatusBarViewModel.LoadMetricsAsync()`
+- `Task RefreshAsync()` : Rafraîchit l'ensemble des métriques de la barre de statut.
+  - *Appelle* ➡️ `StatusBarViewModel.LoadMetricsAsync()`
 
 ### Class : SyncDeltaOption
 **Fichier** : `src\Catamailer.Application\ViewModels\SyncDeltaOption.cs`
@@ -307,6 +352,8 @@ Généré le : 2026-09-25 11:34
 - `IEnumerable<CategoryNode> GetAscendanceChain()` : Récupère la chaîne d'ascendance complète depuis la racine jusqu'à ce nœud inclus.
 - `string GetFullName(string separator)` : Génère le nom complet de la catégorie incluant toute son ascendance, séparée par le caractère spécifié.
   - *Appelle* ➡️ `CategoryNode.GetAscendanceChain()`
+- `CategoryNode CreateFromPath(string path, string separator, IDictionary<string, CategoryNode>? cache)` : Reconstruit l'arbre complet des catégories à partir d'un chemin complet et d'un séparateur, en garantissant l'unicité des références des nœuds grâce au cache fourni.
+  - *Appelle* ➡️ `CategoryNode.AddChild()`
 
 ### Class : DictionaryRule
 **Fichier** : `src\Catamailer.Domain\DictionaryRule.cs`
@@ -316,6 +363,7 @@ Généré le : 2026-09-25 11:34
 - `IReadOnlyList<string> SubjectKeywords { get; set; }` : Obtient la liste des mots-clés recherchés dans le sujet.
 - `IReadOnlyList<string> SenderKeywords { get; set; }` : Obtient la liste des mots-clés (adresses ou noms) recherchés parmi les expéditeurs.
 - `IReadOnlyList<string> RecipientKeywords { get; set; }` : Obtient la liste des mots-clés (adresses ou noms) recherchés parmi les destinataires.
+- `void Update(CategoryNode targetCategory, IEnumerable<string>? subjectKeywords, IEnumerable<string>? senderKeywords, IEnumerable<string>? recipientKeywords)` : Met à jour l'ensemble des propriétés de la règle.
 
 ### Class : ExecutionRule
 **Fichier** : `src\Catamailer.Domain\ExecutionRule.cs`
@@ -535,6 +583,8 @@ Généré le : 2026-09-25 11:34
   - *Appelle* ➡️ `OutlookApplicationWrapper.GetItemFromId()`
 - `void InsertHtmlSignature(string entryId, string signatureName)`
   - *Appelle* ➡️ `OutlookApplicationWrapper.GetItemFromId()`
+- `void AddCategoryToMail(string entryId, string categoryName)`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.GetItemFromId()`
 - `MailMetadata GetMailMetadata(string entryId)`
 - `string? GetSelectedEntryId()`
 - `void ReplaceCategoryOnAllItems(string oldCategoryName, string newCategoryName)`
@@ -579,6 +629,18 @@ Généré le : 2026-09-25 11:34
   - *Appelle* ➡️ `IOutlookApplicationWrapper.GetSelectedEntryId()`
   - *Appelle* ➡️ `IOutlookApplicationWrapper.GetMailMetadata()`
 
+### Class : RuleRepository
+**Fichier** : `src\Catamailer.Infrastructure\RuleRepository.cs`
+**Rôle** : Implémentation Entity Framework Core du dépôt des règles de classification et d'exécution.
+**Membres et Invocations :**
+- `Task<IEnumerable<DictionaryRule>> GetAllDictionaryRulesAsync()`
+- `Task AddDictionaryRuleAsync(DictionaryRule rule)`
+- `Task UpdateDictionaryRuleAsync(DictionaryRule rule)`
+- `Task DeleteDictionaryRuleAsync(DictionaryRule rule)`
+- `Task<IEnumerable<ExecutionRule>> GetAllExecutionRulesAsync()`
+- `Task AddExecutionRuleAsync(ExecutionRule rule)`
+- `Task DeleteExecutionRuleAsync(ExecutionRule rule)`
+
 ### Class : Win32GlobalHotkeyService
 **Fichier** : `src\Catamailer.Infrastructure\Win32GlobalHotkeyService.cs`
 **Rôle** : Implémentation Win32 du service de raccourcis globaux via P/Invoke (user32.dll et comctl32.dll).
@@ -603,6 +665,7 @@ Généré le : 2026-09-25 11:34
 **Rôle** : Implémentation du mappeur traduisant les enregistrements CSV en DictionaryRule.
 **Membres et Invocations :**
 - `IEnumerable<DictionaryRule> Map(IEnumerable<CsvRuleRecord> records)`
+  - *Appelle* ➡️ `CategoryNode.CreateFromPath()`
 
 ### Interface : IMigrationOrchestrator
 **Fichier** : `src\Catamailer.Migrator\Orchestration\IMigrationOrchestrator.cs`
@@ -611,11 +674,12 @@ Généré le : 2026-09-25 11:34
 
 ### Class : MigrationOrchestrator
 **Fichier** : `src\Catamailer.Migrator\Orchestration\MigrationOrchestrator.cs`
-**Rôle** : Implémentation par défaut de l'orchestrateur coordonnant le parser, le mapper et la base de données.
+**Rôle** : Implémentation par défaut de l'orchestrateur coordonnant le parser, le mapper, le seeder de règles d'exécution et la base de données.
 **Membres et Invocations :**
 - `Task MigrateAsync(string csvFilePath)`
   - *Appelle* ➡️ `ICsvParser.ParseLines()`
   - *Appelle* ➡️ `IRuleMapper.Map()`
+  - *Appelle* ➡️ `ILegacyExecutionRuleSeeder.GetHardcodedExecutionRules()`
 
 ### Class : CsvParser
 **Fichier** : `src\Catamailer.Migrator\Parsing\CsvParser.cs`
@@ -644,6 +708,20 @@ Généré le : 2026-09-25 11:34
   - *Appelle* ➡️ `ServiceCollectionExtensions.AddMigratorServices()`
   - *Appelle* ➡️ `IMigrationOrchestrator.MigrateAsync()`
 
+### Interface : ILegacyExecutionRuleSeeder
+**Fichier** : `src\Catamailer.Migrator\Seeding\ILegacyExecutionRuleSeeder.cs`
+**Rôle** : Définit le contrat pour le générateur des règles d'exécution complexes issues du code historique VBA (Étape 2).
+**Membres et Invocations :**
+
+### Class : LegacyExecutionRuleSeeder
+**Fichier** : `src\Catamailer.Migrator\Seeding\LegacyExecutionRuleSeeder.cs`
+**Rôle** : Implémentation fournissant les 13 règles d'exécution (Étape 2) reproduisant le comportement des modules VBA d_Types_Messages et c_Répartiteur.
+**Membres et Invocations :**
+- `IEnumerable<ExecutionRule> GetHardcodedExecutionRules()`
+  - *Appelle* ➡️ `LegacyExecutionRuleSeeder.CreateSubjectRegexRule()`
+  - *Appelle* ➡️ `LegacyExecutionRuleSeeder.CreateSenderAndSubjectRule()`
+  - *Appelle* ➡️ `LegacyExecutionRuleSeeder.CreateMoveByCategoryRule()`
+
 ### Class : ServiceCollectionExtensions
 **Fichier** : `src\Catamailer.Migrator\ServiceCollectionExtensions.cs`
 **Rôle** : Fournit des méthodes d'extension pour configurer l'injection de dépendances du Migrator.
@@ -666,39 +744,6 @@ Généré le : 2026-09-25 11:34
 **Membres et Invocations :**
 - `void EnsureDatabaseCreated(IServiceProvider serviceProvider)` : S'assure que le schéma de la base de données est créé.
 
-### Class : DummyCategoryManagerProvider
-**Fichier** : `src\Catamailer.UI\Dummies\DummyCategoryManagerProvider.cs`
-**Rôle** : Fournisseur factice simulant les retours d'Outlook pour tester l'IHM de synchronisation.
-**Membres et Invocations :**
-- `IEnumerable<(string Name, string? ColorCode)> GetAllCategories()`
-- `void AddCategory(string name, string colorCode)`
-- `void UpdateCategoryColor(string name, string newColorCode)`
-- `void RemoveCategory(string name)`
-
-### Class : DummyCategorySeeder
-**Fichier** : `src\Catamailer.UI\Dummies\DummyCategorySeeder.cs`
-**Rôle** : Injecte un jeu de catégories factices pour le développement. TODO: À supprimer une fois l'import depuis Outlook implémenté.
-**Membres et Invocations :**
-- `void SeedDummyCategories(IServiceProvider serviceProvider)` : Injecte les catégories de test si la base est vide.
-  - *Appelle* ➡️ `CategoryNode.AddChild()`
-
-### Class : DummyRuleRepository
-**Fichier** : `src\Catamailer.UI\Dummies\DummyRuleRepository.cs`
-**Rôle** : Dépôt factice pour fournir des règles en l'absence de base de données.
-**Membres et Invocations :**
-- `Task<IEnumerable<DictionaryRule>> GetAllDictionaryRulesAsync()`
-- `Task AddDictionaryRuleAsync(DictionaryRule rule)`
-- `Task DeleteDictionaryRuleAsync(DictionaryRule rule)`
-- `Task<IEnumerable<ExecutionRule>> GetAllExecutionRulesAsync()`
-- `Task AddExecutionRuleAsync(ExecutionRule rule)`
-- `Task DeleteExecutionRuleAsync(ExecutionRule rule)`
-
-### Class : DummySelectionProvider
-**Fichier** : `src\Catamailer.UI\Dummies\DummySelectionProvider.cs`
-**Rôle** : Fournisseur factice pour valider l'IHM sans dépendre d'Outlook en phase de développement. TODO: À supprimer une fois l'intégration Outlook finalisée.
-**Membres et Invocations :**
-- `MailMetadata? GetSelectedMail()`
-
 ### Class : MainPage
 **Fichier** : `src\Catamailer.UI\MainPage.xaml.cs`
 **Rôle** : Page principale hébergeant exclusivement la vue Blazor.
@@ -710,7 +755,6 @@ Généré le : 2026-09-25 11:34
 **Membres et Invocations :**
 - `MauiApp CreateMauiApp()` : Crée et configure l'instance principale de l'application MAUI. Injecte les dépendances Blazor et initialise le composant de zone de notification (Tray Icon).
   - *Appelle* ➡️ `DatabaseBootstrapper.EnsureDatabaseCreated()`
-  - *Appelle* ➡️ `DummyCategorySeeder.SeedDummyCategories()`
 
 ### Class : App
 **Fichier** : `src\Catamailer.UI\Platforms\Windows\App.xaml.cs`
@@ -726,7 +770,6 @@ Généré le : 2026-09-25 11:34
 - **QuickRuleBuilderModal** : `src\Catamailer.UI\Components\QuickRuleBuilderModal.razor`
 - **Routes** : `src\Catamailer.UI\Components\Routes.razor`
 - **_Imports** : `src\Catamailer.UI\Components\_Imports.razor`
-- **TestQuickActionsPage** (Route: `/test-quick-actions`) : `src\Catamailer.UI\Dummies\TestQuickActionsPage.razor`
 - **MainLayout** : `src\Catamailer.UI\Components\Layout\MainLayout.razor`
 - **CategoryEditor** (Route: `/category-editor`) : `src\Catamailer.UI\Components\Pages\CategoryEditor.razor`
 - **CategorySync** (Route: `/category-sync`) : `src\Catamailer.UI\Components\Pages\CategorySync.razor`
@@ -868,6 +911,12 @@ Généré le : 2026-09-25 11:34
   - *Appelle* ➡️ `RuleNode.AddCriterion()`
   - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
 - `void Evaluate_ShouldReturnTrue_WhenOrNodeHasOneValidCriterion()`
+  - *Appelle* ➡️ `RuleNode.AddCriterion()`
+  - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
+- `void Evaluate_ShouldReturnTrue_WhenSubjectMatchesRegexCriterion_IgnoringCase()`
+  - *Appelle* ➡️ `RuleNode.AddCriterion()`
+  - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
+- `void Evaluate_ShouldReturnTrue_WhenCategoryMatchesExactNode_OrNodeAndChildren()`
   - *Appelle* ➡️ `RuleNode.AddCriterion()`
   - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
 
@@ -1059,17 +1108,54 @@ Généré le : 2026-09-25 11:34
 **Fichier** : `tests\Catamailer.Application.Tests\ViewModels\DictionaryEditorViewModelTests.cs`
 **Membres et Invocations :**
 - `Task InitializeAsync_ShouldLoadDictionaryRules_FromRepository()`
+  - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
   - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
 - `Task AddRuleAsync_ShouldCallRepository_AndRefreshList()`
   - *Appelle* ➡️ `DictionaryEditorViewModel.AddRuleAsync()`
+  - *Appelle* ➡️ `IRuleRepository.AddDictionaryRuleAsync()`
 - `Task DeleteRuleAsync_ShouldCallRepository_AndRefreshList()`
+  - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
   - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
   - *Appelle* ➡️ `DictionaryEditorViewModel.DeleteRuleAsync()`
-- `Task InitializeAsync_ShouldLoadCategories_FromCategoryRepository()`
-  - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
+  - *Appelle* ➡️ `IRuleRepository.DeleteDictionaryRuleAsync()`
 - `Task CreateRuleFromFormAsync_ShouldAddRule_AndClearForm_WhenValid()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
   - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
   - *Appelle* ➡️ `DictionaryEditorViewModel.CreateRuleFromFormAsync()`
+  - *Appelle* ➡️ `IRuleRepository.AddDictionaryRuleAsync()`
+- `Task EditRule_ShouldPopulateForm_AndSetIsEditing()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.EditRule()`
+- `void CancelEdit_ShouldClearForm_AndResetIsEditing()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.EditRule()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.CancelEdit()`
+- `Task UpdateRuleFromFormAsync_ShouldCallRepository_AndClearForm_WhenValid()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.EditRule()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.UpdateRuleFromFormAsync()`
+  - *Appelle* ➡️ `IRuleRepository.UpdateDictionaryRuleAsync()`
+- `Task InitializeAsync_ShouldPopulateFlatCategories_WithIndentationForDropdown()`
+  - *Appelle* ➡️ `CategoryNode.AddChild()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
+- `Task InitializeAsync_ShouldPopulateVisibleGridItems_WithAllCategories_AndLinkRules()`
+  - *Appelle* ➡️ `CategoryNode.AddChild()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
+- `Task ToggleCategory_ShouldCollapseParent_AndHideDescendants()`
+  - *Appelle* ➡️ `CategoryNode.AddChild()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.ToggleCategory()`
+- `Task SearchText_ShouldFilterGridItems_AndAutoExpandParents()`
+  - *Appelle* ➡️ `CategoryNode.AddChild()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
 
 ### Class : PreferencesViewModelTests
 **Fichier** : `tests\Catamailer.Application.Tests\ViewModels\PreferencesViewModelTests.cs`
@@ -1120,8 +1206,10 @@ Généré le : 2026-09-25 11:34
 **Fichier** : `tests\Catamailer.Application.Tests\ViewModels\RuleBuilderViewModelTests.cs`
 **Membres et Invocations :**
 - `void Constructor_ShouldInitializeRootNode()`
-- `Task InitializeAsync_ShouldLoadCategoriesAndExternalResources()`
+- `Task InitializeAsync_ShouldLoadCategoriesAndSignatures_LeavingFoldersLazy()`
   - *Appelle* ➡️ `RuleBuilderViewModel.InitializeAsync()`
+- `Task EnsureFoldersLoadedAsync_ShouldLoadFoldersOnlyOnce()`
+  - *Appelle* ➡️ `RuleBuilderViewModel.EnsureFoldersLoadedAsync()`
 - `void AddCriterion_ShouldAddCriterionToTargetNode()`
   - *Appelle* ➡️ `RuleBuilderViewModel.AddCriterion()`
 - `void RemoveCriterion_ShouldRemoveCriterionFromTargetNode()`
@@ -1159,6 +1247,24 @@ Généré le : 2026-09-25 11:34
   - *Appelle* ➡️ `ShadowModeDashboardViewModel.ToggleAutoWriteAsync()`
   - *Appelle* ➡️ `IShadowModeService.SetAutoWriteEnabledAsync()`
 
+### Class : StatusBarViewModelTests
+**Fichier** : `tests\Catamailer.Application.Tests\ViewModels\StatusBarViewModelTests.cs`
+**Rôle** : Tests unitaires validant le comportement de .
+**Membres et Invocations :**
+- `Task InitializeAsync_ShouldLoadMetricsFromRepositoriesAndServices()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
+  - *Appelle* ➡️ `IRuleRepository.GetAllExecutionRulesAsync()`
+  - *Appelle* ➡️ `IShadowModeService.IsAutoWriteEnabledAsync()`
+  - *Appelle* ➡️ `StatusBarViewModel.InitializeAsync()`
+- `Task RefreshAsync_ShouldUpdateMetrics()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
+  - *Appelle* ➡️ `IRuleRepository.GetAllExecutionRulesAsync()`
+  - *Appelle* ➡️ `IShadowModeService.IsAutoWriteEnabledAsync()`
+  - *Appelle* ➡️ `StatusBarViewModel.InitializeAsync()`
+  - *Appelle* ➡️ `StatusBarViewModel.RefreshAsync()`
+
 ## Projet : Catamailer.Domain.Tests
 ### Class : CategoryNodeTests
 **Fichier** : `tests\Catamailer.Domain.Tests\CategoryNodeTests.cs`
@@ -1186,6 +1292,7 @@ Généré le : 2026-09-25 11:34
 - `void DictionaryRule_Creation_ShouldSetProperties()`
 - `void RuleAction_Creation_ShouldSetActionTypeAndParameter()`
 - `void RuleAction_SupportsNewActionTypes_FromJalon5()`
+- `void RuleAction_SupportsAddCategory_FromJalon6()`
 - `void RuleCriterion_Creation_ShouldSetConditionFields()`
 - `void RuleCriterion_WithCategoryField_AndValidOperator_ShouldBeValid()`
 - `void RuleCriterion_WithInvalidCombinations_ShouldThrowArgumentException()`
@@ -1258,6 +1365,14 @@ Généré le : 2026-09-25 11:34
   - *Appelle* ➡️ `OutlookApplicationWrapper.InsertHtmlSignature()`
 - `void InsertHtmlSignature_ShouldThrowFileNotFoundException_WhenSignatureDoesNotExist()`
   - *Appelle* ➡️ `OutlookApplicationWrapper.InsertHtmlSignature()`
+- `void AddCategoryToMail_ShouldNotThrowNotImplementedException()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.AddCategoryToMail()`
+- `void ExecuteComplexRuleActions_ShouldDispatchAllLegacyActionTypes_WithoutNotImplementedException()`
+  - *Appelle* ➡️ `RuleNode.AddCriterion()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.AddCategoryToMail()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.SetImportance()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.FlagToday()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.MoveToFolder()`
 - `void Dispose()`
   - *Appelle* ➡️ `OutlookApplicationWrapper.Dispose()`
 
@@ -1340,6 +1455,35 @@ Généré le : 2026-09-25 11:34
   - *Appelle* ➡️ `IOutlookApplicationWrapper.GetMailMetadata()`
   - *Appelle* ➡️ `OutlookSelectionProvider.GetSelectedMail()`
 
+### Class : RuleRepositoryTests
+**Fichier** : `tests\Catamailer.Infrastructure.Tests\RuleRepositoryTests.cs`
+**Membres et Invocations :**
+- `Task AddAndGetAllDictionaryRulesAsync_ShouldPersistAndRetrieveRules()`
+  - *Appelle* ➡️ `RuleRepositoryTests.GetInMemoryContext()`
+  - *Appelle* ➡️ `RuleRepository.AddDictionaryRuleAsync()`
+  - *Appelle* ➡️ `RuleRepository.GetAllDictionaryRulesAsync()`
+- `Task UpdateDictionaryRuleAsync_ShouldUpdatePersistedRule()`
+  - *Appelle* ➡️ `RuleRepositoryTests.GetInMemoryContext()`
+  - *Appelle* ➡️ `RuleRepository.AddDictionaryRuleAsync()`
+  - *Appelle* ➡️ `DictionaryRule.Update()`
+  - *Appelle* ➡️ `RuleRepository.UpdateDictionaryRuleAsync()`
+  - *Appelle* ➡️ `RuleRepository.GetAllDictionaryRulesAsync()`
+- `Task DeleteDictionaryRuleAsync_ShouldRemoveRule()`
+  - *Appelle* ➡️ `RuleRepositoryTests.GetInMemoryContext()`
+  - *Appelle* ➡️ `RuleRepository.AddDictionaryRuleAsync()`
+  - *Appelle* ➡️ `RuleRepository.DeleteDictionaryRuleAsync()`
+  - *Appelle* ➡️ `RuleRepository.GetAllDictionaryRulesAsync()`
+- `Task AddAndGetAllExecutionRulesAsync_ShouldPersistAndRetrieveRules()`
+  - *Appelle* ➡️ `RuleRepositoryTests.GetInMemoryContext()`
+  - *Appelle* ➡️ `RuleNode.AddCriterion()`
+  - *Appelle* ➡️ `RuleRepository.AddExecutionRuleAsync()`
+  - *Appelle* ➡️ `RuleRepository.GetAllExecutionRulesAsync()`
+- `Task DeleteExecutionRuleAsync_ShouldRemoveRule()`
+  - *Appelle* ➡️ `RuleRepositoryTests.GetInMemoryContext()`
+  - *Appelle* ➡️ `RuleRepository.AddExecutionRuleAsync()`
+  - *Appelle* ➡️ `RuleRepository.DeleteExecutionRuleAsync()`
+  - *Appelle* ➡️ `RuleRepository.GetAllExecutionRulesAsync()`
+
 ### Class : StateAndSettingsRepositoriesTests
 **Fichier** : `tests\Catamailer.Infrastructure.Tests\StateAndSettingsRepositoriesTests.cs`
 **Rôle** : Classe de tests validant le comportement des dépôts de configuration et d'état.
@@ -1386,16 +1530,24 @@ Généré le : 2026-09-25 11:34
 - `void AddMigratorServices_ShouldRegisterAllRequiredDependencies()`
   - *Appelle* ➡️ `ServiceCollectionExtensions.AddMigratorServices()`
 
+### Class : LegacyExecutionRuleSeederTests
+**Fichier** : `tests\Catamailer.Migrator.Tests\LegacyExecutionRuleSeederTests.cs`
+**Rôle** : Classe de test validant l'initialisation en dur des règles complexes issues du code historique VBA.
+**Membres et Invocations :**
+- `void GetHardcodedExecutionRules_ShouldReturnAll13LegacyVbaRules_WithCorrectCriteriaAndActions()`
+  - *Appelle* ➡️ `LegacyExecutionRuleSeeder.GetHardcodedExecutionRules()`
+
 ### Class : MigrationOrchestratorE2ETests
 **Fichier** : `tests\Catamailer.Migrator.Tests\Orchestration\MigrationOrchestratorE2ETests.cs`
 **Membres et Invocations :**
-- `Task MigrateAsync_WithRealCsvData_ShouldProduceCorrectDictionaryRules()`
+- `Task MigrateAsync_WithRealCsvData_ShouldProduceCorrectDictionaryAndExecutionRules()`
   - *Appelle* ➡️ `MigrationOrchestrator.MigrateAsync()`
+  - *Appelle* ➡️ `CategoryNode.GetFullName()`
 
 ### Class : MigrationOrchestratorTests
 **Fichier** : `tests\Catamailer.Migrator.Tests\Orchestration\MigrationOrchestratorTests.cs`
 **Membres et Invocations :**
-- `Task MigrateAsync_ShouldParseMapAndSaveToDatabase()`
+- `Task MigrateAsync_ShouldParseMapSeedAndSaveToDatabase()`
   - *Appelle* ➡️ `MigrationOrchestrator.MigrateAsync()`
 
 ### Class : RuleMapperTests
@@ -1406,6 +1558,8 @@ Généré le : 2026-09-25 11:34
 - `void Map_ShouldDispatchKeywordsToCorrectFields()`
   - *Appelle* ➡️ `RuleMapper.Map()`
 - `void Map_ShouldIgnoreRecordsWithUnknownFields()`
+  - *Appelle* ➡️ `RuleMapper.Map()`
+- `void Map_ShouldReconstructCategoryTree_WhenSeparatorIsPresent()`
   - *Appelle* ➡️ `RuleMapper.Map()`
 
 ## Projet : Tools.AiDocGenerator.Tests
@@ -1451,6 +1605,10 @@ Généré le : 2026-09-25 11:34
   - *Appelle* ➡️ `Invoke-TestEnvTeardown.ps1`
 - **Invoke-PurgeDatabase.ps1** : `scripts\Invoke-PurgeDatabase.ps1`
   - Paramètre : `[string] $DbName`
+- **Invoke-ShadowTestEnvSetup.ps1** : `scripts\Invoke-ShadowTestEnvSetup.ps1`
+  - Paramètre : `[string] $TestProfile`
+  - Paramètre : `[string] $BasePstPath`
+  - Paramètre : `[string] $PSScriptRoot`
 - **Invoke-TestEnvSetup.ps1** : `scripts\Invoke-TestEnvSetup.ps1`
   - Paramètre : `[string] $TestProfile`
   - Paramètre : `[string] $BasePstPath`

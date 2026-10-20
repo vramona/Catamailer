@@ -2,6 +2,7 @@
 // 2026-09-07 : Création de l'entité DictionaryRule (J1-S1-T2).
 // 2026-09-09 : Scission de Keywords en Subject/Sender/Recipient pour classification ciblée (J3-S2-T2-ST1).
 // 2026-09-25 : Ajout du constructeur privé et setters pour binding Entity Framework (J6-S2-T1 - Phase Verte).
+// 2026-09-25 : Ajout de la méthode Update pour l'édition (J6-S3-T6 - Phase Rouge Correction).
 
 using System.Collections.Generic;
 using System.Linq;
@@ -49,6 +50,22 @@ namespace Catamailer.Domain
         /// <param name="recipientKeywords">Les mots-clés liés aux destinataires.</param>
         public DictionaryRule(
             CategoryNode targetCategory, 
+            IEnumerable<string>? subjectKeywords = null,
+            IEnumerable<string>? senderKeywords = null,
+            IEnumerable<string>? recipientKeywords = null)
+        {
+            Update(targetCategory, subjectKeywords, senderKeywords, recipientKeywords);
+        }
+
+        /// <summary>
+        /// Met à jour l'ensemble des propriétés de la règle.
+        /// </summary>
+        /// <param name="targetCategory">La nouvelle catégorie cible déduite.</param>
+        /// <param name="subjectKeywords">Les nouveaux mots-clés liés au sujet.</param>
+        /// <param name="senderKeywords">Les nouveaux mots-clés liés aux expéditeurs.</param>
+        /// <param name="recipientKeywords">Les nouveaux mots-clés liés aux destinataires.</param>
+        public void Update(
+            CategoryNode targetCategory,
             IEnumerable<string>? subjectKeywords = null,
             IEnumerable<string>? senderKeywords = null,
             IEnumerable<string>? recipientKeywords = null)

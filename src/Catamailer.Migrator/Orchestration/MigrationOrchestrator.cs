@@ -6,6 +6,8 @@
 //         - 2026-09-25 : Implémentation du cycle Parse, Map, Save (J6-S2-T1 - Phase Verte).
 //         - 2026-09-25 : Correction de l'appel via File.ReadLines et ParseLines (J6-S2-T1 - Phase Verte Correction).
 //         - 2026-09-25 : Remplacement par File.ReadAllLines pour éviter les locks I/O (J6-S2-T1 - Phase Verte Fix Lock).
+//         - 2026-09-25 : Ajout de EnsureCreatedAsync pour initialiser le schéma SQLite (J6-S3-B1 - Phase Verte Fix).
+//         - 2026-10-20 : Injection de ILegacyExecutionRuleSeeder et persistance des règles d'exécution VBA (J6-S3-T8 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -13,32 +15,42 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Catamailer.Infrastructure;
 using Catamailer.Migrator.Mapping;
 using Catamailer.Migrator.Parsing;
+using Catamailer.Migrator.Seeding;
+using Microsoft.EntityFrameworkCore;
 
 namespace Catamailer.Migrator.Orchestration
 {
     /// <summary>
-    /// Implémentation par défaut de l'orchestrateur coordonnant le parser, le mapper et la base de données.
+    /// Implémentation par défaut de l'orchestrateur coordonnant le parser, le mapper, le seeder de règles d'exécution et la base de données.
     /// </summary>
     public class MigrationOrchestrator : IMigrationOrchestrator
     {
         private readonly ICsvParser _parser;
         private readonly IRuleMapper _mapper;
+        private readonly ILegacyExecutionRuleSeeder _executionRuleSeeder;
         private readonly CatamailerDbContext _dbContext;
 
         /// <summary>
         /// Initialise une nouvelle instance de la classe <see cref="MigrationOrchestrator"/>.
         /// </summary>
         /// <param name="parser">Le parseur de fichier CSV.</param>
-        /// <param name="mapper">Le mappeur de règles.</param>
+        /// <param name="mapper">Le mappeur de règles de dictionnaire.</param>
+        /// <param name="executionRuleSeeder">Le générateur des règles d'exécution VBA en dur.</param>
         /// <param name="dbContext">Le contexte de base de données cible.</param>
-        public MigrationOrchestrator(ICsvParser parser, IRuleMapper mapper, CatamailerDbContext dbContext)
+        public MigrationOrchestrator(
+            ICsvParser parser,
+            IRuleMapper mapper,
+            ILegacyExecutionRuleSeeder executionRuleSeeder,
+            CatamailerDbContext dbContext)
         {
             _parser = parser ?? throw new ArgumentNullException(nameof(parser));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _executionRuleSeeder = executionRuleSeeder ?? throw new ArgumentNullException(nameof(executionRuleSeeder));
             _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
@@ -55,12 +67,30 @@ namespace Catamailer.Migrator.Orchestration
                 throw new FileNotFoundException($"Le fichier spécifié est introuvable : {csvFilePath}");
             }
 
-            // Utilisation de ReadAllLines pour libérer immédiatement le verrou sur le fichier
-            var lines = File.ReadAllLines(csvFilePath);
+            // Création du schéma de base de données si celui-ci n'existe pas
+            await _dbContext.Database.EnsureCreatedAsync();
+
+            // 1. Étape 1 : Lecture CSV et mapping des règles de dictionnaire
+            var lines = await File.ReadAllLinesAsync(csvFilePath);
             var records = _parser.ParseLines(lines);
             var dictionaryRules = _mapper.Map(records);
 
             await _dbContext.DictionaryRules.AddRangeAsync(dictionaryRules);
+
+            // 2. Étape 2 : Initialisation des règles d'exécution VBA en dur (sans doublon sur le nom)
+            var existingRuleNames = await _dbContext.ExecutionRules
+                .Select(r => r.Name)
+                .ToListAsync();
+
+            var hardcodedRules = _executionRuleSeeder.GetHardcodedExecutionRules()
+                .Where(r => !existingRuleNames.Contains(r.Name))
+                .ToList();
+
+            if (hardcodedRules.Any())
+            {
+                await _dbContext.ExecutionRules.AddRangeAsync(hardcodedRules);
+            }
+
             await _dbContext.SaveChangesAsync();
         }
     }

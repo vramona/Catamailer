@@ -6,8 +6,11 @@
 //         - 2026-09-17 : Implémentation de UpdateAsync (J4-S4-T4).
 //         - 2026-09-23 : Ajout des opérations par lots AddRangeAsync et UpdateRangeAsync (J4-S4-T7 - Phase Verte).
 //         - 2026-09-23 : Modification de GetAllAsync pour supporter le filtre IsDeleted (J4-S4-T6 - Phase Verte).
+//         - 2026-10-19 : Ajout de la directive #nullable enable pour supprimer l'avertissement CS8669 (J6-S3-T7 - Phase Orange).
 // </auto-generated>
 // ------------------------------------------------------------------------------
+
+#nullable enable
 
 using System.Collections.Generic;
 using System.Threading.Tasks;

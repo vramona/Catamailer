@@ -99,16 +99,18 @@
 ### Step 2 - Persistance et Exécution Console - feature/j6-csv-migrator_step-2-db
 - [x] ✅ **J6-S2-T1** - Intégration de `CatamailerDbContext` (ajout de `DictionaryRule`) et création du `MigrationOrchestrator`. (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-2-db - Commit : 7eaf11b3b70261a45e169c1102f0694f8dab24f4) (Cpx: 3 / 3)
 - [x] ✅ **J6-S2-T2** - Test d'intégration End-to-End avec fichier CSV réel. (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-2-db - Commit : 7b470ec947afe5a3f8f3f56fab29167e9d0126d2) (Cpx: 3 / 3)
-Markdown
-### Step 2 - Persistance et Exécution Console - feature/j6-csv-migrator_step-2-db
-- [x] ✅ **J6-S2-T1** - Intégration de `CatamailerDbContext` (ajout de `DictionaryRule`) et création du `MigrationOrchestrator`. (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-2-db - Commit : 7b470ec947afe5a3f8f3f56fab29167e9d0126d2) (Cpx: 3 / 3)
-- [x] ✅ **J6-S2-T2** - Test d'intégration End-to-End avec fichier CSV réel. (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-2-db - Commit : 8be51bbbc959a5e53a91b43974f7d08eda5ad69d) (Cpx: 3 / 3)
+- [x] ✅ **J6-S2-T3** - Configuration de l'injection de dépendances et du point d'entrée CLI (`Program.cs`). (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-2-db - Commit : 8be51bbbc959a5e53a91b43974f7d08eda5ad69d) (Cpx: 2 / 2)
 
 ### Step 3 - Ergonomie et Gestion des Règles Massives (UI) - feature/j6-csv-migrator_step-3-ui
-- [ ] ⚪ **J6-S3-T1** - Intégration de la virtualisation (`<Virtualize>`) pour la liste des règles de l'Étape 1.
-- [ ] ⚪ **J6-S3-T2** - Ajout d'une barre de recherche et filtrage multi-critères (catégorie, champ, mot-clé).
-- [ ] ⚪ **J6-S3-T3** - Implémentation d'un affichage hiérarchique calqué sur l'arborescence des catégories.
-- [ ] ⚪ **J6-S3-T4** - Mécanisme de détection et signalement visuel des conflits/doublons de mots-clés.
+- [x] ✅ **J6-S3-T1** - Intégration de la virtualisation (`<Virtualize>`) pour la liste des règles de l'Étape 1. (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : 84cc4b1358baa3d3826537f7cf39e2be5e4f68d7) (Cpx: 3 / 3)
+- [x] ✅ **J6-S3-T2** - Ajout d'une barre de recherche et filtrage multi-critères (catégorie, champ, mot-clé). (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : 62e065a08ba35748241999ab1a5f0db1ef51143f) (Cpx: 5 / 6)
+- [x] ✅ **J6-S3-T3** - Implémentation d'un affichage hiérarchique calqué sur l'arborescence des catégories (Grille complète et accordéons). (Validé le 14/10/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : d51c923c9ed9ab6a82bde6fc9e52dbe9cd0cd0c8) (Cpx: 3 / 5)
+- [x] ✅ **J6-S3-T5** - Suppression de tous les Dummies du projet `Catamailer.UI` (Refactoring). (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : ba80e3abba76600ce93a2f3750379fca013bf62e) (Cpx: 3 / 3)
+- [x] ✅ **J6-S3-T6** - Édition d'une règle dictionnaire (Ajout UpdateDictionaryRuleAsync et UI). (Validé le 25/09/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : ba80e3abba76600ce93a2f3750379fca013bf62e) (Cpx: 5 / 6)
+- [x] ✅ **J6-S3-T7** - Revue ergonomique de l'édition (Layout Global fixe, StatusBar Outlook, Action Bar standardisée, Raccourci Échap, Haute densité et Lazy Loading COM). (Validé le 19/10/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : eeb6177ed60f0d578c680560afe09d48011a3983) (Cpx: 8 / 8)
+- [x] ⚪ **J6-S3-T8** - Initialisation des règles d'exécution VBA en dur dans le Migrator (Hardcoding des règles complexes). (Validé le 08/10/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : 34bd62b39b0c315cc343bd5fc59e876d466536ab)
+- [x] ✅ **J6-S3-T9** - Tests d'intégration sur les Actions applicables sur les règles complexes (Implémentation COM `AddCategoryToMail` et évaluation `RegexMatch` / `Category` dans `ExecutionEngine`). (Validé le 20/10/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : e625b3d9f9be5c0f56468242f064c5a41ef44ffa) (Cpx: 5 / 5)
+- [x] ✅ **J6-S3-T10** - Fix Import migrator pour recréer l'arborescence. (Validé le 08/10/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : 34bd62b39b0c315cc343bd5fc59e876d466536ab) (Cpx: 5 / 6)
 
 ## Jalon 7 - Inbox Notes, Agenda & Actions Internes - feature/j7-inbox-notes
 ### Step 1 - Modélisation & Agendas - feature/j7-inbox-notes_step-1-core

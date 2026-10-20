@@ -4,6 +4,8 @@
 //     Historique :
 //         - 2026-09-25 : Création du test d'intégration E2E avec données réelles (J6-S2-T2 - Phase Rouge).
 //         - 2026-09-25 : Correction de l'assertion sur le nombre d'expéditeurs dû au nettoyage des doublons (J6-S2-T2 - Phase Verte).
+//         - 2026-09-25 : Correction du test pour utiliser GetFullName suite au refactoring hiérarchique (J6-S3-T10 - Phase Orange).
+//         - 2026-10-20 : Intégration de LegacyExecutionRuleSeeder et vérification de la persistance des 13 règles VBA (J6-S3-T8 - Phase Rouge).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -16,6 +18,7 @@ using Catamailer.Infrastructure;
 using Catamailer.Migrator.Mapping;
 using Catamailer.Migrator.Orchestration;
 using Catamailer.Migrator.Parsing;
+using Catamailer.Migrator.Seeding;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
@@ -54,7 +57,7 @@ DESTINATAIRE; Comitologie-DAMSI-Staff Elargi; damsi-staff-elargi.cnam@assurance-
 ;;;;;;;;;;;;;;;;;;";
 
         [Fact]
-        public async Task MigrateAsync_WithRealCsvData_ShouldProduceCorrectDictionaryRules()
+        public async Task MigrateAsync_WithRealCsvData_ShouldProduceCorrectDictionaryAndExecutionRules()
         {
             // Arrange
             var options = new DbContextOptionsBuilder<CatamailerDbContext>()
@@ -65,10 +68,10 @@ DESTINATAIRE; Comitologie-DAMSI-Staff Elargi; damsi-staff-elargi.cnam@assurance-
             context.Database.OpenConnection();
             context.Database.EnsureCreated();
 
-            // Injection des véritables implémentations de l'Étape 1
             var parser = new CsvParser();
             var mapper = new RuleMapper();
-            var orchestrator = new MigrationOrchestrator(parser, mapper, context);
+            var seeder = new LegacyExecutionRuleSeeder();
+            var orchestrator = new MigrationOrchestrator(parser, mapper, seeder, context);
 
             var tempFilePath = Path.GetTempFileName();
             
@@ -79,37 +82,43 @@ DESTINATAIRE; Comitologie-DAMSI-Staff Elargi; damsi-staff-elargi.cnam@assurance-
                 // Act
                 await orchestrator.MigrateAsync(tempFilePath);
 
-                // Assert
-                var rules = context.DictionaryRules.Include(r => r.TargetCategory).ToList();
+                // Assert : Règles Dictionnaires (Étape 1)
+                var rules = context.DictionaryRules
+                    .Include(r => r.TargetCategory)
+                    .ThenInclude(c => c.Parent)
+                    .ToList();
 
-                // L'extrait contient 6 catégories distinctes (les lignes en commentaires sont ignorées)
                 Assert.Equal(6, rules.Count);
 
-                var adminSyndicats = rules.Single(r => r.TargetCategory.Name == "Administratif-Syndicats");
+                var adminSyndicats = rules.Single(r => r.TargetCategory.GetFullName("-") == "Administratif-Syndicats");
                 Assert.Single(adminSyndicats.SubjectKeywords);
                 Assert.Equal("CRT : Compte-rendu", adminSyndicats.SubjectKeywords[0]);
-                
-                // Le nombre attendu est 16 car "fo.electionsconseil2018.cnam@assurance-maladie.fr" est en doublon dans le CSV
                 Assert.Equal(16, adminSyndicats.SenderKeywords.Count);
                 Assert.Contains("syndicat@snpdos-cfdt.fr", adminSyndicats.SenderKeywords);
                 Assert.Empty(adminSyndicats.RecipientKeywords);
 
-                var carto = rules.Single(r => r.TargetCategory.Name == "Carto");
+                var carto = rules.Single(r => r.TargetCategory.GetFullName("-") == "Carto");
                 Assert.Equal(3, carto.SubjectKeywords.Count);
                 Assert.Contains("[Cartographie Technique]", carto.SubjectKeywords);
                 Assert.Single(carto.SenderKeywords);
                 Assert.Single(carto.RecipientKeywords);
 
-                var hermine = rules.Single(r => r.TargetCategory.Name == "CCOEN-Café L'Hermine Gourmande");
+                var hermine = rules.Single(r => r.TargetCategory.GetFullName("-") == "CCOEN-Café L'Hermine Gourmande");
                 Assert.Equal(2, hermine.SubjectKeywords.Count);
                 Assert.Contains("Hermine Gourmande", hermine.SubjectKeywords);
                 Assert.Empty(hermine.SenderKeywords);
 
-                var staff = rules.Single(r => r.TargetCategory.Name == "Comitologie-DAMSI-Staff Elargi");
+                var staff = rules.Single(r => r.TargetCategory.GetFullName("-") == "Comitologie-DAMSI-Staff Elargi");
                 Assert.Empty(staff.SubjectKeywords);
                 Assert.Empty(staff.SenderKeywords);
                 Assert.Single(staff.RecipientKeywords);
                 Assert.Equal("damsi-staff-elargi.cnam@assurance-maladie.fr", staff.RecipientKeywords[0]);
+
+                // Assert : Règles d'Exécution VBA (Étape 2)
+                var executionRules = context.ExecutionRules.ToList();
+                Assert.Equal(13, executionRules.Count);
+                Assert.Contains(executionRules, r => r.Name == "Qualif CEDA - Actions demandées");
+                Assert.Contains(executionRules, r => r.Name == "Déplacement - Administratif-Syndicats");
             }
             finally
             {

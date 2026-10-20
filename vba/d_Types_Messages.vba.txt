@@ -1,0 +1,189 @@
+Option Explicit
+
+' Analyse dynamique via Dictionnaire Sujet
+Public Function TraiterCategoriesViaDictionnaireSujet(ByRef Item As Object, ByRef LogActions As String) As Boolean
+    Dim K As Variant
+    Dim MotsCles As Variant
+    Dim i As Long
+    Dim ActionReelleAppliquee As Boolean
+    
+    If g_DictSubject Is Nothing Then Exit Function
+    
+    For Each K In g_DictSubject.Keys
+        MotsCles = g_DictSubject(K)
+        
+        If IsArray(MotsCles) Then
+            For i = LBound(MotsCles) To UBound(MotsCles)
+                If Trim(MotsCles(i)) <> "" Then
+                    ' On vérifie si le mot-clé courant est présent dans le sujet
+                    If FiltreSujetContient(Item, CStr(MotsCles(i))) Then
+                        ' Traçabilité enrichie avec le mot-clé exact trouvé !
+                        LogActions = LogActions & "    |---> [FILTRE POSITIF]: Dictionnaire Sujet ['" & K & "'] -> Matches '" & MotsCles(i) & "'" & vbCrLf
+                        
+                        ' Ajout sécurisé de la catégorie (renvoie True uniquement si ajoutée)
+                        If ActionAjouterCategorie(Item, CStr(K), LogActions) Then
+                            ActionReelleAppliquee = True
+                        End If
+                        
+                        ' Un mot-clé trouvé suffit pour valider la catégorie K
+                        Exit For
+                    End If
+                End If
+            Next i
+        End If
+    Next K
+    
+    TraiterCategoriesViaDictionnaireSujet = ActionReelleAppliquee
+End Function
+
+' Analyse dynamique via Dictionnaire Expéditeur
+Public Function TraiterCategoriesViaDictionnaireMailExpediteurs(ByRef Item As Object, ByRef LogActions As String) As Boolean
+    Dim K As Variant
+    Dim MotsCles As Variant
+    Dim i As Long
+    Dim ActionReelleAppliquee As Boolean
+    
+    If g_DictExpediteurs Is Nothing Then Exit Function
+    
+    For Each K In g_DictExpediteurs.Keys
+        MotsCles = g_DictExpediteurs(K)
+        
+        If IsArray(MotsCles) Then
+            For i = LBound(MotsCles) To UBound(MotsCles)
+                If Trim(MotsCles(i)) <> "" Then
+                    ' On vérifie si l'expéditeur correspond (mode CONTAINS ou EXACT)
+                    If FiltreExpediteurVerifie(Item, CStr(MotsCles(i)), "CONTAINS") Then
+                        LogActions = LogActions & "    +-? [FILTRE POSITIF]: Dictionnaire Expéditeur ['" & K & "'] -> Matches '" & MotsCles(i) & "'" & vbCrLf
+                        
+                        ' Ne passe à True QUE SI la catégorie a été réellement ajoutée
+                        If ActionAjouterCategorie(Item, CStr(K), LogActions) Then
+                            ActionReelleAppliquee = True
+                        End If
+                        Exit For ' Un mot-clé trouvé suffit pour cette catégorie
+                    End If
+                End If
+            Next i
+        End If
+    Next K
+    
+    TraiterCategoriesViaDictionnaireMailExpediteurs = ActionReelleAppliquee
+End Function
+
+' Analyse dynamique via Dictionnaire Destinataire
+Public Function TraiterCategoriesViaDictionnaireMailDestinataires(ByRef Item As Object, ByRef LogActions As String) As Boolean
+    Dim K As Variant
+    Dim MotsCles As Variant
+    Dim ActionReelleAppliquee As Boolean
+    Dim i As Long
+    
+    If g_DictDestinataires Is Nothing Then Exit Function
+    
+    For Each K In g_DictDestinataires.Keys
+        MotsCles = g_DictDestinataires(K)
+        For i = LBound(MotsCles) To UBound(MotsCles)
+            If FiltreDestinataireVerifie(Item, CStr(MotsCles(i)), "EXACT") Then
+                LogActions = LogActions & "    +-? [FILTRE POSITIF]: Dictionnaire Destinataire ['" & K & "'] -> Matches '" & MotsCles(i) & "'" & vbCrLf
+                ' Ne passe à True QUE SI la catégorie n'était pas déjà présente
+                If ActionAjouterCategorie(Item, CStr(K), LogActions) Then
+                    ActionReelleAppliquee = True
+                End If
+                Exit For
+            End If
+        Next i
+    Next K
+    
+    TraiterCategoriesViaDictionnaireMailDestinataires = ActionReelleAppliquee
+End Function
+' Messages de Qualif CEDA
+Public Function TraiterMessageQualifCEDA(ByRef Item As Object, ByRef LogActions As String) As Boolean
+    Dim ActionReelleAppliquee As Boolean
+    
+    If FiltreSujetMatchRegEx(Item, "^\[CEDA\] : Actions demandées:") Then
+        LogActions = LogActions & "    +-? [FILTRE POSITIF]: RegEx '^\[CEDA\] : Actions demandées:'" & vbCrLf
+        
+        ' Chaque action renvoie True uniquement si le mail a ete modifie
+        If ActionAjouterCategorie(Item, "DAMSI-DA-QUALIF CEDA", LogActions) Then ActionReelleAppliquee = True
+        If ActionDefinirImportance(Item, olImportanceHigh, LogActions) Then ActionReelleAppliquee = True
+        
+        If EstDeCetteSemaine(Item) Then
+            If ActionAssurerSuiviAujourdhui(Item, LogActions) Then ActionReelleAppliquee = True
+        Else
+            LogActions = LogActions & "    ¦   +-? ACTION IGNOREE: Mail hors semaine civile en cours" & vbCrLf
+        End If
+        
+        TraiterMessageQualifCEDA = ActionReelleAppliquee
+    End If
+End Function
+
+' CR de Qualif CEDA
+Public Function TraiterMessageCRQualifCEDA(ByRef Item As Object, ByRef LogActions As String) As Boolean
+    Dim ActionReelleAppliquee As Boolean
+    
+    If FiltreSujetMatchRegEx(Item, "^\[CEDA\] : Compte rendu") Then
+        LogActions = LogActions & "    +-? [FILTRE POSITIF]: RegEx '^\[CEDA\] : Compte rendu'" & vbCrLf
+        
+        If ActionAjouterCategorie(Item, "DAMSI-DA-QUALIF CEDA", LogActions) Then ActionReelleAppliquee = True
+        If ActionDefinirImportance(Item, olImportanceNormal, LogActions) Then ActionReelleAppliquee = True
+        
+        TraiterMessageCRQualifCEDA = ActionReelleAppliquee
+    End If
+End Function
+
+' Messages liés aux Transports
+Public Function TraiterMessageTransport(ByRef Item As Object, ByRef LogActions As String) As Boolean
+    Dim ActionReelleAppliquee As Boolean
+    
+    If FiltreSujetMatchRegEx(Item, "SNCF|Train|Billet") Then
+        LogActions = LogActions & "    +-? [FILTRE POSITIF]: Sujet Transport" & vbCrLf
+        If ActionAjouterCategorie(Item, "Transport Hotels", LogActions) Then ActionReelleAppliquee = True
+        
+        TraiterMessageTransport = ActionReelleAppliquee
+    End If
+End Function
+
+' Messages Transport à revoir
+Public Function TraiterMessageTransportARevoir(ByRef Item As Object, ByRef LogActions As String) As Boolean
+    Dim ActionReelleAppliquee As Boolean
+    
+    If FiltreSujetMatchRegEx(Item, "A revoir|Modification billet") Then
+        LogActions = LogActions & "    +-? [FILTRE POSITIF]: Transport à revoir" & vbCrLf
+        If ActionAjouterCategorie(Item, "Transport Hotels", LogActions) Then ActionReelleAppliquee = True
+        
+        TraiterMessageTransportARevoir = ActionReelleAppliquee
+    End If
+End Function
+
+' Traitement combiné d'un expéditeur spécifique et sujet
+Public Function TraiterMessageDeAvecSujet(ByRef Item As Object, ByVal ExpediteurCible As String, ByVal SujetCible As String, ByVal NomCategorie As String, ByRef LogActions As String) As Boolean
+    Dim MatchExpe As Boolean
+    Dim MatchSujet As Boolean
+    
+    ' 1. Vérification de l'expéditeur (3 arguments : Item, ExpediteurCible, Mode)
+    MatchExpe = FiltreExpediteurVerifie(Item, ExpediteurCible, "CONTAINS")
+    
+    ' 2. Vérification du sujet (2 arguments : Item, SujetCible)
+    MatchSujet = FiltreSujetContient(Item, SujetCible)
+    
+    ' 3. Si les deux conditions sont réunies
+    If MatchExpe And MatchSujet Then
+        LogActions = LogActions & "    +-? [FILTRE POSITIF]: Expéditeur '" & ExpediteurCible & "' + Sujet '" & SujetCible & "'" & vbCrLf
+        
+        ' Renvoie True SEULEMENT SI la catégorie a été réellement ajoutée
+        TraiterMessageDeAvecSujet = ActionAjouterCategorie(Item, NomCategorie, LogActions)
+    End If
+End Function
+
+Public Function TraiterMessageADeplacerSuivantCategorie(ByRef Item As Object, ByVal NomCategorie As String, ByVal NomSousDossier As String, ByRef LogActions As String) As Boolean
+    Dim CategoriesExistantes As String
+    
+    On Error Resume Next
+    CategoriesExistantes = Item.Categories
+    On Error GoTo 0
+    
+    If InStr(1, CategoriesExistantes, NomCategorie, vbTextCompare) > 0 Then
+        LogActions = LogActions & "    +-? [FILTRE POSITIF]: Présence de la catégorie '" & NomCategorie & "'" & vbCrLf
+        ' Renvoie True SEULEMENT SI le mail a été effectivement déplacé
+        ' (Si le mail est déjà dans le sous-dossier ou s'il est dans Éléments Envoyés, ActionDeplacerDossier renvoie False)
+        TraiterMessageADeplacerSuivantCategorie = ActionDeplacerDossier(Item, NomSousDossier, LogActions)
+    End If
+End Function
