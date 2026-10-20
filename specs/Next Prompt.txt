@@ -1,15 +1,12 @@
-Tu es mon assistant développeur expert pour le projet "Catamailer" (Clean Architecture, .Net 10, MAUI Blazor Hybrid, MVVM, C#, TDD).
+Bonjour ! Nous reprenons le développement de Catamailer.
+Le Step 3 du Jalon 6 (`feature/j6-csv-migrator_step-3-ui`) est terminé et fusionné dans `feature/j6-csv-migrator`.
+Nous démarrons le Step 4 du Jalon 6 : `feature/j6-csv-migrator_step-4-shadow-inspector` (Inspection Interactive Shadow Mode & Écoute Temps Réel).
 
-Voici les 5 fichiers de contexte actuels à prendre en compte :
-1. Specs_Catamailer.md
-2. Specs_Catamailer_Unit_Tests.md
-3. ToDoList.md
-4. FileList.txt
-5. doc/Ai_Architecture.md
+Les tâches du Step 4 sont :
+- J6-S4-T0 : Rendu arborescent indenté des catégories dans la grille de `DictionaryEditor.razor` (aligné visuellement sur `CategoryTreeView`).
+- J6-S4-T1 : Enrichissement Domain & Moteurs (Multi-match Étape 1 style VBA, `ExistingCategories` dans `MailMetadata`, traçabilité détaillée des déclencheurs Étape 1 & Étape 2).
+- J6-S4-T2 : Implémentation COM Réelle dans `OutlookApplicationWrapper` (`NewMailEx`, `GetMailMetadata` avec catégories Outlook, et `GetNextUnprocessedMailEntryIds`).
+- J6-S4-T3 : Service d'Inspection Séquentielle (`ShadowInspectionService` : Abonnement au démarrage, délai 2s, file d'attente, curseur `LastShadowInspectedEntryId`, toggle `IsShadowNotificationEnabled`, Refresh, et actions `ApplyStep1Async` / `ApplyStep2Async` / `ApplyAllAsync`).
+- J6-S4-T4 : UI Blazor (Toggle sur `Home.razor` et modale séquentielle `ShadowInspectorModal.razor`).
 
-[CONTEXTE]
-Démarrage de session : Jalon 5 - Parité VBA et Actions d'Exécution.
-Action attendue : 
-1. Valider la création du Jalon 5 (`feature/j5-iso-vba`) et de son Step 1 (`feature/j5-iso-vba_step-1-core`).
-2. Démarrer la Phase Rouge pour la tâche J5-S1-T1 : Ajout des ActionType manquantes dans le domaine (Transférer, Importance, Rappel, SuiviAujourdhui, DeplacerDossier, SignatureHTML) et mise à jour de l'entité RuleAction.
-[/CONTEXTE]
+Voici les 5 fichiers de suivi et d'architecture à jour (`Specs_Catamailer.md`, `Specs_Catamailer_Unit_Tests.md`, `ToDoList.md`, `FileList.txt`, `Ai_Architecture.md`) ainsi que `DictionaryEditor.razor` et `DictionaryEditorViewModel.cs` pour attaquer J6-S4-T0.
