@@ -11,9 +11,3 @@
 
 - href: Migrator/toc.yml
 
-
-- name: Scripts
-  href: Scripts/toc.yml
-
-- name: Rapport de Tests
-  href: TestsReport/toc.yml
