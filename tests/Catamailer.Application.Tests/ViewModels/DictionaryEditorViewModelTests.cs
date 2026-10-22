@@ -9,6 +9,7 @@
 //         - 2026-09-25 : Ajout des tests pour la recherche multi-critères (J6-S3-T2 - Phase Rouge).
 //         - 2026-10-09 : Ajout du test de tri hiérarchique sur FilteredRules (J6-S3-T3 - Phase Rouge).
 //         - 2026-10-09 : Refonte pour grille hiérarchique complète et accordéons (J6-S3-T4 - Phase Rouge).
+//         - 2026-10-22 : Ajout des tests d'arborescence Depth/HasChildren/FullName et repli par défaut (J6-S4-T0 - Phase Rouge).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -240,11 +241,13 @@ namespace Catamailer.Application.Tests.ViewModels
             // Assert
             Assert.Equal(2, viewModel.FlatCategories.Count());
             Assert.Equal("Root", viewModel.FlatCategories.First().DisplayName);
+            Assert.Equal("Root", viewModel.FlatCategories.First().FullName);
             Assert.Equal("\u00A0\u00A0\u00A0\u00A0Child", viewModel.FlatCategories.Last().DisplayName);
+            Assert.Equal("Root-Child", viewModel.FlatCategories.Last().FullName);
         }
 
         [Fact]
-        public async Task InitializeAsync_ShouldPopulateVisibleGridItems_WithAllCategories_AndLinkRules()
+        public async Task InitializeAsync_ShouldStartCollapsed_AndLinkRulesWhenExpanded()
         {
             // Arrange
             var mockRuleRepo = new Mock<IRuleRepository>();
@@ -261,24 +264,33 @@ namespace Catamailer.Application.Tests.ViewModels
 
             var viewModel = new DictionaryEditorViewModel(mockRuleRepo.Object, mockCatRepo.Object);
 
-            // Act
+            // Act 1 : Initialisation (Arbre fermé par défaut)
             await viewModel.InitializeAsync();
 
-            // Assert
-            var items = viewModel.VisibleGridItems.ToList();
-            Assert.Equal(2, items.Count); // Both nodes should be visible by default (expanded)
-            
-            Assert.Equal("Root", items[0].Category.Name);
-            Assert.Null(items[0].Rule); // Root has no rule
-            Assert.True(items[0].IsExpanded);
+            // Assert 1 : Seule la racine est visible et son état IsExpanded est false
+            var initialItems = viewModel.VisibleGridItems.ToList();
+            Assert.Single(initialItems);
+            Assert.Equal("Root", initialItems[0].Category.Name);
+            Assert.Equal(0, initialItems[0].Depth);
+            Assert.True(initialItems[0].HasChildren);
+            Assert.False(initialItems[0].IsExpanded);
 
-            Assert.Equal("Child", items[1].Category.Name);
-            Assert.NotNull(items[1].Rule); // Child has a rule
-            Assert.Equal("Keyword1", items[1].Rule!.SubjectKeywords.First());
+            // Act 2 : Ouverture de la racine
+            viewModel.ToggleCategory(root);
+
+            // Assert 2 : L'enfant apparaît avec sa règle associée
+            var expandedItems = viewModel.VisibleGridItems.ToList();
+            Assert.Equal(2, expandedItems.Count);
+            Assert.True(expandedItems[0].IsExpanded);
+            Assert.Equal("Child", expandedItems[1].Category.Name);
+            Assert.Equal(1, expandedItems[1].Depth);
+            Assert.False(expandedItems[1].HasChildren);
+            Assert.NotNull(expandedItems[1].Rule);
+            Assert.Equal("Keyword1", expandedItems[1].Rule!.SubjectKeywords.First());
         }
 
         [Fact]
-        public async Task ToggleCategory_ShouldCollapseParent_AndHideDescendants()
+        public async Task ToggleCategory_ShouldExpandAndCollapseParent_HidingDescendants()
         {
             // Arrange
             var mockRuleRepo = new Mock<IRuleRepository>();
@@ -294,10 +306,15 @@ namespace Catamailer.Application.Tests.ViewModels
             var viewModel = new DictionaryEditorViewModel(mockRuleRepo.Object, mockCatRepo.Object);
             await viewModel.InitializeAsync();
 
-            // Act: Collapse root
+            // Act 1 : Expand root then child
+            viewModel.ToggleCategory(root);
+            viewModel.ToggleCategory(child);
+            Assert.Equal(3, viewModel.VisibleGridItems.Count());
+
+            // Act 2 : Collapse root
             viewModel.ToggleCategory(root);
 
-            // Assert: Only root should be visible now
+            // Assert : Only root should be visible now
             var items = viewModel.VisibleGridItems.ToList();
             Assert.Single(items);
             Assert.Equal("Root", items[0].Category.Name);
@@ -330,8 +347,52 @@ namespace Catamailer.Application.Tests.ViewModels
             var items = viewModel.VisibleGridItems.ToList();
             Assert.Equal(2, items.Count);
             Assert.Equal("Finance", items[0].Category.Name);
-            Assert.True(items[0].IsExpanded); // Auto-expanded due to search
+            Assert.True(items[0].IsExpanded);
             Assert.Equal("Facturation", items[1].Category.Name);
+        }
+
+        [Fact]
+        public async Task InitializeAsync_ShouldMatchRulesByFullName_WhenSubCategoriesShareSameShortName()
+        {
+            // Arrange : Deux sous-catégories portant le même nom court "Staff" sous deux branches différentes
+            var mockRuleRepo = new Mock<IRuleRepository>();
+            var mockCatRepo = new Mock<ICategoryRepository>();
+
+            var comito = new CategoryNode("Comitologie");
+            var da = new CategoryNode("DA");
+            var damsi = new CategoryNode("DAMSI");
+            var staffDa = new CategoryNode("Staff");
+            var staffDamsi = new CategoryNode("Staff");
+
+            comito.AddChild(da);
+            comito.AddChild(damsi);
+            da.AddChild(staffDa);
+            damsi.AddChild(staffDamsi);
+
+            var ruleDamsiStaff = new DictionaryRule(staffDamsi, new[] { "Staff DAMSI Keyword" });
+
+            mockCatRepo.Setup(r => r.GetAllAsync(It.IsAny<bool>()))
+                .ReturnsAsync(new List<CategoryNode> { comito, da, damsi, staffDa, staffDamsi });
+            mockRuleRepo.Setup(r => r.GetAllDictionaryRulesAsync())
+                .ReturnsAsync(new List<DictionaryRule> { ruleDamsiStaff });
+
+            var viewModel = new DictionaryEditorViewModel(mockRuleRepo.Object, mockCatRepo.Object);
+
+            // Act
+            await viewModel.InitializeAsync();
+            viewModel.ToggleCategory(comito);
+            viewModel.ToggleCategory(da);
+            viewModel.ToggleCategory(damsi);
+
+            // Assert
+            var items = viewModel.VisibleGridItems.ToList();
+            var itemDaStaff = items.Single(i => i.FullName == "Comitologie-DA-Staff");
+            var itemDamsiStaff = items.Single(i => i.FullName == "Comitologie-DAMSI-Staff");
+
+            Assert.Null(itemDaStaff.Rule);
+            Assert.NotNull(itemDamsiStaff.Rule);
+            Assert.Equal(2, itemDaStaff.Depth);
+            Assert.Equal(2, itemDamsiStaff.Depth);
         }
     }
 }

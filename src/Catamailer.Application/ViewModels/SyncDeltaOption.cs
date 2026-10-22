@@ -9,6 +9,7 @@
 //         - 2026-09-17 : Délégation de l'indicateur IsImplicit à l'entité Domain (J4-S4-T2).
 //         - 2026-09-17 : Ajout de la propriété Direction pour la résolution bidirectionnelle (J4-S4-T4 - Phase Verte).
 //         - 2026-09-23 : Mise à jour de la valeur par défaut de Direction selon le statut du Delta (J4-S4-T6 - Phase Bleue).
+//         - 2026-10-22 : Ajout de la propriété IsExpanded pour le repli des dossiers sans modification (J6-S4-T0 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -16,27 +17,64 @@ using Catamailer.Domain.Sync;
 
 namespace Catamailer.Application.ViewModels
 {
+    /// <summary>
+    /// Représente une option d'écart de synchronisation dans l'arbre de résolution.
+    /// </summary>
     public class SyncDeltaOption
     {
+        /// <summary>
+        /// Obtient l'écart de synchronisation sous-jacent.
+        /// </summary>
         public CategoryDelta Delta { get; }
+
+        /// <summary>
+        /// Indique si cette option est cochée pour être appliquée lors de la synchronisation.
+        /// </summary>
         public bool IsSelected { get; set; } = true;
+
+        /// <summary>
+        /// Obtient la profondeur hiérarchique du nœud (0 pour une racine).
+        /// </summary>
         public int Depth { get; }
+
+        /// <summary>
+        /// Obtient le nom court du segment de catégorie.
+        /// </summary>
         public string ShortName { get; }
+
+        /// <summary>
+        /// Indique si ce nœud est un parent implicite déduit du séparateur.
+        /// </summary>
         public bool IsImplicitParent => Delta.IsImplicit;
+
+        /// <summary>
+        /// Indique si ce nœud possède des enfants dans l'arbre projeté.
+        /// </summary>
         public bool IsFolder { get; set; }
-        
+
+        /// <summary>
+        /// Indique si ce dossier est déplié dans la vue arborescente de synchronisation.
+        /// </summary>
+        public bool IsExpanded { get; set; }
+
+        /// <summary>
+        /// Obtient ou définit la direction de résolution en cas de conflit ou de suppression.
+        /// </summary>
         public SyncResolutionDirection Direction { get; set; }
 
+        /// <summary>
+        /// Initialise une nouvelle instance de <see cref="SyncDeltaOption"/>.
+        /// </summary>
+        /// <param name="delta">L'écart de catégorie détecté.</param>
+        /// <param name="separator">Le séparateur hiérarchique utilisé.</param>
         public SyncDeltaOption(CategoryDelta delta, string separator)
         {
             Delta = delta;
-            
-            // Pour les suppressions logiques, la direction par défaut est "Écraser Outlook" (Catamailer gagne et supprime)
-            // Pour les conflits de couleurs, la direction par défaut reste "Écraser Catamailer" (Outlook gagne)
-            Direction = delta.Status == DeltaStatus.DeletedInCatamailer 
-                ? SyncResolutionDirection.CatamailerToOutlook 
+
+            Direction = delta.Status == DeltaStatus.DeletedInCatamailer
+                ? SyncResolutionDirection.CatamailerToOutlook
                 : SyncResolutionDirection.OutlookToCatamailer;
-            
+
             string cleanSeparator = separator.Trim();
 
             if (string.IsNullOrEmpty(cleanSeparator))

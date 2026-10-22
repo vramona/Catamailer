@@ -11,6 +11,7 @@
 //         - 2026-09-17 : Ajout du test vérifiant la direction par défaut sur écraser Outlook lors d'une perte d'héritage (J4-S4-T5 - Phase Bleue).
 //         - 2026-09-23 : Mise à jour des assertions pour utiliser les opérations de lot AddRangeAsync/UpdateRangeAsync (J4-S4-T7 - Phase Orange).
 //         - 2026-09-23 : Ajout des tests pour la résolution bidirectionnelle des suppressions logiques (J4-S4-T6 - Phase Bleue).
+//         - 2026-10-22 : Ajout des tests d'accordéon et de repli par défaut des branches sans modification (J6-S4-T0 - Phase Rouge).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -63,7 +64,6 @@ namespace Catamailer.Application.Tests.ViewModels
             // Assert
             Assert.True(_sut.HasConflicts);
             
-            // Cat1 (Missing) et Cat3 (Mismatch) doivent être dans la liste de gauche pour construire l'arbre
             Assert.Equal(2, _sut.MissingInCatamailerOptions.Count);
             Assert.Contains(_sut.MissingInCatamailerOptions, o => o.Delta.CategoryName == "Cat1" && o.IsSelected);
             Assert.Contains(_sut.MissingInCatamailerOptions, o => o.Delta.CategoryName == "Cat3" && !o.IsSelected); 
@@ -71,12 +71,11 @@ namespace Catamailer.Application.Tests.ViewModels
             Assert.Single(_sut.MissingInOutlookOptions);
             Assert.Single(_sut.ColorMismatchOptions);
             
-            // Test de la liste Deleted
             Assert.Single(_sut.DeletedInCatamailerOptions);
             var deletedOpt = _sut.DeletedInCatamailerOptions.First();
             Assert.Equal("Cat4", deletedOpt.Delta.CategoryName);
-            Assert.False(deletedOpt.IsSelected); // Non-sélectionné par défaut
-            Assert.Equal(SyncResolutionDirection.CatamailerToOutlook, deletedOpt.Direction); // Direction par défaut : écraser Outlook (supprimer)
+            Assert.False(deletedOpt.IsSelected);
+            Assert.Equal(SyncResolutionDirection.CatamailerToOutlook, deletedOpt.Direction);
         }
         
         [Fact]
@@ -84,7 +83,6 @@ namespace Catamailer.Application.Tests.ViewModels
         {
             // Arrange
             var syncResult = new SyncResult();
-            // Outlook n'a pas de couleur (vide), Catamailer a une couleur effective (#FF0000)
             syncResult.AddDelta(CategoryDelta.CreateColorMismatch("Parent-Child", "", "#FF0000"));
             _syncServiceMock.Setup(s => s.AnalyzeSyncDeltasAsync(It.IsAny<string?>())).ReturnsAsync(syncResult);
 
@@ -112,8 +110,6 @@ namespace Catamailer.Application.Tests.ViewModels
             await _sut.ApplyResolutionsAsync();
 
             // Assert
-            // Le ViewModel doit avoir reconstruit la hiérarchie avant de sauvegarder par lots.
-            // On s'attend à ce que le nœud "Parent" soit sauvegardé avec un enfant "Child".
             _categoryRepositoryMock.Verify(r => r.AddRangeAsync(It.Is<IEnumerable<CategoryNode>>(list => 
                 list.Any(c => 
                     c.Name == "Parent" && 
@@ -123,7 +119,6 @@ namespace Catamailer.Application.Tests.ViewModels
                 )
             )), Times.Once);
             
-            // On ne doit PAS avoir d'insertion d'un nœud plat nommé "Parent-Child"
             _categoryRepositoryMock.Verify(r => r.AddRangeAsync(It.Is<IEnumerable<CategoryNode>>(list => list.Any(c => c.Name == "Parent-Child"))), Times.Never);
         }
 
@@ -154,20 +149,19 @@ namespace Catamailer.Application.Tests.ViewModels
             syncResult.AddDelta(CategoryDelta.CreateColorMismatch("ToCatamailer", "#222", "#333"));
             _syncServiceMock.Setup(s => s.AnalyzeSyncDeltasAsync(It.IsAny<string?>())).ReturnsAsync(syncResult);
             
-            // On mock un nœud existant pour ToCatamailer pour qu'il soit détecté dans existNodes et mis à jour
             var existingNode = new CategoryNode("ToCatamailer", "#333");
             _categoryRepositoryMock.Setup(r => r.GetAllAsync(It.IsAny<bool>())).ReturnsAsync(new[] { existingNode });
             
             await _sut.InitializeAsync();
 
-            // Act : On modifie les directions
+            // Act
             var opt1 = _sut.ColorMismatchOptions.First(o => o.Delta.CategoryName == "ToOutlook");
             opt1.IsSelected = true;
-            opt1.Direction = SyncResolutionDirection.CatamailerToOutlook; // Ecrase Outlook avec #111
+            opt1.Direction = SyncResolutionDirection.CatamailerToOutlook;
 
             var opt2 = _sut.ColorMismatchOptions.First(o => o.Delta.CategoryName == "ToCatamailer");
             opt2.IsSelected = true;
-            opt2.Direction = SyncResolutionDirection.OutlookToCatamailer; // Ecrase Catamailer avec #222
+            opt2.Direction = SyncResolutionDirection.OutlookToCatamailer;
 
             await _sut.ApplyResolutionsAsync();
 
@@ -186,7 +180,7 @@ namespace Catamailer.Application.Tests.ViewModels
             _syncServiceMock.Setup(s => s.AnalyzeSyncDeltasAsync(It.IsAny<string?>())).ReturnsAsync(syncResult);
             
             var existingNode = new CategoryNode("ToRestoreInCatamailer", "#111");
-            existingNode.MarkAsDeleted(); // Initialement supprimée
+            existingNode.MarkAsDeleted();
             _categoryRepositoryMock.Setup(r => r.GetAllAsync(It.IsAny<bool>())).ReturnsAsync(new[] { existingNode });
             
             await _sut.InitializeAsync();
@@ -194,20 +188,66 @@ namespace Catamailer.Application.Tests.ViewModels
             // Act
             var optDelete = _sut.DeletedInCatamailerOptions.First(o => o.Delta.CategoryName == "ToDeleteInOutlook");
             optDelete.IsSelected = true;
-            optDelete.Direction = SyncResolutionDirection.CatamailerToOutlook; // Écrase Outlook -> On supprime l'élément dans Outlook
+            optDelete.Direction = SyncResolutionDirection.CatamailerToOutlook;
 
             var optRestore = _sut.DeletedInCatamailerOptions.First(o => o.Delta.CategoryName == "ToRestoreInCatamailer");
             optRestore.IsSelected = true;
-            optRestore.Direction = SyncResolutionDirection.OutlookToCatamailer; // Écrase Catamailer -> On restaure l'élément localement
+            optRestore.Direction = SyncResolutionDirection.OutlookToCatamailer;
 
             await _sut.ApplyResolutionsAsync();
 
             // Assert
-            // L'appel COM RemoveCategory doit être déclenché
             _outlookProviderMock.Verify(p => p.RemoveCategory("ToDeleteInOutlook"), Times.Once);
-            
-            // Le UpdateRangeAsync doit être déclenché avec la catégorie restaurée (IsDeleted == false)
             _categoryRepositoryMock.Verify(r => r.UpdateRangeAsync(It.Is<IEnumerable<CategoryNode>>(list => list.Any(c => c.Name == "ToRestoreInCatamailer" && !c.IsDeleted))), Times.Once);
+        }
+
+        [Fact]
+        public async Task InitializeAsync_ShouldCollapseAllFolders_ExceptThoseWithModifiedDescendants()
+        {
+            // Arrange : Cas réel issu de la capture utilisateur
+            var syncResult = new SyncResult();
+            // Branche Cercle C Prestation : contient un descendant modifié (Employeurs) -> doit être ouverte
+            syncResult.AddDelta(CategoryDelta.CreateSynchronized("Cercle C Prestation", "#8F8F8F"));
+            syncResult.AddDelta(CategoryDelta.CreateMissingInCatamailer("Cercle C Prestation-Employeurs", "#8F8F8F", "#8F8F8F", false));
+            syncResult.AddDelta(CategoryDelta.CreateSynchronized("Cercle C Prestation-Refonte Rente Inva", "#8F8F8F"));
+
+            // Branche Cercle D Bénéficiaire : aucun descendant modifié -> doit être fermée
+            syncResult.AddDelta(CategoryDelta.CreateSynchronized("Cercle D Bénéficiaire", "#E8825D"));
+            syncResult.AddDelta(CategoryDelta.CreateSynchronized("Cercle D Bénéficiaire-Droits", "#E8825D"));
+            syncResult.AddDelta(CategoryDelta.CreateSynchronized("Cercle D Bénéficiaire-Droits-Middle Office", "#E8825D"));
+
+            _syncServiceMock.Setup(s => s.AnalyzeSyncDeltasAsync(It.IsAny<string?>())).ReturnsAsync(syncResult);
+            _sut.Separator = "-";
+
+            // Act
+            await _sut.InitializeAsync();
+
+            // Assert
+            var cercleC = _sut.MissingInCatamailerOptions.Single(o => o.Delta.CategoryName == "Cercle C Prestation");
+            var cercleD = _sut.MissingInCatamailerOptions.Single(o => o.Delta.CategoryName == "Cercle D Bénéficiaire");
+            var droits = _sut.MissingInCatamailerOptions.Single(o => o.Delta.CategoryName == "Cercle D Bénéficiaire-Droits");
+
+            Assert.True(cercleC.IsFolder);
+            Assert.True(cercleC.IsExpanded);
+
+            Assert.True(cercleD.IsFolder);
+            Assert.False(cercleD.IsExpanded);
+
+            Assert.True(droits.IsFolder);
+            Assert.False(droits.IsExpanded);
+
+            var visible = _sut.VisibleMissingInCatamailerOptions.ToList();
+            Assert.Contains(visible, o => o.Delta.CategoryName == "Cercle C Prestation-Employeurs");
+            Assert.Contains(visible, o => o.Delta.CategoryName == "Cercle D Bénéficiaire");
+            Assert.DoesNotContain(visible, o => o.Delta.CategoryName == "Cercle D Bénéficiaire-Droits");
+            Assert.DoesNotContain(visible, o => o.Delta.CategoryName == "Cercle D Bénéficiaire-Droits-Middle Office");
+
+            // Act 2 : Déplier manuellement Cercle D Bénéficiaire
+            _sut.ToggleFolder(cercleD);
+            var visibleAfterExpand = _sut.VisibleMissingInCatamailerOptions.ToList();
+            Assert.Contains(visibleAfterExpand, o => o.Delta.CategoryName == "Cercle D Bénéficiaire-Droits");
+            // Middle Office reste caché car son parent direct "Droits" est toujours fermé
+            Assert.DoesNotContain(visibleAfterExpand, o => o.Delta.CategoryName == "Cercle D Bénéficiaire-Droits-Middle Office");
         }
     }
 }

@@ -11,6 +11,7 @@
 //         - 2026-09-25 : Ajout de la recherche multi-critères SearchText et FilteredRules (J6-S3-T2 - Phase Verte).
 //         - 2026-10-09 : Ajout du tri hiérarchique sur FilteredRules (J6-S3-T3 - Phase Verte).
 //         - 2026-10-09 : Refonte avec DictionaryCategoryItem pour grille hiérarchique et accordéons (J6-S3-T4 - Phase Verte).
+//         - 2026-10-22 : Ajout de FullName, Depth, HasChildren et repli par défaut IsExpanded = false (J6-S4-T0 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -30,9 +31,35 @@ namespace Catamailer.Application.ViewModels
     /// </summary>
     public class DictionaryCategoryItem
     {
+        /// <summary>
+        /// Obtient ou définit le nœud de catégorie associé à la ligne.
+        /// </summary>
         public CategoryNode Category { get; set; } = default!;
+
+        /// <summary>
+        /// Obtient ou définit la règle de dictionnaire associée à la catégorie, ou null si aucune règle n'est définie.
+        /// </summary>
         public DictionaryRule? Rule { get; set; }
-        public bool IsExpanded { get; set; } = true;
+
+        /// <summary>
+        /// Indique si le nœud parent est déplié dans la grille hiérarchique (fermé par défaut).
+        /// </summary>
+        public bool IsExpanded { get; set; } = false;
+
+        /// <summary>
+        /// Obtient le chemin complet hiérarchique de la catégorie (ex: "Comitologie-DA-Staff").
+        /// </summary>
+        public string FullName => Category.GetFullName("-");
+
+        /// <summary>
+        /// Obtient la profondeur du nœud dans l'arborescence (0 pour une racine).
+        /// </summary>
+        public int Depth => Category.Depth;
+
+        /// <summary>
+        /// Indique si cette catégorie possède des sous-catégories enfants.
+        /// </summary>
+        public bool HasChildren { get; set; }
     }
 
     /// <summary>
@@ -40,7 +67,19 @@ namespace Catamailer.Application.ViewModels
     /// </summary>
     public class FlatCategoryOption
     {
+        /// <summary>
+        /// Obtient ou définit le nœud de catégorie associé.
+        /// </summary>
         public CategoryNode Category { get; set; } = default!;
+
+        /// <summary>
+        /// Obtient ou définit le chemin complet unique de la catégorie.
+        /// </summary>
+        public string FullName { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Obtient ou définit le libellé indenté pour l'affichage dans une liste déroulante.
+        /// </summary>
         public string DisplayName { get; set; } = string.Empty;
     }
 
@@ -49,6 +88,7 @@ namespace Catamailer.Application.ViewModels
     /// </summary>
     public class DictionaryEditorViewModel
     {
+        private const string HierarchySeparator = "-";
         private readonly IRuleRepository _ruleRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly ObservableCollection<DictionaryRule> _rules = new();
@@ -79,11 +119,12 @@ namespace Catamailer.Application.ViewModels
             {
                 foreach (var item in _gridItems)
                 {
-                    string indent = new string('\u00A0', item.Category.Depth * 4);
-                    yield return new FlatCategoryOption 
-                    { 
-                        Category = item.Category, 
-                        DisplayName = indent + item.Category.Name 
+                    string indent = new string('\u00A0', item.Depth * 4);
+                    yield return new FlatCategoryOption
+                    {
+                        Category = item.Category,
+                        FullName = item.FullName,
+                        DisplayName = indent + item.Category.Name
                     };
                 }
             }
@@ -104,15 +145,17 @@ namespace Catamailer.Application.ViewModels
                 {
                     var lowerSearch = SearchText.Trim().ToLowerInvariant();
                     var matchingItems = _gridItems.Where(i => MatchesSearch(i, lowerSearch)).ToList();
-                    
+
                     var itemsToShow = new HashSet<DictionaryCategoryItem>();
                     foreach (var match in matchingItems)
                     {
                         itemsToShow.Add(match);
                         var current = match.Category.Parent;
-                        while(current != null)
+                        while (current != null)
                         {
-                            var ancestorItem = _gridItems.FirstOrDefault(i => i.Category.Name == current.Name);
+                            var currentFullName = current.GetFullName(HierarchySeparator);
+                            var ancestorItem = _gridItems.FirstOrDefault(i =>
+                                string.Equals(i.FullName, currentFullName, StringComparison.OrdinalIgnoreCase));
                             if (ancestorItem != null)
                             {
                                 ancestorItem.IsExpanded = true;
@@ -193,9 +236,13 @@ namespace Catamailer.Application.ViewModels
         /// <summary>
         /// Plie ou déplie une catégorie dans la grille hiérarchique.
         /// </summary>
+        /// <param name="category">La catégorie à plier ou déplier.</param>
         public void ToggleCategory(CategoryNode category)
         {
-            var item = _gridItems.FirstOrDefault(i => i.Category.Name == category.Name);
+            var targetFullName = category.GetFullName(HierarchySeparator);
+            var item = _gridItems.FirstOrDefault(i =>
+                ReferenceEquals(i.Category, category) ||
+                string.Equals(i.FullName, targetFullName, StringComparison.OrdinalIgnoreCase));
             if (item != null)
             {
                 item.IsExpanded = !item.IsExpanded;
@@ -210,9 +257,15 @@ namespace Catamailer.Application.ViewModels
         {
             await _ruleRepository.AddDictionaryRuleAsync(rule);
             _rules.Add(rule);
-            
-            var item = _gridItems.FirstOrDefault(i => i.Category.Name == rule.TargetCategory.Name);
-            if (item != null) item.Rule = rule;
+
+            var targetFullName = rule.TargetCategory.GetFullName(HierarchySeparator);
+            var item = _gridItems.FirstOrDefault(i =>
+                ReferenceEquals(i.Category, rule.TargetCategory) ||
+                string.Equals(i.FullName, targetFullName, StringComparison.OrdinalIgnoreCase));
+            if (item != null)
+            {
+                item.Rule = rule;
+            }
         }
 
         /// <summary>
@@ -223,9 +276,15 @@ namespace Catamailer.Application.ViewModels
         {
             await _ruleRepository.DeleteDictionaryRuleAsync(rule);
             _rules.Remove(rule);
-            
-            var item = _gridItems.FirstOrDefault(i => i.Category.Name == rule.TargetCategory.Name);
-            if (item != null) item.Rule = null;
+
+            var targetFullName = rule.TargetCategory.GetFullName(HierarchySeparator);
+            var item = _gridItems.FirstOrDefault(i =>
+                ReferenceEquals(i.Category, rule.TargetCategory) ||
+                string.Equals(i.FullName, targetFullName, StringComparison.OrdinalIgnoreCase));
+            if (item != null)
+            {
+                item.Rule = null;
+            }
         }
 
         /// <summary>
@@ -235,7 +294,10 @@ namespace Catamailer.Application.ViewModels
         public void EditRule(DictionaryRule rule)
         {
             EditingRule = rule;
-            SelectedCategory = _availableCategories.FirstOrDefault(c => c.Name == rule.TargetCategory.Name);
+            var targetFullName = rule.TargetCategory.GetFullName(HierarchySeparator);
+            SelectedCategory = _availableCategories.FirstOrDefault(c =>
+                ReferenceEquals(c, rule.TargetCategory) ||
+                string.Equals(c.GetFullName(HierarchySeparator), targetFullName, StringComparison.OrdinalIgnoreCase));
             SubjectKeywordsInput = string.Join(", ", rule.SubjectKeywords);
             SenderKeywordsInput = string.Join(", ", rule.SenderKeywords);
             RecipientKeywordsInput = string.Join(", ", rule.RecipientKeywords);
@@ -279,7 +341,7 @@ namespace Catamailer.Application.ViewModels
                 .ToArray();
 
             var newRule = new DictionaryRule(SelectedCategory, subjectKeywords, senderKeywords, recipientKeywords);
-            
+
             await AddRuleAsync(newRule);
 
             CancelEdit();
@@ -310,17 +372,24 @@ namespace Catamailer.Application.ViewModels
                 .Where(k => !string.IsNullOrEmpty(k))
                 .ToArray();
 
-            // Supprime le lien visuel de l'ancienne catégorie
             var oldItem = _gridItems.FirstOrDefault(i => i.Rule == EditingRule);
-            if (oldItem != null) oldItem.Rule = null;
+            if (oldItem != null)
+            {
+                oldItem.Rule = null;
+            }
 
             EditingRule.Update(SelectedCategory, subjectKeywords, senderKeywords, recipientKeywords);
-            
+
             await _ruleRepository.UpdateDictionaryRuleAsync(EditingRule);
 
-            // Établit le lien visuel vers la nouvelle catégorie
-            var newItem = _gridItems.FirstOrDefault(i => i.Category.Name == SelectedCategory.Name);
-            if (newItem != null) newItem.Rule = EditingRule;
+            var selectedFullName = SelectedCategory.GetFullName(HierarchySeparator);
+            var newItem = _gridItems.FirstOrDefault(i =>
+                ReferenceEquals(i.Category, SelectedCategory) ||
+                string.Equals(i.FullName, selectedFullName, StringComparison.OrdinalIgnoreCase));
+            if (newItem != null)
+            {
+                newItem.Rule = EditingRule;
+            }
 
             CancelEdit();
         }
@@ -328,26 +397,47 @@ namespace Catamailer.Application.ViewModels
         private void BuildGridItems()
         {
             _gridItems.Clear();
-            var rootCategories = _availableCategories.Where(c => c.Parent == null).OrderBy(c => c.Name);
+
+            var childrenByParent = _availableCategories
+                .Where(c => c.Parent != null)
+                .GroupBy(c => c.Parent!)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.OrderBy(c => c.Name, StringComparer.OrdinalIgnoreCase).ToList());
+
+            var rootCategories = _availableCategories
+                .Where(c => c.Parent == null)
+                .OrderBy(c => c.Name, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
             foreach (var root in rootCategories)
             {
-                TraverseGrid(root);
+                TraverseGrid(root, childrenByParent);
             }
         }
 
-        private void TraverseGrid(CategoryNode node)
+        private void TraverseGrid(CategoryNode node, Dictionary<CategoryNode, List<CategoryNode>> childrenByParent)
         {
-            var rule = _rules.FirstOrDefault(r => r.TargetCategory.Name == node.Name);
+            var nodeFullName = node.GetFullName(HierarchySeparator);
+            var rule = _rules.FirstOrDefault(r =>
+                ReferenceEquals(r.TargetCategory, node) ||
+                string.Equals(r.TargetCategory.GetFullName(HierarchySeparator), nodeFullName, StringComparison.OrdinalIgnoreCase));
+
+            var children = childrenByParent.TryGetValue(node, out var mappedChildren)
+                ? mappedChildren
+                : node.Children.OrderBy(c => c.Name, StringComparer.OrdinalIgnoreCase).ToList();
+
             _gridItems.Add(new DictionaryCategoryItem
             {
                 Category = node,
                 Rule = rule,
-                IsExpanded = true
+                IsExpanded = false,
+                HasChildren = children.Count > 0
             });
 
-            foreach (var child in node.Children.OrderBy(c => c.Name))
+            foreach (var child in children)
             {
-                TraverseGrid(child);
+                TraverseGrid(child, childrenByParent);
             }
         }
 
@@ -356,8 +446,14 @@ namespace Catamailer.Application.ViewModels
             var current = item.Category.Parent;
             while (current != null)
             {
-                var ancestorItem = _gridItems.FirstOrDefault(i => i.Category.Name == current.Name);
-                if (ancestorItem != null && !ancestorItem.IsExpanded) return false;
+                var currentFullName = current.GetFullName(HierarchySeparator);
+                var ancestorItem = _gridItems.FirstOrDefault(i =>
+                    ReferenceEquals(i.Category, current) ||
+                    string.Equals(i.FullName, currentFullName, StringComparison.OrdinalIgnoreCase));
+                if (ancestorItem != null && !ancestorItem.IsExpanded)
+                {
+                    return false;
+                }
                 current = current.Parent;
             }
             return true;
@@ -365,13 +461,19 @@ namespace Catamailer.Application.ViewModels
 
         private bool MatchesSearch(DictionaryCategoryItem item, string lowerSearch)
         {
-            if (item.Category.Name.ToLowerInvariant().Contains(lowerSearch)) return true;
+            if (item.Category.Name.ToLowerInvariant().Contains(lowerSearch) ||
+                item.FullName.ToLowerInvariant().Contains(lowerSearch))
+            {
+                return true;
+            }
+
             if (item.Rule != null)
             {
                 if (item.Rule.SubjectKeywords.Any(k => k.ToLowerInvariant().Contains(lowerSearch))) return true;
                 if (item.Rule.SenderKeywords.Any(k => k.ToLowerInvariant().Contains(lowerSearch))) return true;
                 if (item.Rule.RecipientKeywords.Any(k => k.ToLowerInvariant().Contains(lowerSearch))) return true;
             }
+
             return false;
         }
     }

@@ -16,6 +16,7 @@
 //         - 2026-09-23 : Ajout de traces Stopwatch unitaires pour mesurer le bottleneck RPC COM (J4-S4-T7).
 //         - 2026-09-23 : Ajout de la liste DeletedInCatamailerOptions et résolution bidirectionnelle (J4-S4-T6 - Phase Bleue).
 //         - 2026-09-24 : Nettoyage des traces de performance pour respecter le silence sur succès (J5-S2-T2 - Phase Orange).
+//         - 2026-10-22 : Ajout de VisibleMissingInCatamailerOptions, ToggleFolder et ouverture auto des seules branches modifiées (J6-S4-T0 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -29,44 +30,147 @@ using Catamailer.Domain.Sync;
 
 namespace Catamailer.Application.ViewModels
 {
+    /// <summary>
+    /// ViewModel gérant l'écran d'analyse et de résolution de la synchronisation des catégories.
+    /// </summary>
     public class CategorySyncViewModel
     {
         private readonly ICategorySyncService _syncService;
         private readonly ICategoryRepository _categoryRepository;
         private readonly ICategoryManagerProvider _outlookProvider;
 
+        /// <summary>
+        /// Obtient ou définit le caractère séparateur d'arborescence.
+        /// </summary>
         public string Separator { get; set; } = "-";
+
+        /// <summary>
+        /// Indique si des différences ont été détectées entre Outlook et Catamailer.
+        /// </summary>
         public bool HasConflicts { get; private set; }
 
+        /// <summary>
+        /// Obtient la liste complète des options de l'arbre projeté Catamailer.
+        /// </summary>
         public List<SyncDeltaOption> MissingInCatamailerOptions { get; private set; } = new();
+
+        /// <summary>
+        /// Obtient la liste filtrée des options visibles dans l'arbre projeté selon l'état d'ouverture des dossiers parents.
+        /// </summary>
+        public IEnumerable<SyncDeltaOption> VisibleMissingInCatamailerOptions
+        {
+            get
+            {
+                if (!MissingInCatamailerOptions.Any())
+                {
+                    return Enumerable.Empty<SyncDeltaOption>();
+                }
+
+                string cleanSep = Separator.Trim();
+                if (string.IsNullOrEmpty(cleanSep))
+                {
+                    return MissingInCatamailerOptions;
+                }
+
+                var mapByPath = MissingInCatamailerOptions.ToDictionary(
+                    o => o.Delta.CategoryName.Trim(),
+                    o => o,
+                    StringComparer.OrdinalIgnoreCase);
+
+                var visible = new List<SyncDeltaOption>();
+                foreach (var opt in MissingInCatamailerOptions)
+                {
+                    if (IsOptionVisible(opt, cleanSep, mapByPath))
+                    {
+                        visible.Add(opt);
+                    }
+                }
+
+                return visible;
+            }
+        }
+
+        /// <summary>
+        /// Obtient la liste des catégories présentes dans Catamailer mais absentes d'Outlook.
+        /// </summary>
         public List<SyncDeltaOption> MissingInOutlookOptions { get; private set; } = new();
+
+        /// <summary>
+        /// Obtient la liste des conflits de couleurs détectés.
+        /// </summary>
         public List<SyncDeltaOption> ColorMismatchOptions { get; private set; } = new();
+
+        /// <summary>
+        /// Obtient la liste des catégories supprimées logiquement dans Catamailer mais encore présentes dans Outlook.
+        /// </summary>
         public List<SyncDeltaOption> DeletedInCatamailerOptions { get; private set; } = new();
 
+        /// <summary>
+        /// Obtient ou définit l'état de sélection globale pour les catégories à importer dans Catamailer.
+        /// </summary>
         public bool SelectAllMissingInCatamailer
         {
             get => MissingInCatamailerOptions.Any() && MissingInCatamailerOptions.All(o => o.IsSelected);
-            set { foreach (var o in MissingInCatamailerOptions) { if (o.Delta.Status == DeltaStatus.MissingInCatamailer) o.IsSelected = value; } }
+            set
+            {
+                foreach (var o in MissingInCatamailerOptions)
+                {
+                    if (o.Delta.Status == DeltaStatus.MissingInCatamailer)
+                    {
+                        o.IsSelected = value;
+                    }
+                }
+            }
         }
 
+        /// <summary>
+        /// Obtient ou définit l'état de sélection globale pour les catégories à pousser vers Outlook.
+        /// </summary>
         public bool SelectAllMissingInOutlook
         {
             get => MissingInOutlookOptions.Any() && MissingInOutlookOptions.All(o => o.IsSelected);
-            set { foreach (var o in MissingInOutlookOptions) o.IsSelected = value; }
+            set
+            {
+                foreach (var o in MissingInOutlookOptions)
+                {
+                    o.IsSelected = value;
+                }
+            }
         }
 
+        /// <summary>
+        /// Obtient ou définit l'état de sélection globale pour les conflits de couleurs.
+        /// </summary>
         public bool SelectAllColorMismatch
         {
             get => ColorMismatchOptions.Any() && ColorMismatchOptions.All(o => o.IsSelected);
-            set { foreach (var o in ColorMismatchOptions) o.IsSelected = value; }
+            set
+            {
+                foreach (var o in ColorMismatchOptions)
+                {
+                    o.IsSelected = value;
+                }
+            }
         }
-        
+
+        /// <summary>
+        /// Obtient ou définit l'état de sélection globale pour les suppressions logiques.
+        /// </summary>
         public bool SelectAllDeletedInCatamailer
         {
             get => DeletedInCatamailerOptions.Any() && DeletedInCatamailerOptions.All(o => o.IsSelected);
-            set { foreach (var o in DeletedInCatamailerOptions) o.IsSelected = value; }
+            set
+            {
+                foreach (var o in DeletedInCatamailerOptions)
+                {
+                    o.IsSelected = value;
+                }
+            }
         }
 
+        /// <summary>
+        /// Initialise une nouvelle instance de <see cref="CategorySyncViewModel"/>.
+        /// </summary>
         public CategorySyncViewModel(
             ICategorySyncService syncService,
             ICategoryRepository categoryRepository,
@@ -77,37 +181,68 @@ namespace Catamailer.Application.ViewModels
             _outlookProvider = outlookProvider;
         }
 
+        /// <summary>
+        /// Analyse les écarts de synchronisation et construit l'arbre en repliant par défaut toutes les branches sans modification.
+        /// </summary>
         public async Task InitializeAsync()
         {
             var syncResult = await _syncService.AnalyzeSyncDeltasAsync(Separator);
             HasConflicts = syncResult.HasConflicts;
 
             var combinedCatamailerList = syncResult.Deltas
-                .Where(d => d.Status == DeltaStatus.MissingInCatamailer || 
-                            d.Status == DeltaStatus.Synchronized || 
+                .Where(d => d.Status == DeltaStatus.MissingInCatamailer ||
+                            d.Status == DeltaStatus.Synchronized ||
                             d.Status == DeltaStatus.ColorMismatch)
                 .OrderBy(d => d.CategoryName, StringComparer.OrdinalIgnoreCase)
                 .Select(d => new SyncDeltaOption(d, Separator)
                 {
-                    IsSelected = d.Status == DeltaStatus.MissingInCatamailer
+                    IsSelected = d.Status == DeltaStatus.MissingInCatamailer,
+                    IsExpanded = false
                 })
                 .ToList();
 
             MissingInCatamailerOptions = combinedCatamailerList;
 
+            string cleanSep = Separator.Trim();
             var parentPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            foreach (var opt in MissingInCatamailerOptions)
+            var expandedAncestorPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            if (!string.IsNullOrEmpty(cleanSep))
             {
-                int lastSep = opt.Delta.CategoryName.LastIndexOf(Separator);
-                if (lastSep >= 0)
+                foreach (var opt in MissingInCatamailerOptions)
                 {
-                    parentPaths.Add(opt.Delta.CategoryName.Substring(0, lastSep).Trim());
+                    string currentPath = opt.Delta.CategoryName.Trim();
+                    int lastSep = currentPath.LastIndexOf(cleanSep, StringComparison.Ordinal);
+                    if (lastSep >= 0)
+                    {
+                        parentPaths.Add(currentPath.Substring(0, lastSep).Trim());
+                    }
+
+                    // Si cet élément comporte une modification réelle (non synchronisé et non simple parent implicite),
+                    // tous ses ancêtres doivent être ouverts par défaut.
+                    bool hasModification = opt.Delta.Status != DeltaStatus.Synchronized && !opt.IsImplicitParent;
+                    if (hasModification)
+                    {
+                        string ancestorWalk = currentPath;
+                        while (true)
+                        {
+                            int sepIdx = ancestorWalk.LastIndexOf(cleanSep, StringComparison.Ordinal);
+                            if (sepIdx < 0)
+                            {
+                                break;
+                            }
+                            ancestorWalk = ancestorWalk.Substring(0, sepIdx).Trim();
+                            expandedAncestorPaths.Add(ancestorWalk);
+                        }
+                    }
                 }
             }
 
             foreach (var opt in MissingInCatamailerOptions)
             {
-                opt.IsFolder = parentPaths.Contains(opt.Delta.CategoryName);
+                string path = opt.Delta.CategoryName.Trim();
+                opt.IsFolder = parentPaths.Contains(path);
+                opt.IsExpanded = opt.IsFolder && expandedAncestorPaths.Contains(path);
             }
 
             MissingInOutlookOptions = syncResult.GetMissingInOutlook()
@@ -119,27 +254,66 @@ namespace Catamailer.Application.ViewModels
                 .OrderBy(d => d.CategoryName, StringComparer.OrdinalIgnoreCase)
                 .Select(d => new SyncDeltaOption(d, Separator)
                 {
-                    Direction = (string.IsNullOrEmpty(d.OutlookColor) && !string.IsNullOrEmpty(d.CatamailerColor)) 
-                        ? SyncResolutionDirection.CatamailerToOutlook 
+                    Direction = (string.IsNullOrEmpty(d.OutlookColor) && !string.IsNullOrEmpty(d.CatamailerColor))
+                        ? SyncResolutionDirection.CatamailerToOutlook
                         : SyncResolutionDirection.OutlookToCatamailer
                 })
                 .ToList();
-                
+
             DeletedInCatamailerOptions = syncResult.GetDeletedInCatamailer()
                 .OrderBy(d => d.CategoryName, StringComparer.OrdinalIgnoreCase)
                 .Select(d => new SyncDeltaOption(d, Separator)
                 {
-                    IsSelected = false // Non sélectionné par défaut comme demandé
+                    IsSelected = false
                 })
                 .ToList();
         }
 
+        /// <summary>
+        /// Plie ou déplie un dossier dans la vue arborescente de synchronisation.
+        /// </summary>
+        /// <param name="folderOption">L'option dossier à plier ou déplier.</param>
+        public void ToggleFolder(SyncDeltaOption folderOption)
+        {
+            if (folderOption != null && folderOption.IsFolder)
+            {
+                folderOption.IsExpanded = !folderOption.IsExpanded;
+            }
+        }
+
+        private static bool IsOptionVisible(
+            SyncDeltaOption option,
+            string cleanSep,
+            Dictionary<string, SyncDeltaOption> mapByPath)
+        {
+            string currentPath = option.Delta.CategoryName.Trim();
+            while (true)
+            {
+                int sepIdx = currentPath.LastIndexOf(cleanSep, StringComparison.Ordinal);
+                if (sepIdx < 0)
+                {
+                    break;
+                }
+
+                currentPath = currentPath.Substring(0, sepIdx).Trim();
+                if (mapByPath.TryGetValue(currentPath, out var ancestor) && !ancestor.IsExpanded)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Applique l'ensemble des résolutions sélectionnées vers SQLite et Outlook.
+        /// </summary>
         public async Task ApplyResolutionsAsync()
         {
             var existingNodes = (await _categoryRepository.GetAllAsync(includeDeleted: true) ?? Enumerable.Empty<CategoryNode>()).ToList();
             var existingMapByFullName = existingNodes.ToDictionary(
-                n => n.GetFullName(Separator), 
-                n => n, 
+                n => n.GetFullName(Separator),
+                n => n,
                 StringComparer.OrdinalIgnoreCase);
 
             var selectedToCatamailer = MissingInCatamailerOptions
@@ -175,7 +349,7 @@ namespace Catamailer.Application.ViewModels
                     if (lastSep >= 0)
                     {
                         string parentFullName = option.Delta.CategoryName.Substring(0, lastSep).Trim();
-                        
+
                         if (existingMapByFullName.TryGetValue(parentFullName, out var parentNode))
                         {
                             if (targetNode.Parent != parentNode)
@@ -224,7 +398,7 @@ namespace Catamailer.Application.ViewModels
                 else
                 {
                     var dbNode = existingNodes.FirstOrDefault(n => string.Equals(n.Name, option.ShortName, StringComparison.OrdinalIgnoreCase));
-                    
+
                     if (dbNode == null)
                     {
                         dbNode = new CategoryNode(option.ShortName, option.Delta.OutlookColor);
@@ -239,22 +413,19 @@ namespace Catamailer.Application.ViewModels
                 }
             }
 
-            // --- Résolution des suppressions logiques ---
             var deletedNodesToRestore = new HashSet<CategoryNode>();
-            
+
             foreach (var option in DeletedInCatamailerOptions.Where(o => o.IsSelected))
             {
                 if (option.Direction == SyncResolutionDirection.CatamailerToOutlook)
                 {
-                    // L'utilisateur donne raison à Catamailer : on supprime physiquement dans Outlook
                     _outlookProvider.RemoveCategory(option.Delta.CategoryName);
                 }
                 else
                 {
-                    // L'utilisateur donne raison à Outlook : on restaure la catégorie dans Catamailer
                     if (existingMapByFullName.TryGetValue(option.Delta.CategoryName, out var deletedNode))
                     {
-                        deletedNode.Restore(); // Passe IsDeleted à false
+                        deletedNode.Restore();
                         deletedNodesToRestore.Add(deletedNode);
                     }
                 }
@@ -271,7 +442,10 @@ namespace Catamailer.Application.ViewModels
                 await _categoryRepository.UpdateRangeAsync(combinedUpdates);
             }
         }
-        
+
+        /// <summary>
+        /// Relance l'analyse de synchronisation.
+        /// </summary>
         public async Task RefreshAsync()
         {
             await InitializeAsync();

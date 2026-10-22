@@ -13,6 +13,7 @@
 //         - 2026-10-09 : Restauration de la densité ultra-compacte suite revue (J6-S3-T3 - Phase Bleue Itération 6).
 //         - 2026-10-19 : Intégration dans l'architecture Layout global et Action Bar standardisée (J6-S3-T7 - Phase Bleue).
 //         - 2026-10-19 : Compression verticale maximale des lignes (J6-S3-T7 - Phase Bleue Itération 2).
+//         - 2026-10-22 : Ajout des flèches d'accordéon et filtrage via VisibleMissingInCatamailerOptions (J6-S4-T0 - Phase Bleue).
 // </auto-generated>
 // ------------------------------------------------------------------------------ 
 *@
@@ -43,6 +44,18 @@
         border-radius: 50%;
         display: inline-block;
         flex-shrink: 0;
+    }
+    .sync-accordion-toggle {
+        cursor: pointer;
+        width: 1rem;
+        font-size: 0.65rem;
+        display: inline-block;
+        text-align: center;
+        user-select: none;
+        line-height: 1;
+    }
+    .sync-accordion-toggle:hover {
+        color: #0d6efd !important;
     }
 </style>
 
@@ -107,7 +120,7 @@
                             </div>
                         </div>
 
-                        @foreach (var option in ViewModel.MissingInCatamailerOptions)
+                        @foreach (var option in ViewModel.VisibleMissingInCatamailerOptions)
                         {
                             bool isSync = option.Delta.Status == DeltaStatus.Synchronized;
                             string rowClass = isSync ? "row g-0 border-bottom align-items-center bg-light text-muted" : "row g-0 border-bottom align-items-center hover-bg-light";
@@ -131,6 +144,17 @@
                                 
                                 <div class="col-6 sync-row-cell d-flex justify-content-between align-items-center">
                                     <div style="padding-left: @(option.Depth * 14)px;" class="d-flex align-items-center text-truncate">
+                                        @if (option.IsFolder)
+                                        {
+                                            <span class="sync-accordion-toggle text-muted me-1 flex-shrink-0" @onclick="() => ViewModel.ToggleFolder(option)" title="Déplier/Replier">
+                                                @(option.IsExpanded ? "▼" : "▶")
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="me-1 flex-shrink-0" style="width: 1rem; display: inline-block;"></span>
+                                        }
+
                                         @if (isSync)
                                         {
                                             <span class="me-2" style="width: 0.72rem; display: inline-block;"></span>

@@ -219,3 +219,7 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 - [x] ✅ `J6-S3-T9 - ExecuteComplexRuleActions_ShouldDispatchAllLegacyActionTypes_WithoutNotImplementedException` (Validé le 20/10/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : e625b3d9f9be5c0f56468242f064c5a41ef44ffa)
 - [x] ✅ `J6-S3-T10 - Map_ShouldReconstructCategoryTree_WhenSeparatorIsPresent` (Validé le 08/10/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : 34bd62b39b0c315cc343bd5fc59e876d466536ab)
 - [x] ✅ `J6-S3-T10 - MigrateAsync_WithRealCsvData_ShouldProduceCorrectDictionaryRules` (Validé le 08/10/2026 sur feature/j6-csv-migrator_step-3-ui - Commit : 34bd62b39b0c315cc343bd5fc59e876d466536ab)
+
+### 🟢 J6-S4 : Inspection Interactive Shadow Mode & Écoute Temps Réel
+- [x] ✅ `J6-S4-T0 - InitializeAsync_ShouldMatchRulesByFullName_WhenSubCategoriesShareSameShortName` (Validé le 22/10/2026 sur feature/j6-csv-migrator_step-4-shadow-inspector - Commit : <COMMIT_HASH>) (Cpx: 5 / 5)
+- [x] ✅ `J6-S4-T0 - InitializeAsync_ShouldCollapseAllFolders_ExceptThoseWithModifiedDescendants` (Validé le 22/10/2026 sur feature/j6-csv-migrator_step-4-shadow-inspector - Commit : <COMMIT_HASH>)

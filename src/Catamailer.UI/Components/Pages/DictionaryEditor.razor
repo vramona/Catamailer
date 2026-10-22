@@ -16,6 +16,7 @@
 //         - 2026-10-09 : Densité ultra-compacte, grille complète avec accordéons et Dropdown indentée (J6-S3-T4 - Phase Bleue).
 //         - 2026-10-19 : Intégration dans le nouveau Layout avec barre d'actions fixe en bas (J6-S3-T7 - Phase Bleue).
 //         - 2026-10-19 : Compression verticale maximale des lignes du tableau (J6-S3-T7 - Phase Bleue Itération 2).
+//         - 2026-10-22 : Rendu arborescent indenté en pixels entiers aligné sur CategoryTreeNode et clé FullName (J6-S4-T0 - Phase Bleue).
 // </auto-generated>
 // ------------------------------------------------------------------------------ -->
 
@@ -70,6 +71,13 @@
         font-family: Consolas, monospace;
         font-size: 0.74rem;
     }
+    .tree-indent-guide {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border-left: 1px dotted #ced4da;
+        flex-shrink: 0;
+    }
 </style>
 
 <div class="cata-screen-container">
@@ -95,9 +103,10 @@
                             <option value="" selected="@(ViewModel.SelectedCategory == null)">-- Sélectionner --</option>
                             @if (ViewModel.FlatCategories != null)
                             {
+                                var selectedFullName = ViewModel.SelectedCategory?.GetFullName("-");
                                 @foreach (var opt in ViewModel.FlatCategories)
                                 {
-                                    <option value="@opt.Category.Name" selected="@(ViewModel.SelectedCategory?.Name == opt.Category.Name)">
+                                    <option value="@opt.FullName" selected="@(string.Equals(selectedFullName, opt.FullName, StringComparison.OrdinalIgnoreCase))">
                                         @opt.DisplayName
                                     </option>
                                 }
@@ -138,34 +147,32 @@
                     <Virtualize Items="@ViewModel.VisibleGridItems.ToList()" ItemSize="20" Context="item">
                         <tr class="clickable-row @(ViewModel.EditingRule == item.Rule && item.Rule != null ? "table-warning" : (ViewModel.SelectedCategory == item.Category && !ViewModel.IsEditing ? "table-info" : ""))" @onclick="() => OnRowClicked(item)">
                             <td class="align-middle fw-medium ps-2">
-                                <div class="d-flex align-items-center">
-                                    <div style="width: @(item.Category.Depth * 1.25)rem; flex-shrink: 0;"></div>
-                                    
-                                    @if (item.Category.Children.Any())
+                                <div class="d-flex align-items-center" style="padding-left: @(item.Depth * 16)px;">
+                                    @if (item.HasChildren)
                                     {
-                                        <span class="accordion-toggle text-muted flex-shrink-0" @onclick:stopPropagation="true" @onclick="() => ViewModel.ToggleCategory(item.Category)">
+                                        <span class="accordion-toggle text-muted me-1 flex-shrink-0" @onclick:stopPropagation="true" @onclick="() => ViewModel.ToggleCategory(item.Category)" title="Déplier/Replier">
                                             @(item.IsExpanded ? "▼" : "▶")
                                         </span>
                                     }
                                     else
                                     {
-                                        <span class="flex-shrink-0" style="width: 1rem; display: inline-block;"></span>
+                                        <span class="me-1 flex-shrink-0" style="width: 1rem; display: inline-block;"></span>
                                     }
 
                                     @if (!string.IsNullOrEmpty(item.Category.Color))
                                     {
-                                        <span class="cat-color-dot mx-1 flex-shrink-0" style="background-color: @item.Category.Color;"></span>
+                                        <span class="cat-color-dot me-1 flex-shrink-0" style="background-color: @item.Category.Color;"></span>
                                     }
                                     else if (!string.IsNullOrEmpty(item.Category.EffectiveColor))
                                     {
-                                        <span class="cat-color-dot mx-1 border flex-shrink-0" style="background-color: @item.Category.EffectiveColor; opacity: 0.6;" title="Couleur héritée"></span>
+                                        <span class="cat-color-dot me-1 border flex-shrink-0" style="background-color: @item.Category.EffectiveColor; opacity: 0.6;" title="Couleur héritée"></span>
                                     }
                                     else
                                     {
-                                        <span class="cat-color-dot mx-1 flex-shrink-0" style="background-color: transparent;"></span>
+                                        <span class="cat-color-dot me-1 bg-light border flex-shrink-0"></span>
                                     }
                                     
-                                    <span class="text-truncate @(item.Rule == null ? "text-muted" : "text-dark")" title="@item.Category.Name">
+                                    <span class="text-truncate @(item.Rule == null ? "text-muted fw-normal" : "text-dark fw-semibold")" title="@item.FullName">
                                         @item.Category.Name
                                     </span>
                                 </div>
@@ -252,8 +259,9 @@
 
     private void OnCategorySelected(ChangeEventArgs e)
     {
-        var selectedName = e.Value?.ToString();
-        ViewModel.SelectedCategory = ViewModel.AvailableCategories?.FirstOrDefault(c => c.Name == selectedName);
+        var selectedFullName = e.Value?.ToString();
+        ViewModel.SelectedCategory = ViewModel.AvailableCategories?.FirstOrDefault(c =>
+            string.Equals(c.GetFullName("-"), selectedFullName, StringComparison.OrdinalIgnoreCase));
     }
 
     private void OnRowClicked(DictionaryCategoryItem item)

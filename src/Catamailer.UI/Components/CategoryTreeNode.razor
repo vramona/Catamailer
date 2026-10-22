@@ -7,6 +7,7 @@
 //         - 2026-09-22 : Ajout du bouton de suppression logique et de l'EventCallback (J4-S4-T6 - Phase Bleue).
 //         - 2026-10-09 : Harmonisation densité ultra-compacte (J6-S3-T4 - Phase Bleue).
 //         - 2026-10-19 : Compression verticale maximale des lignes (J6-S3-T7 - Phase Bleue Itération 2).
+//         - 2026-10-22 : Repli par défaut des nœuds à l'ouverture (isExpanded = false) (J6-S4-T0 - Phase Bleue).
 // </auto-generated>
 // ------------------------------------------------------------------------------ -->
 
@@ -64,7 +65,7 @@
     [Parameter]
     public EventCallback<CategoryNode> OnNodeDeleted { get; set; }
 
-    private bool isExpanded = true;
+    private bool isExpanded = false;
 
     private void Toggle()
     {

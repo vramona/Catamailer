@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-10-20 16:53
+Généré le : 2026-10-22 11:22
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -111,23 +111,26 @@ Généré le : 2026-10-20 16:53
 
 ### Class : CategorySyncViewModel
 **Fichier** : `src\Catamailer.Application\ViewModels\CategorySyncViewModel.cs`
+**Rôle** : ViewModel gérant l'écran d'analyse et de résolution de la synchronisation des catégories.
 **Membres et Invocations :**
-- `string Separator { get; set; }`
-- `bool HasConflicts { get; set; }`
-- `List<SyncDeltaOption> MissingInCatamailerOptions { get; set; }`
-- `List<SyncDeltaOption> MissingInOutlookOptions { get; set; }`
-- `List<SyncDeltaOption> ColorMismatchOptions { get; set; }`
-- `List<SyncDeltaOption> DeletedInCatamailerOptions { get; set; }`
-- `bool SelectAllMissingInCatamailer { get; set; }`
-- `bool SelectAllMissingInOutlook { get; set; }`
-- `bool SelectAllColorMismatch { get; set; }`
-- `bool SelectAllDeletedInCatamailer { get; set; }`
-- `Task InitializeAsync()`
+- `string Separator { get; set; }` : Obtient ou définit le caractère séparateur d'arborescence.
+- `bool HasConflicts { get; set; }` : Indique si des différences ont été détectées entre Outlook et Catamailer.
+- `List<SyncDeltaOption> MissingInCatamailerOptions { get; set; }` : Obtient la liste complète des options de l'arbre projeté Catamailer.
+- `IEnumerable<SyncDeltaOption> VisibleMissingInCatamailerOptions { get; }` : Obtient la liste filtrée des options visibles dans l'arbre projeté selon l'état d'ouverture des dossiers parents.
+- `List<SyncDeltaOption> MissingInOutlookOptions { get; set; }` : Obtient la liste des catégories présentes dans Catamailer mais absentes d'Outlook.
+- `List<SyncDeltaOption> ColorMismatchOptions { get; set; }` : Obtient la liste des conflits de couleurs détectés.
+- `List<SyncDeltaOption> DeletedInCatamailerOptions { get; set; }` : Obtient la liste des catégories supprimées logiquement dans Catamailer mais encore présentes dans Outlook.
+- `bool SelectAllMissingInCatamailer { get; set; }` : Obtient ou définit l'état de sélection globale pour les catégories à importer dans Catamailer.
+- `bool SelectAllMissingInOutlook { get; set; }` : Obtient ou définit l'état de sélection globale pour les catégories à pousser vers Outlook.
+- `bool SelectAllColorMismatch { get; set; }` : Obtient ou définit l'état de sélection globale pour les conflits de couleurs.
+- `bool SelectAllDeletedInCatamailer { get; set; }` : Obtient ou définit l'état de sélection globale pour les suppressions logiques.
+- `Task InitializeAsync()` : Analyse les écarts de synchronisation et construit l'arbre en repliant par défaut toutes les branches sans modification.
   - *Appelle* ➡️ `ICategorySyncService.AnalyzeSyncDeltasAsync()`
   - *Appelle* ➡️ `SyncResult.GetMissingInOutlook()`
   - *Appelle* ➡️ `SyncResult.GetColorConflicts()`
   - *Appelle* ➡️ `SyncResult.GetDeletedInCatamailer()`
-- `Task ApplyResolutionsAsync()`
+- `void ToggleFolder(SyncDeltaOption folderOption)` : Plie ou déplie un dossier dans la vue arborescente de synchronisation.
+- `Task ApplyResolutionsAsync()` : Applique l'ensemble des résolutions sélectionnées vers SQLite et Outlook.
   - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
   - *Appelle* ➡️ `CategoryNode.GetFullName()`
   - *Appelle* ➡️ `CategoryNode.UpdateColor()`
@@ -138,7 +141,7 @@ Généré le : 2026-10-20 16:53
   - *Appelle* ➡️ `ICategoryManagerProvider.UpdateCategoryColor()`
   - *Appelle* ➡️ `ICategoryManagerProvider.RemoveCategory()`
   - *Appelle* ➡️ `CategoryNode.Restore()`
-- `Task RefreshAsync()`
+- `Task RefreshAsync()` : Relance l'analyse de synchronisation.
   - *Appelle* ➡️ `CategorySyncViewModel.InitializeAsync()`
 
 ### Class : CategoryTreeViewModel
@@ -157,16 +160,20 @@ Généré le : 2026-10-20 16:53
 **Fichier** : `src\Catamailer.Application\ViewModels\DictionaryEditorViewModel.cs`
 **Rôle** : Représente un élément de la grille hiérarchique combinant catégorie et règle.
 **Membres et Invocations :**
-- `CategoryNode Category { get; set; }`
-- `DictionaryRule? Rule { get; set; }`
-- `bool IsExpanded { get; set; }`
+- `CategoryNode Category { get; set; }` : Obtient ou définit le nœud de catégorie associé à la ligne.
+- `DictionaryRule? Rule { get; set; }` : Obtient ou définit la règle de dictionnaire associée à la catégorie, ou null si aucune règle n'est définie.
+- `bool IsExpanded { get; set; }` : Indique si le nœud parent est déplié dans la grille hiérarchique (fermé par défaut).
+- `string FullName { get; }` : Obtient le chemin complet hiérarchique de la catégorie (ex: "Comitologie-DA-Staff").
+- `int Depth { get; }` : Obtient la profondeur du nœud dans l'arborescence (0 pour une racine).
+- `bool HasChildren { get; set; }` : Indique si cette catégorie possède des sous-catégories enfants.
 
 ### Class : FlatCategoryOption
 **Fichier** : `src\Catamailer.Application\ViewModels\DictionaryEditorViewModel.cs`
 **Rôle** : Représente une option de catégorie formatée (indentée) pour les listes déroulantes.
 **Membres et Invocations :**
-- `CategoryNode Category { get; set; }`
-- `string DisplayName { get; set; }`
+- `CategoryNode Category { get; set; }` : Obtient ou définit le nœud de catégorie associé.
+- `string FullName { get; set; }` : Obtient ou définit le chemin complet unique de la catégorie.
+- `string DisplayName { get; set; }` : Obtient ou définit le libellé indenté pour l'affichage dans une liste déroulante.
 
 ### Class : DictionaryEditorViewModel
 **Fichier** : `src\Catamailer.Application\ViewModels\DictionaryEditorViewModel.cs`
@@ -188,11 +195,15 @@ Généré le : 2026-10-20 16:53
   - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
   - *Appelle* ➡️ `DictionaryEditorViewModel.BuildGridItems()`
 - `void ToggleCategory(CategoryNode category)` : Plie ou déplie une catégorie dans la grille hiérarchique.
+  - *Appelle* ➡️ `CategoryNode.GetFullName()`
 - `Task AddRuleAsync(DictionaryRule rule)` : Ajoute une nouvelle règle au dépôt et met à jour la grille en mémoire.
   - *Appelle* ➡️ `IRuleRepository.AddDictionaryRuleAsync()`
+  - *Appelle* ➡️ `CategoryNode.GetFullName()`
 - `Task DeleteRuleAsync(DictionaryRule rule)` : Supprime une règle du dépôt et met à jour la grille en mémoire.
   - *Appelle* ➡️ `IRuleRepository.DeleteDictionaryRuleAsync()`
+  - *Appelle* ➡️ `CategoryNode.GetFullName()`
 - `void EditRule(DictionaryRule rule)` : Charge une règle existante dans le formulaire pour édition.
+  - *Appelle* ➡️ `CategoryNode.GetFullName()`
 - `void CancelEdit()` : Annule l'édition en cours et réinitialise le formulaire.
 - `Task CreateRuleFromFormAsync()` : Crée une nouvelle règle à partir des données saisies dans le formulaire.
   - *Appelle* ➡️ `DictionaryEditorViewModel.AddRuleAsync()`
@@ -200,6 +211,7 @@ Généré le : 2026-10-20 16:53
 - `Task UpdateRuleFromFormAsync()` : Met à jour la règle en cours d'édition avec les données du formulaire.
   - *Appelle* ➡️ `DictionaryRule.Update()`
   - *Appelle* ➡️ `IRuleRepository.UpdateDictionaryRuleAsync()`
+  - *Appelle* ➡️ `CategoryNode.GetFullName()`
   - *Appelle* ➡️ `DictionaryEditorViewModel.CancelEdit()`
 
 ### Class : PreferencesViewModel
@@ -317,14 +329,16 @@ Généré le : 2026-10-20 16:53
 
 ### Class : SyncDeltaOption
 **Fichier** : `src\Catamailer.Application\ViewModels\SyncDeltaOption.cs`
+**Rôle** : Représente une option d'écart de synchronisation dans l'arbre de résolution.
 **Membres et Invocations :**
-- `CategoryDelta Delta { get; }`
-- `bool IsSelected { get; set; }`
-- `int Depth { get; }`
-- `string ShortName { get; }`
-- `bool IsImplicitParent { get; }`
-- `bool IsFolder { get; set; }`
-- `SyncResolutionDirection Direction { get; set; }`
+- `CategoryDelta Delta { get; }` : Obtient l'écart de synchronisation sous-jacent.
+- `bool IsSelected { get; set; }` : Indique si cette option est cochée pour être appliquée lors de la synchronisation.
+- `int Depth { get; }` : Obtient la profondeur hiérarchique du nœud (0 pour une racine).
+- `string ShortName { get; }` : Obtient le nom court du segment de catégorie.
+- `bool IsImplicitParent { get; }` : Indique si ce nœud est un parent implicite déduit du séparateur.
+- `bool IsFolder { get; set; }` : Indique si ce nœud possède des enfants dans l'arbre projeté.
+- `bool IsExpanded { get; set; }` : Indique si ce dossier est déplié dans la vue arborescente de synchronisation.
+- `SyncResolutionDirection Direction { get; set; }` : Obtient ou définit la direction de résolution en cas de conflit ou de suppression.
 
 ## Projet : Catamailer.Domain
 ### Class : AppSetting
@@ -1094,6 +1108,13 @@ Généré le : 2026-10-20 16:53
   - *Appelle* ➡️ `CategorySyncViewModel.ApplyResolutionsAsync()`
   - *Appelle* ➡️ `ICategoryManagerProvider.RemoveCategory()`
   - *Appelle* ➡️ `ICategoryRepository.UpdateRangeAsync()`
+- `Task InitializeAsync_ShouldCollapseAllFolders_ExceptThoseWithModifiedDescendants()`
+  - *Appelle* ➡️ `SyncResult.AddDelta()`
+  - *Appelle* ➡️ `CategoryDelta.CreateSynchronized()`
+  - *Appelle* ➡️ `CategoryDelta.CreateMissingInCatamailer()`
+  - *Appelle* ➡️ `ICategorySyncService.AnalyzeSyncDeltasAsync()`
+  - *Appelle* ➡️ `CategorySyncViewModel.InitializeAsync()`
+  - *Appelle* ➡️ `CategorySyncViewModel.ToggleFolder()`
 
 ### Class : CategoryTreeViewModelTests
 **Fichier** : `tests\Catamailer.Application.Tests\ViewModels\CategoryTreeViewModelTests.cs`
@@ -1141,12 +1162,13 @@ Généré le : 2026-10-20 16:53
   - *Appelle* ➡️ `CategoryNode.AddChild()`
   - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
   - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
-- `Task InitializeAsync_ShouldPopulateVisibleGridItems_WithAllCategories_AndLinkRules()`
+- `Task InitializeAsync_ShouldStartCollapsed_AndLinkRulesWhenExpanded()`
   - *Appelle* ➡️ `CategoryNode.AddChild()`
   - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
   - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
   - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
-- `Task ToggleCategory_ShouldCollapseParent_AndHideDescendants()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.ToggleCategory()`
+- `Task ToggleCategory_ShouldExpandAndCollapseParent_HidingDescendants()`
   - *Appelle* ➡️ `CategoryNode.AddChild()`
   - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
   - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
@@ -1156,6 +1178,12 @@ Généré le : 2026-10-20 16:53
   - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
   - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
   - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
+- `Task InitializeAsync_ShouldMatchRulesByFullName_WhenSubCategoriesShareSameShortName()`
+  - *Appelle* ➡️ `CategoryNode.AddChild()`
+  - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
+  - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.InitializeAsync()`
+  - *Appelle* ➡️ `DictionaryEditorViewModel.ToggleCategory()`
 
 ### Class : PreferencesViewModelTests
 **Fichier** : `tests\Catamailer.Application.Tests\ViewModels\PreferencesViewModelTests.cs`
