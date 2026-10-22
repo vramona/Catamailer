@@ -6,11 +6,14 @@
 //         - 2026-09-07 : Ajout des tests pour l'évaluation d'un critère simple sur l'expéditeur (J1-S2-T2).
 //         - 2026-09-07 : Ajout des tests pour l'opérateur Contains et la logique Or (J1-S2-T2).
 //         - 2026-10-20 : Ajout des tests pour RegexMatch et MailField.Category (ExactNode / NodeAndChildren) (J6-S3-T9 - Phase Rouge).
+//         - 2026-10-22 : Ajout du test EvaluateAll avec traçabilité des déclencheurs et chaînage AddCategory -> MoveToFolder (J6-S4-T1 - Phase Rouge).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
 #nullable enable
 
+using System.Collections.Generic;
+using System.Linq;
 using Catamailer.Domain;
 using Xunit;
 
@@ -131,6 +134,52 @@ namespace Catamailer.Application.Tests
             Assert.True(engine.Evaluate("Sujet", "exp@cnam.fr", appliedCategories, exactNode));
             Assert.False(engine.Evaluate("Sujet", "exp@cnam.fr", new[] { "Administratif" }, exactNode));
             Assert.True(engine.Evaluate("Sujet", "exp@cnam.fr", appliedCategories, hierarchyNode));
+        }
+
+        [Fact]
+        public void EvaluateAll_ShouldReturnMatchedRulesWithTriggerDetails_AndChainAddCategoryToSubsequentRules()
+        {
+            // Arrange : Simulation du cas VBA "Transport Hotels - Confirmation réservation" suivi de "Déplacement - Transport Hotels"
+            var engine = new ExecutionEngine();
+
+            var nodeHotel = new RuleNode(LogicalOperator.And);
+            nodeHotel.AddCriterion(new RuleCriterion(MailField.Sender, MatchOperator.Contains, "ucanss@ailleursbusiness.com"));
+            nodeHotel.AddCriterion(new RuleCriterion(MailField.Subject, MatchOperator.Contains, "Confirmation de votre réservation hôtel"));
+            var ruleHotel = new ExecutionRule(
+                "Transport Hotels - Confirmation réservation",
+                nodeHotel,
+                new[] { new RuleAction(ActionType.AddCategory, "Transport Hotels") });
+
+            var nodeMove = new RuleNode(LogicalOperator.And);
+            nodeMove.AddCriterion(new RuleCriterion(MailField.Category, MatchOperator.ExactNode, "Transport Hotels"));
+            var ruleMove = new ExecutionRule(
+                "Déplacement - Transport Hotels",
+                nodeMove,
+                new[] { new RuleAction(ActionType.MoveToFolder, "Transport Hotels") });
+
+            var metadata = new MailMetadata(
+                "ENTRY_1",
+                "Confirmation de votre réservation hôtel Paris",
+                "ucanss@ailleursbusiness.com",
+                null,
+                new List<string>(),
+                new List<string>());
+
+            // Act : Aucune catégorie initiale issue de l'étape 1, mais la règle 1 ajoute "Transport Hotels", ce qui doit déclencher la règle 2
+            var matches = engine.EvaluateAll(metadata, Enumerable.Empty<string>(), new[] { ruleHotel, ruleMove });
+
+            // Assert
+            Assert.Equal(2, matches.Count);
+
+            Assert.Equal("Transport Hotels - Confirmation réservation", matches[0].Rule.Name);
+            Assert.Equal(2, matches[0].TriggerDescriptions.Count);
+            Assert.Contains(matches[0].TriggerDescriptions, d => d.Contains("ucanss@ailleursbusiness.com"));
+            Assert.Contains(matches[0].TriggerDescriptions, d => d.Contains("Confirmation de votre réservation hôtel"));
+
+            Assert.Equal("Déplacement - Transport Hotels", matches[1].Rule.Name);
+            Assert.Single(matches[1].TriggerDescriptions);
+            Assert.Contains("Transport Hotels", matches[1].TriggerDescriptions[0]);
+            Assert.Equal(ActionType.MoveToFolder, matches[1].Actions[0].Type);
         }
     }
 }

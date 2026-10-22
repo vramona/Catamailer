@@ -1,20 +1,25 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-10-22 11:22
+Généré le : 2026-10-22 13:41
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
 **Fichier** : `src\Catamailer.Application\ClassificationEngine.cs`
-**Rôle** : Moteur d'évaluation de l'Étape 1 : déduction de la catégorie principale en fonction des dictionnaires de mots-clés contextuels.
+**Rôle** : Moteur d'évaluation de l'Étape 1 : déduction des catégories en fonction des dictionnaires de mots-clés contextuels.
 **Membres et Invocations :**
-- `ClassificationResult? Classify(MailMetadata metadata, IEnumerable<DictionaryRule> rules)` : Évalue les métadonnées d'un e-mail par rapport à un ensemble de règles de dictionnaire.
+- `ClassificationResult? Classify(MailMetadata metadata, IEnumerable<DictionaryRule> rules)` : Évalue les métadonnées d'un e-mail par rapport à un ensemble de règles de dictionnaire et retourne la première correspondance.
+  - *Appelle* ➡️ `ClassificationEngine.ClassifyAll()`
+- `IReadOnlyList<ClassificationResult> ClassifyAll(MailMetadata metadata, IEnumerable<DictionaryRule> rules)` : Évalue l'intégralité des règles de dictionnaire sur les métadonnées d'un e-mail (parité VBA) et retourne toutes les catégories déclenchées avec leur déclencheur exact.
   - *Appelle* ➡️ `CategoryNode.GetAscendanceChain()`
 
 ### Class : ClassificationResult
 **Fichier** : `src\Catamailer.Application\ClassificationResult.cs`
-**Rôle** : Représente le résultat de l'évaluation de l'Étape 1 (Classification).
+**Rôle** : Représente le résultat unitaire de l'évaluation de l'Étape 1 (Classification) avec la trace du déclencheur.
 **Membres et Invocations :**
 - `CategoryNode MatchedCategory { get; }` : Obtient la catégorie principale déduite par le moteur.
 - `IReadOnlyList<CategoryNode> AppliedCategories { get; }` : Obtient la chaîne d'ascendance complète des catégories appliquées.
+- `MailField TriggerField { get; }` : Obtient le champ de l'e-mail qui a déclenché la règle (Subject, Sender ou Recipients).
+- `string MatchedKeyword { get; }` : Obtient le mot-clé exact du dictionnaire qui a déclenché la règle.
+- `string MatchedValue { get; }` : Obtient la valeur réelle du champ de l'e-mail sur laquelle le mot-clé a été trouvé.
 
 ### Class : DebounceService
 **Fichier** : `src\Catamailer.Application\DebounceService.cs`
@@ -33,8 +38,17 @@ Généré le : 2026-10-22 11:22
 - `bool Evaluate(string subject, string sender, RuleNode node)` : Évalue un nœud de règle composite par rapport aux métadonnées textuelles d'un e-mail.
   - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
 - `bool Evaluate(string subject, string sender, IEnumerable<string>? categories, RuleNode node)` : Évalue un nœud de règle composite par rapport aux métadonnées complètes (incluant les catégories) d'un e-mail.
-  - *Appelle* ➡️ `ExecutionEngine.EvaluateCriterion()`
-  - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
+  - *Appelle* ➡️ `ExecutionEngine.TryEvaluateNode()`
+- `IReadOnlyList<ExecutionRuleMatchResult> EvaluateAll(MailMetadata metadata, IEnumerable<string>? initialCategories, IEnumerable<ExecutionRule> rules)` : Évalue l'ensemble des règles d'exécution (Étape 2) sur un e-mail, en chaînant dynamiquement les catégories ajoutées par .
+  - *Appelle* ➡️ `ExecutionEngine.TryEvaluateNode()`
+
+### Class : ExecutionRuleMatchResult
+**Fichier** : `src\Catamailer.Application\ExecutionRuleMatchResult.cs`
+**Rôle** : Représente le résultat détaillé d'une règle d'exécution (Étape 2) validée pour un e-mail, incluant ses critères déclencheurs et ses actions.
+**Membres et Invocations :**
+- `ExecutionRule Rule { get; }` : Obtient la règle d'exécution validée.
+- `IReadOnlyList<string> TriggerDescriptions { get; }` : Obtient la liste des descriptions textuelles des critères ayant déclenché la règle.
+- `IReadOnlyList<RuleAction> Actions { get; }` : Obtient la liste ordonnée des actions qui doivent être appliquées par cette règle.
 
 ### Class : HistoryRunner
 **Fichier** : `src\Catamailer.Application\HistoryRunner.cs`
@@ -251,13 +265,16 @@ Généré le : 2026-10-22 11:22
 - `List<SelectableOption> SenderOptions { get; set; }` : Options de sélection pour les expéditeurs (Sender et OnBehalfOf).
 - `List<SelectableOption> RecipientOptions { get; set; }` : Options de sélection pour les destinataires externes.
 - `IEnumerable<CategoryNode> Categories { get; set; }` : Obtient la liste globale des catégories disponibles.
-- `IEnumerable<CategoryNode> TriggeredCategories { get; set; }` : Obtient la liste des catégories qui sont déjà déclenchées par l'e-mail courant.
+- `IEnumerable<CategoryNode> TriggeredCategories { get; set; }` : Obtient la liste des catégories (incluant leur ascendance) qui sont déjà déclenchées par l'e-mail courant.
+- `IReadOnlyList<ClassificationResult> TriggeredResults { get; set; }` : Obtient la liste détaillée des résultats de classification (incluant le champ et le mot-clé déclencheur) pour l'e-mail courant.
+- `IReadOnlyList<string> ExistingOutlookCategories { get; set; }` : Obtient la liste des catégories déjà positionnées sur l'e-mail dans Outlook.
 - `CategoryNode? SelectedCategory { get; set; }` : Obtient la catégorie cible actuellement sélectionnée pour la règle.
-- `Task InitializeAsync()` : Initialise le ViewModel en récupérant les métadonnées, en construisant les options de filtrage et en identifiant les catégories déjà déclenchées.
+- `Task InitializeAsync()` : Initialise le ViewModel en récupérant les métadonnées, en construisant les options de filtrage et en identifiant toutes les catégories déjà déclenchées ainsi que leurs déclencheurs.
   - *Appelle* ➡️ `ICategoryRepository.GetAllAsync()`
   - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
   - *Appelle* ➡️ `ISelectionProvider.GetSelectedMail()`
-  - *Appelle* ➡️ `ClassificationEngine.Classify()`
+  - *Appelle* ➡️ `ClassificationEngine.ClassifyAll()`
+  - *Appelle* ➡️ `CategoryNode.GetFullName()`
 - `void SelectCategory(CategoryNode category)` : Définit la catégorie cible pour la règle en cours de création.
 - `DictionaryRule? BuildRule()` : Construit l'objet DictionaryRule final en incluant uniquement les options cochées.
 
@@ -893,6 +910,10 @@ Généré le : 2026-10-22 11:22
 - `void Classify_ShouldReturnCategory_WhenKeywordMatchesRecipient()`
   - *Appelle* ➡️ `ClassificationEngineTests.CreateDummyMetadata()`
   - *Appelle* ➡️ `ClassificationEngine.Classify()`
+- `void ClassifyAll_ShouldEvaluateAllRules_AndReturnMultipleMatchesWithTriggerDetails()`
+  - *Appelle* ➡️ `CategoryNode.AddChild()`
+  - *Appelle* ➡️ `ClassificationEngineTests.CreateDummyMetadata()`
+  - *Appelle* ➡️ `ClassificationEngine.ClassifyAll()`
 
 ### Class : DebounceServiceTests
 **Fichier** : `tests\Catamailer.Application.Tests\DebounceServiceTests.cs`
@@ -933,6 +954,9 @@ Généré le : 2026-10-22 11:22
 - `void Evaluate_ShouldReturnTrue_WhenCategoryMatchesExactNode_OrNodeAndChildren()`
   - *Appelle* ➡️ `RuleNode.AddCriterion()`
   - *Appelle* ➡️ `ExecutionEngine.Evaluate()`
+- `void EvaluateAll_ShouldReturnMatchedRulesWithTriggerDetails_AndChainAddCategoryToSubsequentRules()`
+  - *Appelle* ➡️ `RuleNode.AddCriterion()`
+  - *Appelle* ➡️ `ExecutionEngine.EvaluateAll()`
 
 ### Class : HistoryRunnerTests
 **Fichier** : `tests\Catamailer.Application.Tests\HistoryRunnerTests.cs`
@@ -1219,6 +1243,12 @@ Généré le : 2026-10-22 11:22
   - *Appelle* ➡️ `QuickRuleBuilderViewModel.InitializeAsync()`
 - `Task InitializeAsync_ShouldIdentifyTriggeredCategories_WhenRulesMatch()`
   - *Appelle* ➡️ `ISelectionProvider.GetSelectedMail()`
+  - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
+  - *Appelle* ➡️ `QuickRuleBuilderViewModelTests.CreateViewModel()`
+  - *Appelle* ➡️ `QuickRuleBuilderViewModel.InitializeAsync()`
+- `Task InitializeAsync_ShouldIdentifyAllMultipleTriggeredCategories_AndExposeTriggerDetailsAndExistingOutlookCategories()`
+  - *Appelle* ➡️ `ISelectionProvider.GetSelectedMail()`
+  - *Appelle* ➡️ `CategoryNode.AddChild()`
   - *Appelle* ➡️ `IRuleRepository.GetAllDictionaryRulesAsync()`
   - *Appelle* ➡️ `QuickRuleBuilderViewModelTests.CreateViewModel()`
   - *Appelle* ➡️ `QuickRuleBuilderViewModel.InitializeAsync()`

@@ -4,6 +4,7 @@
 //     Historique :
 //         - 2026-09-07 : Création initiale (Phase Rouge).
 //         - 2026-09-09 : Ajout de OnBehalfOf et scission Internal/External Recipients (J3-S2-T2-ST1).
+//         - 2026-10-22 : Ajout de ExistingCategories pour l'inspection Shadow Mode (J6-S4-T1 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -22,11 +23,13 @@ namespace Catamailer.Domain
     /// <param name="OnBehalfOf">L'adresse de la personne pour le compte de qui l'e-mail est envoyé, le cas échéant.</param>
     /// <param name="InternalRecipients">La liste des adresses des destinataires internes.</param>
     /// <param name="ExternalRecipients">La liste des adresses des destinataires externes.</param>
+    /// <param name="ExistingCategories">La liste des catégories actuellement positionnées sur l'e-mail dans Outlook.</param>
     public record MailMetadata(
-        string EntryId, 
-        string Subject, 
-        string Sender, 
-        string? OnBehalfOf, 
+        string EntryId,
+        string Subject,
+        string Sender,
+        string? OnBehalfOf,
         IEnumerable<string> InternalRecipients,
-        IEnumerable<string> ExternalRecipients);
+        IEnumerable<string> ExternalRecipients,
+        IEnumerable<string>? ExistingCategories = null);
 }

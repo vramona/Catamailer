@@ -223,3 +223,6 @@ Ce document référence l'intégralité des tests unitaires (TDD) et d'intégrat
 ### 🟢 J6-S4 : Inspection Interactive Shadow Mode & Écoute Temps Réel
 - [x] ✅ `J6-S4-T0 - InitializeAsync_ShouldMatchRulesByFullName_WhenSubCategoriesShareSameShortName` (Validé le 22/10/2026 sur feature/j6-csv-migrator_step-4-shadow-inspector - Commit : 3af63c878b3a2d5a1965362846d755fee2416896) (Cpx: 5 / 5)
 - [x] ✅ `J6-S4-T0 - InitializeAsync_ShouldCollapseAllFolders_ExceptThoseWithModifiedDescendants` (Validé le 22/10/2026 sur feature/j6-csv-migrator_step-4-shadow-inspector - Commit : 3af63c878b3a2d5a1965362846d755fee2416896)
+- [x] ✅ `J6-S4-T1 - ClassifyAll_ShouldEvaluateAllRules_AndReturnMultipleMatchesWithTriggerDetails` (Validé le 22/10/2026 sur feature/j6-csv-migrator_step-4-shadow-inspector - Commit : <COMMIT_HASH>) (Cpx: 5 / 5)
+- [x] ✅ `J6-S4-T1 - EvaluateAll_ShouldReturnMatchedRulesWithTriggerDetails_AndChainAddCategoryToSubsequentRules` (Validé le 22/10/2026 sur feature/j6-csv-migrator_step-4-shadow-inspector - Commit : <COMMIT_HASH>)
+- [x] ✅ `J6-S4-T1 - InitializeAsync_ShouldIdentifyAllMultipleTriggeredCategories_AndExposeTriggerDetailsAndExistingOutlookCategories` (Validé le 22/10/2026 sur feature/j6-csv-migrator_step-4-shadow-inspector - Commit : <COMMIT_HASH>)

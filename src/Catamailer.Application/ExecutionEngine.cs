@@ -6,6 +6,7 @@
 //         - 2026-09-07 : Ajout de l'évaluation des critères d'égalité et de la récursivité des nœuds logiques (J1-S2-T2).
 //         - 2026-09-07 : Ajout de la prise en charge de l'opérateur Contains (J1-S2-T2).
 //         - 2026-10-20 : Prise en charge de RegexMatch et MailField.Category (ExactNode et NodeAndChildren) (J6-S3-T9 - Phase Verte).
+//         - 2026-10-22 : Ajout de EvaluateAll avec traçabilité des critères déclencheurs et chaînage AddCategory (J6-S4-T1 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -46,29 +47,98 @@ namespace Catamailer.Application
         /// <returns>True si l'arbre est validé, False sinon.</returns>
         public bool Evaluate(string subject, string sender, IEnumerable<string>? categories, RuleNode node)
         {
+            var categoryList = categories?.ToList() ?? new List<string>();
+            return TryEvaluateNode(subject, sender, categoryList, node, out _);
+        }
+
+        /// <summary>
+        /// Évalue l'ensemble des règles d'exécution (Étape 2) sur un e-mail, en chaînant dynamiquement les catégories ajoutées par <see cref="ActionType.AddCategory"/>.
+        /// </summary>
+        /// <param name="metadata">Les métadonnées de l'e-mail.</param>
+        /// <param name="initialCategories">Les catégories initiales (issues d'Outlook ou de l'Étape 1).</param>
+        /// <param name="rules">Les règles d'exécution à évaluer dans l'ordre.</param>
+        /// <returns>La liste des règles déclenchées avec leurs critères déclencheurs et leurs actions.</returns>
+        public IReadOnlyList<ExecutionRuleMatchResult> EvaluateAll(
+            MailMetadata metadata,
+            IEnumerable<string>? initialCategories,
+            IEnumerable<ExecutionRule> rules)
+        {
+            var results = new List<ExecutionRuleMatchResult>();
+            if (metadata == null || rules == null)
+            {
+                return results;
+            }
+
+            var workingCategories = new List<string>();
+            if (initialCategories != null)
+            {
+                foreach (var cat in initialCategories.Where(c => !string.IsNullOrWhiteSpace(c)))
+                {
+                    if (!workingCategories.Any(existing => string.Equals(existing.Trim(), cat.Trim(), StringComparison.OrdinalIgnoreCase)))
+                    {
+                        workingCategories.Add(cat.Trim());
+                    }
+                }
+            }
+
+            string subject = metadata.Subject ?? string.Empty;
+            string sender = metadata.Sender ?? string.Empty;
+
+            foreach (var rule in rules)
+            {
+                if (TryEvaluateNode(subject, sender, workingCategories, rule.RootNode, out var triggers))
+                {
+                    results.Add(new ExecutionRuleMatchResult(rule, triggers));
+
+                    // Parité VBA : toute action AddCategory enrichit immédiatement les catégories du mail pour les règles suivantes (ex: Déplacement)
+                    foreach (var action in rule.Actions.Where(a => a.Type == ActionType.AddCategory))
+                    {
+                        if (!string.IsNullOrWhiteSpace(action.Parameter) &&
+                            !workingCategories.Any(existing => string.Equals(existing, action.Parameter.Trim(), StringComparison.OrdinalIgnoreCase)))
+                        {
+                            workingCategories.Add(action.Parameter.Trim());
+                        }
+                    }
+                }
+            }
+
+            return results;
+        }
+
+        private bool TryEvaluateNode(
+            string subject,
+            string sender,
+            IReadOnlyList<string> categories,
+            RuleNode node,
+            out List<string> matchedTriggers)
+        {
+            matchedTriggers = new List<string>();
+
             if (node == null || (!node.Criteria.Any() && !node.ChildNodes.Any()))
             {
                 return false;
             }
 
-            var categoryList = categories?.ToList() ?? new List<string>();
-
             if (node.Operator == LogicalOperator.And)
             {
                 foreach (var criterion in node.Criteria)
                 {
-                    if (!EvaluateCriterion(subject, sender, categoryList, criterion))
+                    if (!EvaluateCriterion(subject, sender, categories, criterion))
                     {
+                        matchedTriggers.Clear();
                         return false;
                     }
+                    matchedTriggers.Add(FormatCriterionDescription(criterion));
                 }
 
                 foreach (var childNode in node.ChildNodes)
                 {
-                    if (!Evaluate(subject, sender, categoryList, childNode))
+                    if (!TryEvaluateNode(subject, sender, categories, childNode, out var childTriggers))
                     {
+                        matchedTriggers.Clear();
                         return false;
                     }
+                    matchedTriggers.AddRange(childTriggers);
                 }
 
                 return true;
@@ -77,22 +147,29 @@ namespace Catamailer.Application
             {
                 foreach (var criterion in node.Criteria)
                 {
-                    if (EvaluateCriterion(subject, sender, categoryList, criterion))
+                    if (EvaluateCriterion(subject, sender, categories, criterion))
                     {
+                        matchedTriggers.Add(FormatCriterionDescription(criterion));
                         return true;
                     }
                 }
 
                 foreach (var childNode in node.ChildNodes)
                 {
-                    if (Evaluate(subject, sender, categoryList, childNode))
+                    if (TryEvaluateNode(subject, sender, categories, childNode, out var childTriggers))
                     {
+                        matchedTriggers.AddRange(childTriggers);
                         return true;
                     }
                 }
 
                 return false;
             }
+        }
+
+        private static string FormatCriterionDescription(RuleCriterion criterion)
+        {
+            return $"{criterion.Field} {criterion.Operator} \"{criterion.Value}\"";
         }
 
         /// <summary>
