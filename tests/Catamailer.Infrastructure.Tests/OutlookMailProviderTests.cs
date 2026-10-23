@@ -5,6 +5,7 @@
 //         - 2026-09-07 : Création initiale (Phase Rouge).
 //         - 2026-09-07 : Correction nullable (Phase Verte).
 //         - 2026-09-09 : Adaptation à la refonte de MailMetadata (J3-S2-T2-ST1).
+//         - 2026-10-22 : Ajout du test de découpage des collections d'EntryID sur NewMailEx (J6-S4-T2 - Phase Rouge).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -57,6 +58,31 @@ namespace Catamailer.Infrastructure.Tests
             Assert.Equal(expectedEntryId, receivedMetadata!.EntryId);
             Assert.Equal("Test Subject", receivedMetadata.Subject);
             Assert.Equal("sender@test.com", receivedMetadata.Sender);
+        }
+
+        [Fact]
+        public void StartListening_ShouldSplitCommaSeparatedEntryIds_WhenNewMailExProvidesMultipleIds()
+        {
+            // Arrange : Outlook NewMailEx peut fournir plusieurs EntryIDs séparés par une virgule lors d'une réception groupée
+            var mockWrapper = new Mock<IOutlookApplicationWrapper>();
+            var meta1 = new MailMetadata("ID_1", "Sujet 1", "exp1@test.com", null, new List<string>(), new List<string>());
+            var meta2 = new MailMetadata("ID_2", "Sujet 2", "exp2@test.com", null, new List<string>(), new List<string>());
+
+            mockWrapper.Setup(w => w.GetMailMetadata("ID_1")).Returns(meta1);
+            mockWrapper.Setup(w => w.GetMailMetadata("ID_2")).Returns(meta2);
+
+            var provider = new OutlookMailProvider(mockWrapper.Object);
+            var receivedList = new List<MailMetadata>();
+            provider.NewMailReceived += (_, metadata) => receivedList.Add(metadata);
+
+            // Act
+            provider.StartListening();
+            mockWrapper.Raise(w => w.OnNewMailEx += null, "ID_1, ID_2");
+
+            // Assert
+            Assert.Equal(2, receivedList.Count);
+            Assert.Equal("ID_1", receivedList[0].EntryId);
+            Assert.Equal("ID_2", receivedList[1].EntryId);
         }
     }
 }

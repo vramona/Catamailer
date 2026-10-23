@@ -6,6 +6,7 @@
 //         - 2026-09-24 : Ajout des tests pour l'arborescence des dossiers (J5-S2-T2 - Phase Rouge).
 //         - 2026-09-24 : Ajout du test d'erreur pour la lecture de signature (J5-S2-T3 - Phase Rouge).
 //         - 2026-10-20 : Ajout des tests d'intégration pour AddCategoryToMail et les actions des règles complexes (J6-S3-T9 - Phase Rouge).
+//         - 2026-10-22 : Ajout des tests pour GetMailMetadata, GetSelectedEntryId et GetNextUnprocessedMailEntryIds (J6-S4-T2 - Phase Rouge).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -151,6 +152,27 @@ namespace Catamailer.Infrastructure.IntegrationTests
 
                 Assert.IsNotType<NotImplementedException>(exception);
             }
+        }
+
+        [Fact]
+        public void GetMailMetadata_ShouldNotThrowNotImplementedException()
+        {
+            var exception = Record.Exception(() => _wrapper.GetMailMetadata("dummy_id"));
+            Assert.IsNotType<NotImplementedException>(exception);
+        }
+
+        [Fact]
+        public void GetSelectedEntryId_ShouldNotThrowNotImplementedException()
+        {
+            var exception = Record.Exception(() => _wrapper.GetSelectedEntryId());
+            Assert.IsNotType<NotImplementedException>(exception);
+        }
+
+        [Fact]
+        public void GetNextUnprocessedMailEntryIds_ShouldNotThrowNotImplementedException()
+        {
+            var exception = Record.Exception(() => _wrapper.GetNextUnprocessedMailEntryIds(null, 5));
+            Assert.IsNotType<NotImplementedException>(exception);
         }
 
         public void Dispose()

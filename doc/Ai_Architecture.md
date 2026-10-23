@@ -1,5 +1,5 @@
 ﻿# Contexte d'Architecture IA et Arbre des Invocations
-Généré le : 2026-10-22 13:41
+Généré le : 2026-10-23 11:58
 
 ## Projet : Catamailer.Application
 ### Class : ClassificationEngine
@@ -617,10 +617,15 @@ Généré le : 2026-10-22 13:41
 - `void AddCategoryToMail(string entryId, string categoryName)`
   - *Appelle* ➡️ `OutlookApplicationWrapper.GetItemFromId()`
 - `MailMetadata GetMailMetadata(string entryId)`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.GetItemFromId()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.ResolveSenderSmtp()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.ResolveRecipientsSmtp()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.ExtractCategories()`
 - `string? GetSelectedEntryId()`
 - `void ReplaceCategoryOnAllItems(string oldCategoryName, string newCategoryName)`
 - `IEnumerable<string> GetNextUnprocessedMailEntryIds(string? lastEntryId, int maxItems)`
 - `void Dispose()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.TryUnhookNewMailExEvent()`
 
 ### Class : OutlookCategoryManagerProvider
 **Fichier** : `src\Catamailer.Infrastructure\OutlookCategoryManagerProvider.cs`
@@ -642,8 +647,8 @@ Généré le : 2026-10-22 13:41
 **Fichier** : `src\Catamailer.Infrastructure\OutlookMailProvider.cs`
 **Rôle** : Implémentation du fournisseur de messagerie basée sur l'Interop COM Outlook.
 **Membres et Invocations :**
-- `void StartListening()`
-- `void StopListening()`
+- `void StartListening()` : Démarre l'écoute des événements de réception d'e-mails d'Outlook.
+- `void StopListening()` : Arrête l'écoute des événements de réception d'e-mails d'Outlook.
 
 ### Class : OutlookMassUpdateProvider
 **Fichier** : `src\Catamailer.Infrastructure\OutlookMassUpdateProvider.cs`
@@ -1431,6 +1436,12 @@ Généré le : 2026-10-22 13:41
   - *Appelle* ➡️ `OutlookApplicationWrapper.SetImportance()`
   - *Appelle* ➡️ `OutlookApplicationWrapper.FlagToday()`
   - *Appelle* ➡️ `OutlookApplicationWrapper.MoveToFolder()`
+- `void GetMailMetadata_ShouldNotThrowNotImplementedException()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.GetMailMetadata()`
+- `void GetSelectedEntryId_ShouldNotThrowNotImplementedException()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.GetSelectedEntryId()`
+- `void GetNextUnprocessedMailEntryIds_ShouldNotThrowNotImplementedException()`
+  - *Appelle* ➡️ `OutlookApplicationWrapper.GetNextUnprocessedMailEntryIds()`
 - `void Dispose()`
   - *Appelle* ➡️ `OutlookApplicationWrapper.Dispose()`
 
@@ -1490,6 +1501,9 @@ Généré le : 2026-10-22 13:41
 **Rôle** : Classe de tests validant le comportement du fournisseur Outlook COM.
 **Membres et Invocations :**
 - `void StartListening_ShouldTriggerNewMailReceived_WhenOutlookRaisesNewMailEx()`
+  - *Appelle* ➡️ `IOutlookApplicationWrapper.GetMailMetadata()`
+  - *Appelle* ➡️ `OutlookMailProvider.StartListening()`
+- `void StartListening_ShouldSplitCommaSeparatedEntryIds_WhenNewMailExProvidesMultipleIds()`
   - *Appelle* ➡️ `IOutlookApplicationWrapper.GetMailMetadata()`
   - *Appelle* ➡️ `OutlookMailProvider.StartListening()`
 

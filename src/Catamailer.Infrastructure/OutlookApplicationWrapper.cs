@@ -19,6 +19,7 @@
 //         - 2026-09-24 : Implémentation de GetAvailableSignatures (J6-S1-T1 - Phase Verte).
 //         - 2026-10-19 : Ajout du cache mémoire sur GetAvailableFolderPaths pour supprimer la latence RPC (J6-S3-T7 - Phase Verte).
 //         - 2026-10-20 : Implémentation de AddCategoryToMail avec garde anti-doublon VBA (J6-S3-T9 - Phase Verte).
+//         - 2026-10-22 : Implémentation COM réelle de NewMailEx, GetMailMetadata (SMTP + ExistingCategories), GetSelectedEntryId et GetNextUnprocessedMailEntryIds (J6-S4-T2 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -27,6 +28,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using Catamailer.Domain;
 
@@ -37,16 +39,22 @@ namespace Catamailer.Infrastructure
     /// </summary>
     public class OutlookApplicationWrapper : IOutlookApplicationWrapper
     {
+        private static readonly Guid ApplicationEvents11Iid = new("0006304E-0000-0000-C000-000000000046");
+        private const int NewMailExDispId = 0x0000FAB5;
+        private const string MapiSenderSmtpPropTag = "http://schemas.microsoft.com/mapi/proptag/0x5D01001F";
+        private const string MapiAddressEntrySmtpPropTag = "http://schemas.microsoft.com/mapi/proptag/0x39FE001F";
+
         private readonly dynamic _application;
+        private readonly Dictionary<string, string> _smtpAddressCache = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Action<string> _newMailExCallback;
+        private bool _isNewMailExHooked;
         private List<string>? _cachedFolderPaths;
 
-#pragma warning disable CS0067 // L'événement n'est jamais utilisé
         /// <inheritdoc />
         public event Action<string>? OnNewMailEx;
-#pragma warning restore CS0067
 
         /// <summary>
-        /// Initialise une nouvelle instance de OutlookApplicationWrapper et attache l'application COM dynamiquement.
+        /// Initialise une nouvelle instance de <see cref="OutlookApplicationWrapper"/> et attache l'application COM dynamiquement.
         /// </summary>
         public OutlookApplicationWrapper()
         {
@@ -63,6 +71,57 @@ namespace Catamailer.Infrastructure
             }
 
             _application = instance;
+            _newMailExCallback = HandleComNewMailEx;
+            if (OperatingSystem.IsWindows())
+            {
+                TryHookNewMailExEvent();
+            }
+        }
+
+        [SupportedOSPlatform("windows")]
+        private void TryHookNewMailExEvent()
+        {
+            if (!OperatingSystem.IsWindows())
+            {
+                return;
+            }
+
+            try
+            {
+                ComEventsHelper.Combine(_application, ApplicationEvents11Iid, NewMailExDispId, _newMailExCallback);
+                _isNewMailExHooked = true;
+            }
+            catch
+            {
+                // Ignorer si le point de connexion COM n'est pas disponible dans le contexte courant
+            }
+        }
+
+        [SupportedOSPlatform("windows")]
+        private void TryUnhookNewMailExEvent()
+        {
+            if (!_isNewMailExHooked || !OperatingSystem.IsWindows())
+            {
+                return;
+            }
+
+            try
+            {
+                ComEventsHelper.Remove(_application, ApplicationEvents11Iid, NewMailExDispId, _newMailExCallback);
+                _isNewMailExHooked = false;
+            }
+            catch
+            {
+                // Ignorer lors de la fermeture
+            }
+        }
+
+        private void HandleComNewMailEx(string entryIdCollection)
+        {
+            if (!string.IsNullOrWhiteSpace(entryIdCollection))
+            {
+                OnNewMailEx?.Invoke(entryIdCollection);
+            }
         }
 
         /// <summary>
@@ -304,7 +363,6 @@ namespace Catamailer.Infrastructure
             return signatures;
         }
 
-        // Implémentation explicite de l'interface IExternalResourceProvider
         Task<IEnumerable<string>> IExternalResourceProvider.GetAvailableFolderPathsAsync()
         {
             return Task.FromResult(GetAvailableFolderPaths());
@@ -485,36 +543,458 @@ namespace Catamailer.Infrastructure
         }
 
         // ====================================================================================
-        // MÉTHODES EN ATTENTE D'IMPLÉMENTATION NATIVE (BOUCHONS POUR COMPILATION)
+        // LECTURE DES MÉTADONNÉES, SÉLECTION ET CURSEUR HISTORIQUE (J6-S4-T2)
         // ====================================================================================
 
         /// <inheritdoc />
         public MailMetadata GetMailMetadata(string entryId)
         {
-            throw new NotImplementedException("Implémentation COM manquante.");
+            if (string.IsNullOrWhiteSpace(entryId))
+            {
+                return new MailMetadata(
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    null,
+                    Array.Empty<string>(),
+                    Array.Empty<string>(),
+                    Array.Empty<string>());
+            }
+
+            try
+            {
+                dynamic item = GetItemFromId(entryId);
+                if (item == null)
+                {
+                    return new MailMetadata(
+                        entryId,
+                        string.Empty,
+                        string.Empty,
+                        null,
+                        Array.Empty<string>(),
+                        Array.Empty<string>(),
+                        Array.Empty<string>());
+                }
+
+                string subject = string.Empty;
+                try { subject = (string?)item.Subject ?? string.Empty; } catch { }
+
+                string? onBehalfOf = null;
+                try
+                {
+                    string rawBehalf = (string?)item.SentOnBehalfOfName ?? string.Empty;
+                    if (!string.IsNullOrWhiteSpace(rawBehalf))
+                    {
+                        onBehalfOf = rawBehalf.Trim();
+                    }
+                }
+                catch { }
+
+                string senderSmtp = ResolveSenderSmtp(item);
+                ResolveRecipientsSmtp(item, out List<string> internalRecipients, out List<string> externalRecipients);
+                List<string> existingCategories = ExtractCategories(item);
+
+                return new MailMetadata(
+                    entryId,
+                    subject,
+                    senderSmtp,
+                    onBehalfOf,
+                    internalRecipients,
+                    externalRecipients,
+                    existingCategories);
+            }
+            catch
+            {
+                return new MailMetadata(
+                    entryId,
+                    string.Empty,
+                    string.Empty,
+                    null,
+                    Array.Empty<string>(),
+                    Array.Empty<string>(),
+                    Array.Empty<string>());
+            }
+        }
+
+        private string ResolveSenderSmtp(dynamic item)
+        {
+            string rawSenderAddress = string.Empty;
+            try { rawSenderAddress = (string?)item.SenderEmailAddress ?? string.Empty; } catch { }
+
+            if (rawSenderAddress.Contains('@'))
+            {
+                return rawSenderAddress.Trim().ToLowerInvariant();
+            }
+
+            string cacheKey = $"EXPE||{rawSenderAddress}";
+            if (!string.IsNullOrEmpty(rawSenderAddress) && _smtpAddressCache.TryGetValue(cacheKey, out var cachedSmtp))
+            {
+                return cachedSmtp;
+            }
+
+            string resolved = string.Empty;
+
+            // 1. MAPI direct sur le MailItem (0x5D01001F)
+            try
+            {
+                resolved = (string?)item.PropertyAccessor.GetProperty(MapiSenderSmtpPropTag) ?? string.Empty;
+            }
+            catch { }
+
+            // 2. Secours MAPI sur l'objet Sender (0x39FE001F) ou ExchangeUser
+            if (string.IsNullOrWhiteSpace(resolved))
+            {
+                try
+                {
+                    dynamic? senderEntry = item.Sender;
+                    if (senderEntry != null)
+                    {
+                        try
+                        {
+                            resolved = (string?)senderEntry.PropertyAccessor.GetProperty(MapiAddressEntrySmtpPropTag) ?? string.Empty;
+                        }
+                        catch { }
+
+                        if (string.IsNullOrWhiteSpace(resolved))
+                        {
+                            try
+                            {
+                                dynamic? exUser = senderEntry.GetExchangeUser();
+                                if (exUser != null)
+                                {
+                                    resolved = (string?)exUser.PrimarySmtpAddress ?? string.Empty;
+                                }
+                                else
+                                {
+                                    dynamic? exDl = senderEntry.GetExchangeDistributionList();
+                                    if (exDl != null)
+                                    {
+                                        resolved = (string?)exDl.PrimarySmtpAddress ?? string.Empty;
+                                    }
+                                }
+                            }
+                            catch { }
+                        }
+                    }
+                }
+                catch { }
+            }
+
+            if (string.IsNullOrWhiteSpace(resolved))
+            {
+                resolved = rawSenderAddress;
+                if (string.IsNullOrWhiteSpace(resolved))
+                {
+                    try { resolved = (string?)item.SenderName ?? string.Empty; } catch { }
+                }
+            }
+
+            resolved = (resolved ?? string.Empty).Trim().ToLowerInvariant();
+            if (!string.IsNullOrEmpty(rawSenderAddress) && !string.IsNullOrEmpty(resolved))
+            {
+                _smtpAddressCache[cacheKey] = resolved;
+            }
+
+            return resolved;
+        }
+
+        private void ResolveRecipientsSmtp(dynamic item, out List<string> internalList, out List<string> externalList)
+        {
+            internalList = new List<string>();
+            externalList = new List<string>();
+
+            try
+            {
+                dynamic? recipients = item.Recipients;
+                if (recipients == null)
+                {
+                    return;
+                }
+
+                int count = (int)recipients.Count;
+                for (int i = 1; i <= count; i++)
+                {
+                    try
+                    {
+                        dynamic recip = recipients[i];
+                        ResolveSingleRecipientSmtp(recip, out string smtp, out bool isInternal);
+                        if (!string.IsNullOrWhiteSpace(smtp))
+                        {
+                            if (isInternal)
+                            {
+                                if (!internalList.Contains(smtp, StringComparer.OrdinalIgnoreCase))
+                                {
+                                    internalList.Add(smtp);
+                                }
+                            }
+                            else
+                            {
+                                if (!externalList.Contains(smtp, StringComparer.OrdinalIgnoreCase))
+                                {
+                                    externalList.Add(smtp);
+                                }
+                            }
+                        }
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+        }
+
+        private void ResolveSingleRecipientSmtp(dynamic recip, out string smtp, out bool isInternal)
+        {
+            string rawAddress = string.Empty;
+            string rawName = string.Empty;
+            try { rawAddress = (string?)recip.Address ?? string.Empty; } catch { }
+            try { rawName = (string?)recip.Name ?? string.Empty; } catch { }
+
+            if (rawAddress.Contains('@'))
+            {
+                smtp = rawAddress.Trim().ToLowerInvariant();
+                isInternal = false;
+                return;
+            }
+
+            string cacheKey = $"RECIP||{rawName}||{rawAddress}";
+            string aeType = string.Empty;
+            dynamic? addressEntry = null;
+
+            try
+            {
+                addressEntry = recip.AddressEntry;
+                if (addressEntry != null)
+                {
+                    aeType = (string?)addressEntry.Type ?? string.Empty;
+                }
+            }
+            catch { }
+
+            isInternal = string.Equals(aeType, "EX", StringComparison.OrdinalIgnoreCase);
+
+            if (_smtpAddressCache.TryGetValue(cacheKey, out var cachedSmtp))
+            {
+                smtp = cachedSmtp;
+                return;
+            }
+
+            string resolved = string.Empty;
+            if (addressEntry != null)
+            {
+                if (isInternal)
+                {
+                    try
+                    {
+                        dynamic? exUser = addressEntry.GetExchangeUser();
+                        if (exUser != null)
+                        {
+                            resolved = (string?)exUser.PrimarySmtpAddress ?? string.Empty;
+                        }
+                        else
+                        {
+                            dynamic? exDl = addressEntry.GetExchangeDistributionList();
+                            if (exDl != null)
+                            {
+                                resolved = (string?)exDl.PrimarySmtpAddress ?? string.Empty;
+                            }
+                        }
+                    }
+                    catch { }
+                }
+                else
+                {
+                    try
+                    {
+                        resolved = (string?)addressEntry.PropertyAccessor.GetProperty(MapiAddressEntrySmtpPropTag) ?? string.Empty;
+                    }
+                    catch { }
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(resolved))
+            {
+                resolved = rawAddress.Contains('@') ? rawAddress : rawName;
+            }
+
+            smtp = (resolved ?? string.Empty).Trim().ToLowerInvariant();
+            if (!string.IsNullOrEmpty(smtp))
+            {
+                _smtpAddressCache[cacheKey] = smtp;
+            }
+        }
+
+        private static List<string> ExtractCategories(dynamic item)
+        {
+            var list = new List<string>();
+            try
+            {
+                string rawCategories = (string?)item.Categories ?? string.Empty;
+                if (!string.IsNullOrWhiteSpace(rawCategories))
+                {
+                    list = rawCategories
+                        .Replace(";", ",")
+                        .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(c => c.Trim())
+                        .Where(c => !string.IsNullOrEmpty(c))
+                        .ToList();
+                }
+            }
+            catch { }
+
+            return list;
         }
 
         /// <inheritdoc />
         public string? GetSelectedEntryId()
         {
-            throw new NotImplementedException("Implémentation COM manquante.");
+            try
+            {
+                object? explorerObj = _application.ActiveExplorer();
+                if (explorerObj == null)
+                {
+                    return null;
+                }
+
+                dynamic explorer = explorerObj;
+                object? selectionObj = explorer.Selection;
+                if (selectionObj == null)
+                {
+                    return null;
+                }
+
+                dynamic selection = selectionObj;
+                if ((int)selection.Count < 1)
+                {
+                    return null;
+                }
+
+                dynamic firstItem = selection[1];
+                return (string?)firstItem.EntryID;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         /// <inheritdoc />
         public void ReplaceCategoryOnAllItems(string oldCategoryName, string newCategoryName)
         {
-            throw new NotImplementedException("Implémentation COM manquante.");
+            if (string.IsNullOrWhiteSpace(oldCategoryName) || string.IsNullOrWhiteSpace(newCategoryName))
+            {
+                return;
+            }
+
+            try
+            {
+                dynamic inbox = _application.Session.GetDefaultFolder(6);
+                dynamic items = inbox.Items;
+                int count = (int)items.Count;
+
+                for (int i = 1; i <= count; i++)
+                {
+                    try
+                    {
+                        dynamic item = items[i];
+                        string cats = (string?)item.Categories ?? string.Empty;
+                        if (string.IsNullOrWhiteSpace(cats))
+                        {
+                            continue;
+                        }
+
+                        var parts = cats.Replace(";", ",")
+                            .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                            .Select(c => c.Trim())
+                            .ToList();
+
+                        bool updated = false;
+                        for (int p = 0; p < parts.Count; p++)
+                        {
+                            if (string.Equals(parts[p], oldCategoryName.Trim(), StringComparison.OrdinalIgnoreCase))
+                            {
+                                parts[p] = newCategoryName.Trim();
+                                updated = true;
+                            }
+                        }
+
+                        if (updated)
+                        {
+                            item.Categories = string.Join(", ", parts.Distinct(StringComparer.OrdinalIgnoreCase));
+                            item.Save();
+                        }
+                    }
+                    catch { }
+                }
+            }
+            catch { }
         }
 
         /// <inheritdoc />
         public IEnumerable<string> GetNextUnprocessedMailEntryIds(string? lastEntryId, int maxItems)
         {
-            throw new NotImplementedException("Implémentation COM manquante.");
+            var results = new List<string>();
+            if (maxItems <= 0)
+            {
+                return results;
+            }
+
+            try
+            {
+                dynamic inbox = _application.Session.GetDefaultFolder(6);
+                dynamic items = inbox.Items;
+                int total = (int)items.Count;
+                if (total == 0)
+                {
+                    return results;
+                }
+
+                var allIds = new List<string>(total);
+                int foundIndex = -1;
+
+                for (int i = 1; i <= total; i++)
+                {
+                    try
+                    {
+                        dynamic item = items[i];
+                        string? id = (string?)item.EntryID;
+                        if (!string.IsNullOrWhiteSpace(id))
+                        {
+                            if (!string.IsNullOrWhiteSpace(lastEntryId) &&
+                                string.Equals(id, lastEntryId, StringComparison.OrdinalIgnoreCase))
+                            {
+                                foundIndex = allIds.Count;
+                            }
+                            allIds.Add(id);
+                        }
+                    }
+                    catch { }
+                }
+
+                int startIndex = foundIndex >= 0
+                    ? foundIndex + 1
+                    : Math.Max(0, allIds.Count - maxItems);
+
+                for (int idx = startIndex; idx < allIds.Count && results.Count < maxItems; idx++)
+                {
+                    results.Add(allIds[idx]);
+                }
+            }
+            catch
+            {
+                // Ignorer en cas d'indisponibilité temporaire COM
+            }
+
+            return results;
         }
 
         /// <inheritdoc />
         public void Dispose()
         {
+            if (OperatingSystem.IsWindows())
+            {
+                TryUnhookNewMailExEvent();
+            }
+
             if (_application != null)
             {
                 try

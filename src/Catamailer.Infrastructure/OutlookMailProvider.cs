@@ -5,6 +5,7 @@
 //         - 2026-09-07 : Création initiale (Phase Rouge).
 //         - 2026-09-07 : Ajout du contexte nullable explicite (Correction CS8669).
 //         - 2026-09-07 : Implémentation de l'écoute COM (Phase Verte).
+//         - 2026-10-22 : Découpage des collections d'EntryIDs séparés par des virgules lors de NewMailEx (J6-S4-T2 - Phase Verte).
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
@@ -22,31 +23,59 @@ namespace Catamailer.Infrastructure
     {
         private readonly IOutlookApplicationWrapper _outlookWrapper;
 
+        /// <summary>
+        /// Événement déclenché lorsqu'un nouvel e-mail est reçu et que ses métadonnées ont été extraites.
+        /// </summary>
         public event EventHandler<MailMetadata>? NewMailReceived;
 
         /// <summary>
-        /// Initialise une nouvelle instance de OutlookMailProvider.
+        /// Initialise une nouvelle instance de <see cref="OutlookMailProvider"/>.
         /// </summary>
         /// <param name="outlookWrapper">L'abstraction de l'application Outlook.</param>
         public OutlookMailProvider(IOutlookApplicationWrapper outlookWrapper)
         {
-            _outlookWrapper = outlookWrapper;
+            _outlookWrapper = outlookWrapper ?? throw new ArgumentNullException(nameof(outlookWrapper));
         }
 
+        /// <summary>
+        /// Démarre l'écoute des événements de réception d'e-mails d'Outlook.
+        /// </summary>
         public void StartListening()
         {
+            _outlookWrapper.OnNewMailEx -= OutlookWrapper_OnNewMailEx;
             _outlookWrapper.OnNewMailEx += OutlookWrapper_OnNewMailEx;
         }
 
+        /// <summary>
+        /// Arrête l'écoute des événements de réception d'e-mails d'Outlook.
+        /// </summary>
         public void StopListening()
         {
             _outlookWrapper.OnNewMailEx -= OutlookWrapper_OnNewMailEx;
         }
 
-        private void OutlookWrapper_OnNewMailEx(string entryId)
+        private void OutlookWrapper_OnNewMailEx(string entryIdCollection)
         {
-            var metadata = _outlookWrapper.GetMailMetadata(entryId);
-            NewMailReceived?.Invoke(this, metadata);
+            if (string.IsNullOrWhiteSpace(entryIdCollection))
+            {
+                return;
+            }
+
+            var entryIds = entryIdCollection.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            foreach (var rawId in entryIds)
+            {
+                var entryId = rawId.Trim();
+                if (string.IsNullOrEmpty(entryId))
+                {
+                    continue;
+                }
+
+                var metadata = _outlookWrapper.GetMailMetadata(entryId);
+                if (metadata != null)
+                {
+                    NewMailReceived?.Invoke(this, metadata);
+                }
+            }
         }
     }
 }
